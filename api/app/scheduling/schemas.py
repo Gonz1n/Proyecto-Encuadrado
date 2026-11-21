@@ -59,6 +59,22 @@ class PublicBookingIn(BaseModel):
     patient_rut: str
     patient_birth_date: date
     modality: Literal["in_person", "remote"] = "in_person"
+    accept_terms: bool = Field(default=False, validate_default=True)
+    data_consent: bool = Field(default=False, validate_default=True)
+
+    @field_validator("accept_terms")
+    @classmethod
+    def terms_accepted(cls, value: bool) -> bool:
+        if not value:
+            raise ValueError("Debes aceptar los términos y condiciones")
+        return value
+
+    @field_validator("data_consent")
+    @classmethod
+    def consent_given(cls, value: bool) -> bool:
+        if not value:
+            raise ValueError("Debes autorizar el tratamiento de tus datos personales")
+        return value
 
     @field_validator("patient_email", mode="wrap")
     @classmethod

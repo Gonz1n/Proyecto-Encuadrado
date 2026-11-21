@@ -70,7 +70,8 @@ def create_public_appointment(
     session: Session, center: Center, data: PublicBookingIn, professional: Membership, service: Service
 ) -> Appointment:
     lock_professional(session, professional)
-    if data.start not in slots_for_day(session, professional, service, data.start.date(), clock.local_now()):
+    now = clock.local_now()
+    if data.start not in slots_for_day(session, professional, service, data.start.date(), now):
         session.rollback()
         raise SlotUnavailable
     appointment = Appointment(
@@ -85,6 +86,8 @@ def create_public_appointment(
         patient_rut=data.patient_rut,
         patient_birth_date=data.patient_birth_date,
         modality=data.modality,
+        terms_accepted_at=now,
+        data_consent_at=now,
     )
     session.add(appointment)
     session.commit()

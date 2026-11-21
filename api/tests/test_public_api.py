@@ -32,6 +32,8 @@ def booking(setup, **overrides):
         "patient_phone": "+56 9 1234 5678",
         "patient_rut": "12.345.678-5",
         "patient_birth_date": "1990-05-14",
+        "accept_terms": True,
+        "data_consent": True,
     }
     body.update(overrides)
     return body
@@ -151,6 +153,8 @@ def test_public_booking_creates_appointment(client, setup, session):
     assert appointment.patient_rut == "12.345.678-5"
     assert appointment.patient_birth_date == date(1990, 5, 14)
     assert appointment.end - appointment.start == timedelta(minutes=60)
+    assert appointment.terms_accepted_at is not None
+    assert appointment.data_consent_at == appointment.terms_accepted_at
 
 
 def test_second_booking_of_same_slot_returns_409(client, setup):
@@ -317,3 +321,36 @@ def test_invalid_email_message_is_spanish(client, setup):
     response = post(client, setup, patient_email="nope")
     assert response.status_code == 400
     assert response.json() == {"patient_email": ["Ingresa un correo electrónico válido."]}
+
+
+TERMS_ERROR = "Debes aceptar los términos y condiciones"
+CONSENT_ERROR = "Debes autorizar el tratamiento de tus datos personales"
+
+
+@pytest.mark.parametrize("value", [False, "missing"])
+def test_booking_requires_accept_terms(client, setup, value):
+    body = booking(setup, accept_terms=value)
+    if value == "missing":
+        del body["accept_terms"]
+    response = client.post(f"/api/public/centers/{setup[0].slug}/appointments/", json=body)
+    assert response.status_code == 400
+    assert response.json() == {"accept_terms": [TERMS_ERROR]}
+
+
+@pytest.mark.parametrize("value", [False, "missing"])
+def test_booking_requires_data_consent(client, setup, value):
+    body = booking(setup, data_consent=value)
+    if value == "missing":
+        del body["data_consent"]
+    response = client.post(f"/api/public/centers/{setup[0].slug}/appointments/", json=body)
+    assert response.status_code == 400
+    assert response.json() == {"data_consent": [CONSENT_ERROR]}
+
+
+def test_booking_reports_both_checkboxes_with_other_errors(client, setup):
+    response = post(client, setup, accept_terms=False, data_consent=False, patient_rut="x")
+    assert response.status_code == 400
+    body = response.json()
+    assert body["accept_terms"] == [TERMS_ERROR]
+    assert body["data_consent"] == [CONSENT_ERROR]
+    assert "patient_rut" in body

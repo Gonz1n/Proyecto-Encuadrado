@@ -274,3 +274,14 @@ def test_members_lists_all_roles(setup, membership_factory):
     assert first["role_label"] == "Administrador"
     assert set(first) == {"id", "role", "role_label", "user"}
     assert set(first["user"]) == {"full_name", "email", "title", "avatar_url"}
+
+
+def test_terms_are_trimmed_and_limited_to_5000(setup):
+    center, client = setup(ADMIN)
+    saved = client.patch(url(center), json={"terms": "  Texto  "})
+    assert saved.status_code == 200
+    assert saved.json()["terms"] == "Texto"
+    assert client.patch(url(center), json={"terms": "a" * 5000}).status_code == 200
+    too_long = client.patch(url(center), json={"terms": "a" * 5001})
+    assert too_long.status_code == 400
+    assert "terms" in too_long.json()

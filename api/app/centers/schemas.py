@@ -66,7 +66,7 @@ class CenterUpdate(BaseModel):
     closing_time: HourMinute = Field(default=None)
     lunch_start: HourMinute | None = Field(default=None)
     lunch_end: HourMinute | None = Field(default=None)
-    terms: str = Field(default=None)
+    terms: Annotated[str, Field(max_length=5000)] = Field(default=None)
     website_url: Annotated[str, Field(max_length=200)] = Field(default=None)
     instagram_url: Annotated[str, Field(max_length=200)] = Field(default=None)
     facebook_url: Annotated[str, Field(max_length=200)] = Field(default=None)
