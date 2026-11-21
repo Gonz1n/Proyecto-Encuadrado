@@ -1,0 +1,124 @@
+'use client'
+
+import { CalendarDays, LogOut, Settings, UserRound, type LucideIcon } from 'lucide-react'
+import Link from 'next/link'
+import { useParams, usePathname } from 'next/navigation'
+import type { ReactNode } from 'react'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
+import { useAuth } from '@/features/auth/auth-context'
+import type { CurrentUser } from '@/features/auth/api'
+import { RoleBadge } from '@/features/permissions/role-badge'
+import { useCurrentMembership } from '@/features/permissions/use-can'
+import { cn } from '@/lib/utils'
+import { CenterSwitcher } from './center-switcher'
+import { NotFoundPage } from './not-found-page'
+
+const NAV_ITEMS: { section: string; label: string; icon: LucideIcon }[] = [
+  { section: 'agenda', label: 'Agenda', icon: CalendarDays },
+  { section: 'configuracion', label: 'Configuración', icon: Settings },
+  { section: 'perfil', label: 'Mi perfil', icon: UserRound },
+]
+
+const focusRing = 'outline-none focus-visible:ring-3 focus-visible:ring-ring/50'
+
+function initials(user: CurrentUser): string {
+  return `${user.first_name.charAt(0)}${user.last_name.charAt(0)}`.toUpperCase()
+}
+
+export function AppShell({ children }: { children: ReactNode }) {
+  const { user, logout } = useAuth()
+  const membership = useCurrentMembership()
+  const pathname = usePathname()
+  const { slug } = useParams<{ slug: string }>()
+
+  if (!user) return null
+  if (!membership) {
+    return (
+      <NotFoundPage
+        title="No tienes acceso a este centro"
+        description="Tu cuenta no pertenece al equipo de este centro. Si crees que es un error, pide acceso a su administración."
+        action={
+          <Button nativeButton={false} render={<Link href="/" />}>
+            Ir a mi centro
+          </Button>
+        }
+      />
+    )
+  }
+
+  return (
+    <div className="min-h-svh bg-background">
+      <title>{`${membership.center.name} | Encuadrado Centros`}</title>
+      <header className="sticky top-0 z-40 border-b bg-background">
+        <div className="mx-auto flex h-14 max-w-6xl items-center gap-2 px-4 sm:gap-3 sm:px-6">
+          <Link
+            href="/"
+            aria-label="Encuadrado Centros, ir al inicio"
+            className={cn(
+              'flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground',
+              focusRing,
+            )}
+          >
+            <CalendarDays className="size-4" aria-hidden="true" />
+          </Link>
+          <div className="flex min-w-0 flex-1 items-center">
+            {user.memberships.length > 1 ? (
+              <CenterSwitcher memberships={user.memberships} current={membership} />
+            ) : (
+              <span className="truncate px-2 text-base font-semibold">
+                {membership.center.name}
+              </span>
+            )}
+          </div>
+          <RoleBadge role={membership.role} />
+          <div className="hidden items-center gap-2.5 border-l pl-3 md:flex">
+            <Avatar size="sm">
+              {user.avatar_url ? <AvatarImage src={user.avatar_url} alt="" /> : null}
+              <AvatarFallback>{initials(user)}</AvatarFallback>
+            </Avatar>
+            <div className="flex flex-col leading-tight">
+              <span className="text-sm font-medium">{user.full_name}</span>
+              {user.title ? (
+                <span className="text-xs text-muted-foreground">{user.title}</span>
+              ) : null}
+            </div>
+          </div>
+          <Button variant="ghost" size="sm" onClick={logout}>
+            <LogOut aria-hidden="true" />
+            <span className="sr-only sm:not-sr-only">Cerrar sesión</span>
+          </Button>
+        </div>
+        <nav aria-label="Secciones del centro" className="mx-auto max-w-6xl px-4 sm:px-6">
+          <ul className="-mb-px flex gap-5">
+            {NAV_ITEMS.map(({ section, label, icon: Icon }) => {
+              const href = `/app/${slug}/${section}`
+              const isActive = pathname.startsWith(href)
+              return (
+                <li key={section}>
+                  <Link
+                    href={href}
+                    aria-current={isActive ? 'page' : undefined}
+                    className={cn(
+                      'inline-flex h-10 items-center gap-2 border-b-2 text-sm font-medium transition-colors',
+                      focusRing,
+                      isActive
+                        ? 'border-primary text-foreground'
+                        : 'border-transparent text-muted-foreground hover:text-foreground',
+                    )}
+                  >
+                    <Icon className="size-4" aria-hidden="true" />
+                    {label}
+                  </Link>
+                </li>
+              )
+            })}
+          </ul>
+        </nav>
+      </header>
+      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+        {children}
+      </main>
+    </div>
+  )
+}
