@@ -54,6 +54,8 @@ def test_any_role_reads_center(setup, role):
         "description": "",
         "opening_time": "09:00",
         "closing_time": "18:00",
+        "lunch_start": None,
+        "lunch_end": None,
         "terms": "",
         "website_url": "",
         "instagram_url": "",

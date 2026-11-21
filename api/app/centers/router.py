@@ -8,6 +8,7 @@ from app.centers.models import CenterClosure, Service
 from app.centers.schemas import (
     CenterOut,
     CenterUpdate,
+    CenterUpdatedOut,
     ClosureCreatedOut,
     ClosureIn,
     ClosureOut,
@@ -17,13 +18,17 @@ from app.centers.schemas import (
     ServiceUpdate,
 )
 from app.scheduling import repository as scheduling_repository
-from app.scheduling.services import cancel_for_center
+from app.scheduling.services import cancel_for_center, lock_center_professionals
 from app.db import SessionDep
 from app.errors import DomainError, field_error
 
 router = APIRouter(prefix="/api/centers/{slug}", tags=["centers"])
 
 CLOSING_ERROR = "El horario de término debe ser posterior al de inicio"
+LUNCH_PAIR_ERROR = "Indica inicio y término de la colación"
+LUNCH_ORDER_ERROR = "El término de la colación debe ser posterior al inicio"
+LUNCH_RANGE_ERROR = "La colación debe estar dentro del horario de atención"
+LUNCH_NOTE = "Cancelada por colación del centro"
 PAST_DATE_ERROR = "La fecha no puede ser pasada"
 DUPLICATE_CLOSURE_ERROR = "Ese día ya está marcado como cerrado"
 
@@ -33,18 +38,41 @@ def read_center(access: CenterDep) -> CenterOut:
     return CenterOut.model_validate(access.center)
 
 
-@router.patch("/", response_model=CenterOut)
-def update_center(session: SessionDep, access: AdminDep, data: CenterUpdate) -> CenterOut:
+def _validate_lunch(lunch_start, lunch_end, opening, closing) -> None:
+    if lunch_start is None and lunch_end is None:
+        return
+    if lunch_start is None or lunch_end is None:
+        raise field_error("lunch_end", LUNCH_PAIR_ERROR)
+    if lunch_end <= lunch_start:
+        raise field_error("lunch_end", LUNCH_ORDER_ERROR)
+    if lunch_start < opening or lunch_end > closing:
+        raise field_error("lunch_end", LUNCH_RANGE_ERROR)
+
+
+@router.patch("/", response_model=CenterUpdatedOut)
+def update_center(
+    session: SessionDep, access: AdminDep, user: CurrentUser, data: CenterUpdate
+) -> CenterUpdatedOut:
     center = access.center
     changes = data.model_dump(exclude_unset=True)
     opening = changes.get("opening_time", center.opening_time)
     closing = changes.get("closing_time", center.closing_time)
     if closing <= opening:
         raise field_error("closing_time", CLOSING_ERROR)
+    lunch = (changes.get("lunch_start", center.lunch_start), changes.get("lunch_end", center.lunch_end))
+    _validate_lunch(*lunch, opening, closing)
+    lunch_changed = lunch != (center.lunch_start, center.lunch_end)
+    cancelled = 0
+    if lunch_changed and lunch[0] is not None:
+        lock_center_professionals(session, center)
+        appointments = scheduling_repository.confirmed_future_overlapping_lunch(
+            session, center.id, *lunch, clock.local_now()
+        )
+        cancelled = cancel_for_center(session, center, appointments, LUNCH_NOTE, user)
     for field, value in changes.items():
         setattr(center, field, value)
     session.commit()
-    return CenterOut.model_validate(center)
+    return CenterUpdatedOut(**CenterOut.model_validate(center).model_dump(), cancelled_appointments=cancelled)
 
 
 @router.get("/services/", response_model=list[ServiceOut])

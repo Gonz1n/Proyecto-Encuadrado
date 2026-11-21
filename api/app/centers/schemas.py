@@ -25,6 +25,8 @@ class CenterOut(BaseModel):
     description: str
     opening_time: HourMinute
     closing_time: HourMinute
+    lunch_start: HourMinute | None
+    lunch_end: HourMinute | None
     terms: str
     website_url: str
     instagram_url: str
@@ -34,6 +36,10 @@ class CenterOut(BaseModel):
     open_days: list[int]
 
 
+class CenterUpdatedOut(CenterOut):
+    cancelled_appointments: int
+
+
 class CenterUpdate(BaseModel):
     model_config = ConfigDict(extra="ignore", str_strip_whitespace=True)
 
@@ -41,6 +47,8 @@ class CenterUpdate(BaseModel):
     description: Annotated[str, Field(max_length=400)] = Field(default=None)
     opening_time: HourMinute = Field(default=None)
     closing_time: HourMinute = Field(default=None)
+    lunch_start: HourMinute | None = Field(default=None)
+    lunch_end: HourMinute | None = Field(default=None)
     terms: str = Field(default=None)
     website_url: Annotated[str, Field(max_length=200)] = Field(default=None)
     instagram_url: Annotated[str, Field(max_length=200)] = Field(default=None)

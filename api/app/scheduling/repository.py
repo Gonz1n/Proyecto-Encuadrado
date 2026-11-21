@@ -1,6 +1,6 @@
 from datetime import date, datetime, time, timedelta
 
-from sqlalchemy import select
+from sqlalchemy import Time, func, literal, select
 from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.centers.access import CenterAccess
@@ -79,6 +79,23 @@ def confirmed_future_on_day(session: Session, center_id: int, day: date, now: da
                 Appointment.start > now,
                 Appointment.start >= datetime.combine(day, time.min),
                 Appointment.start < datetime.combine(day + timedelta(days=1), time.min),
+            )
+        )
+    )
+
+
+def confirmed_future_overlapping_lunch(
+    session: Session, center_id: int, lunch_start: time, lunch_end: time, now: datetime
+) -> list[Appointment]:
+    midnight = func.date_trunc("day", Appointment.start)
+    return list(
+        session.scalars(
+            select(Appointment).where(
+                Appointment.center_id == center_id,
+                Appointment.status == AppointmentStatus.CONFIRMED,
+                Appointment.start > now,
+                Appointment.start < midnight.op("+")(literal(lunch_end, Time)),
+                midnight.op("+")(literal(lunch_start, Time)) < Appointment.end,
             )
         )
     )
