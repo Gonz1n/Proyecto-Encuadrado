@@ -6,6 +6,7 @@ export const queryKeys = {
   members: (slug: string) => ['members', slug] as const,
   appointments: (slug: string, filters: unknown) =>
     ['appointments', slug, filters] as const,
+  publicCenters: ['public-centers'] as const,
   publicCenter: (slug: string) => ['public-center', slug] as const,
   availability: (slug: string, params: unknown) =>
     ['availability', slug, params] as const,

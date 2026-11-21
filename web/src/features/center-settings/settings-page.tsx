@@ -16,7 +16,7 @@ export function SettingsPage() {
 
   return (
     <div className="space-y-12">
-      <title>Configuración | Encuadrado Centros</title>
+      <title>Configuración | CentradaMente</title>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold tracking-tight">Configuración</h1>
         <a

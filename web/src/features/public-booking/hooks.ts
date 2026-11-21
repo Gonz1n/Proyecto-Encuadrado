@@ -15,6 +15,14 @@ export function usePublicCenter(slug: string) {
   })
 }
 
+export function usePublicCenters() {
+  return useQuery({
+    queryKey: queryKeys.publicCenters,
+    queryFn: publicBookingApi.centers,
+    staleTime: 5 * 60 * 1000,
+  })
+}
+
 export function useAvailableDays(slug: string, query: Partial<SlotQuery>) {
   const { service, professional } = query
   return useQuery({

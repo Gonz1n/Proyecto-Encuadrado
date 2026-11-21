@@ -101,7 +101,7 @@ function ProfileForm({ user }: { user: CurrentUser }) {
 
   return (
     <div className="space-y-6">
-      <title>Mi perfil | Encuadrado Centros</title>
+      <title>Mi perfil | CentradaMente</title>
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Mi perfil</h1>
         <p className="text-sm text-muted-foreground">

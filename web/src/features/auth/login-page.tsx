@@ -1,7 +1,7 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { CalendarDays, CircleAlert, Loader2 } from 'lucide-react'
+import { CircleAlert, Loader2 } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { z } from 'zod'
@@ -31,10 +31,8 @@ function loginErrorMessage(error: unknown): string {
 function Wordmark({ className }: { className?: string }) {
   return (
     <div className={cn('flex items-center gap-2.5 font-semibold', className)}>
-      <span className="flex size-8 items-center justify-center rounded-lg bg-current/10">
-        <CalendarDays className="size-4" aria-hidden="true" />
-      </span>
-      Encuadrado Centros
+      <img src="/logo-centradamente.svg" alt="" aria-hidden="true" className="h-8 w-auto" />
+      CentradaMente
     </div>
   )
 }
@@ -65,7 +63,7 @@ export function LoginPage() {
 
   return (
     <div className="grid min-h-svh lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
-      <title>Ingresar | Encuadrado Centros</title>
+      <title>Ingresar | CentradaMente</title>
       <aside className="hidden flex-col justify-between bg-primary p-10 text-primary-foreground lg:flex">
         <Wordmark />
         <p className="max-w-sm text-2xl leading-snug font-semibold tracking-tight text-balance">

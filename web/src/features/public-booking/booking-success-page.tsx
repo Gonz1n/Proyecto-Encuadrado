@@ -49,7 +49,7 @@ export function BookingSuccessPage() {
   return (
     <div className="min-h-svh bg-background">
       <title>{`Hora agendada | ${booking.center.name}`}</title>
-      <PublicHeader slug={booking.center.slug} name={booking.center.name} />
+      <PublicHeader slug={booking.center.slug} />
       <main className="mx-auto max-w-lg px-4 py-10 sm:px-6 sm:py-16">
         <CircleCheck className="size-10 text-primary" aria-hidden="true" />
         <h1 className="mt-5 text-2xl font-semibold tracking-tight text-balance sm:text-3xl">

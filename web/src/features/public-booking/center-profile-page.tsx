@@ -10,6 +10,8 @@ import { formatCLP, formatDuration, formatOpenDays } from '@/lib/format'
 import { SOCIAL_NETWORKS, socialHref } from '@/lib/social-links'
 import type { PublicCenter } from './api'
 import { isNotFound, usePublicCenter } from './hooks'
+import { centerPhoto } from './center-photos'
+import { PublicHeader } from './public-header'
 import { ProfessionalAvatar } from './professional-avatar'
 import { ProfessionalProfileDialog, ProfessionalSubtitle } from './professional-profile-dialog'
 
@@ -48,38 +50,55 @@ export function CenterProfilePage() {
 
 function CenterProfile({ center }: { center: PublicCenter }) {
   const bookingPath = `/c/${center.slug}/agendar`
+  const photo = centerPhoto(center.slug)
   return (
     <div className="min-h-svh bg-background">
       <title>{`${center.name} | Agenda en línea`}</title>
+      <PublicHeader slug={center.slug} />
       <header className="border-b bg-accent/40">
-        <div className="mx-auto max-w-5xl px-4 pt-10 pb-8 sm:px-6 sm:pt-16 sm:pb-12">
-          <span
-            aria-hidden="true"
-            className="flex size-12 items-center justify-center rounded-xl bg-primary text-lg font-semibold text-primary-foreground"
-          >
-            {center.name.charAt(0).toUpperCase()}
-          </span>
-          <h1 className="mt-6 text-3xl font-semibold tracking-tight text-balance [overflow-wrap:break-word] sm:text-4xl">
-            {center.name}
-          </h1>
-          {center.description ? (
-            <p className="mt-3 max-w-2xl text-base text-muted-foreground text-pretty sm:text-lg">
-              {center.description}
+        <div
+          className={
+            photo
+              ? 'mx-auto grid max-w-5xl items-center gap-8 px-4 pt-10 pb-8 sm:px-6 sm:pt-16 sm:pb-12 md:grid-cols-2 md:gap-12'
+              : 'mx-auto max-w-5xl px-4 pt-10 pb-8 sm:px-6 sm:pt-16 sm:pb-12'
+          }
+        >
+          <div className="min-w-0">
+            <span
+              aria-hidden="true"
+              className="flex size-12 items-center justify-center rounded-xl bg-primary text-lg font-semibold text-primary-foreground"
+            >
+              {center.name.charAt(0).toUpperCase()}
+            </span>
+            <h1 className="mt-6 text-3xl font-semibold tracking-tight text-balance [overflow-wrap:break-word] sm:text-4xl">
+              {center.name}
+            </h1>
+            {center.description ? (
+              <p className="mt-3 max-w-2xl text-base text-muted-foreground text-pretty sm:text-lg">
+                {center.description}
+              </p>
+            ) : null}
+            <p className="mt-4 flex items-center gap-2 text-sm">
+              <Clock className="size-4 text-primary" aria-hidden="true" />
+              Atiende {formatOpenDays(center.open_days)}, de {center.opening_time} a {center.closing_time} h
             </p>
+            <SocialLinksList center={center} />
+            <Button
+              size="lg"
+              className="mt-8 h-11 w-full px-5 text-base sm:w-auto"
+              nativeButton={false}
+              render={<Link href={bookingPath} />}
+            >
+              Agendar una hora
+            </Button>
+          </div>
+          {photo ? (
+            <img
+              src={photo}
+              alt={`Foto de ${center.name}`}
+              className="aspect-[4/3] w-full rounded-2xl object-cover"
+            />
           ) : null}
-          <p className="mt-4 flex items-center gap-2 text-sm">
-            <Clock className="size-4 text-primary" aria-hidden="true" />
-            Atiende {formatOpenDays(center.open_days)}, de {center.opening_time} a {center.closing_time} h
-          </p>
-          <SocialLinksList center={center} />
-          <Button
-            size="lg"
-            className="mt-8 h-11 w-full px-5 text-base sm:w-auto"
-            nativeButton={false}
-            render={<Link href={bookingPath} />}
-          >
-            Agendar una hora
-          </Button>
         </div>
       </header>
 

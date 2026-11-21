@@ -19,6 +19,12 @@ export type PublicService = {
   duration_minutes: number
 }
 
+export type PublicCenterSummary = {
+  slug: string
+  name: string
+  description: string
+}
+
 export type PublicCenter = {
   name: string
   slug: string
@@ -56,6 +62,7 @@ export type Booking = {
 const base = (slug: string) => `/api/public/centers/${slug}`
 
 export const publicBookingApi = {
+  centers: () => apiFetch<PublicCenterSummary[]>('/api/public/centers/'),
   center: (slug: string) => apiFetch<PublicCenter>(`${base(slug)}/`),
   availableDays: (slug: string, query: SlotQuery) =>
     apiFetch<{ days: string[] }>(

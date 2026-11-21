@@ -10,7 +10,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const center = await getPublicCenter(slug)
   if (!center) notFound()
-  return { title: `${center.name} | Encuadrado`, description: center.description }
+  return { title: `${center.name} | CentradaMente`, description: center.description }
 }
 
 export default function Page() {

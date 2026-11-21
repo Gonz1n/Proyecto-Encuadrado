@@ -49,18 +49,15 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-svh bg-background">
-      <title>{`${membership.center.name} | Encuadrado Centros`}</title>
+      <title>{`${membership.center.name} | CentradaMente`}</title>
       <header className="sticky top-0 z-40 border-b bg-background">
         <div className="mx-auto flex h-14 max-w-6xl items-center gap-2 px-4 sm:gap-3 sm:px-6">
           <Link
             href="/"
-            aria-label="Encuadrado Centros, ir al inicio"
-            className={cn(
-              'flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground',
-              focusRing,
-            )}
+            aria-label="CentradaMente, ir al inicio"
+            className={cn('flex shrink-0 items-center rounded-lg', focusRing)}
           >
-            <CalendarDays className="size-4" aria-hidden="true" />
+            <img src="/logo-centradamente.svg" alt="" aria-hidden="true" className="h-8 w-auto" />
           </Link>
           <div className="flex min-w-0 flex-1 items-center">
             {user.memberships.length > 1 ? (

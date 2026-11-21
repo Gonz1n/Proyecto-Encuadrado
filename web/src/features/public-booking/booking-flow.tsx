@@ -127,7 +127,7 @@ export function BookingPage() {
   return (
     <div className="min-h-svh bg-background">
       <title>{`Agendar en ${center.data.name}`}</title>
-      <PublicHeader slug={slug} name={center.data.name} />
+      <PublicHeader slug={slug} />
       <main className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-10">
         <BookingFlow.Root key={slug} slug={slug} center={center.data}>
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:gap-10">

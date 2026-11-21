@@ -1,19 +1,69 @@
-import { CalendarDays } from 'lucide-react'
-import Link from 'next/link'
+'use client'
 
-export function PublicHeader({ slug, name }: { slug: string; name: string }) {
+import { Check, ChevronDown } from 'lucide-react'
+import Link from 'next/link'
+import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { centersMenuItems } from './centers-menu'
+import { usePublicCenters } from './hooks'
+
+const menuMotion =
+  'w-80 max-w-[calc(100vw-2rem)] duration-[180ms] ease-[cubic-bezier(0.23,1,0.32,1)] data-closed:duration-[130ms] data-[side=bottom]:slide-in-from-top-0 motion-reduce:data-open:zoom-in-100 motion-reduce:data-closed:zoom-out-100'
+
+export function PublicHeader({ slug }: { slug: string }) {
+  const centers = usePublicCenters()
+  const items = centersMenuItems(centers.data ?? [], slug)
+
   return (
     <header className="border-b bg-background">
-      <div className="mx-auto flex h-14 max-w-5xl items-center px-4 sm:px-6">
+      <div className="mx-auto flex h-14 max-w-5xl items-center justify-between gap-3 px-4 sm:px-6">
         <Link
           href={`/c/${slug}`}
           className="-ml-1 flex min-w-0 items-center gap-2.5 rounded-lg p-1 font-semibold outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
         >
-          <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <CalendarDays className="size-4" aria-hidden="true" />
-          </span>
-          <span className="truncate">{name}</span>
+          <img src="/logo-centradamente.svg" alt="" aria-hidden="true" className="h-8 w-auto shrink-0" />
+          <span className="truncate">CentradaMente</span>
         </Link>
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            render={
+              <Button
+                variant="ghost"
+                className="h-10 shrink-0 gap-1.5 px-3 transition-[transform,background-color,color] duration-150 ease-out active:scale-[0.97] motion-reduce:transition-none [@media(hover:hover)_and_(pointer:fine)]:hover:bg-muted"
+              />
+            }
+          >
+            Otros centros
+            <ChevronDown aria-hidden="true" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" sideOffset={6} className={menuMotion}>
+            {items.map((item) => (
+              <DropdownMenuItem
+                key={item.slug}
+                render={<Link href={`/c/${item.slug}`} />}
+                className="min-h-11 gap-3 px-2.5 py-2"
+              >
+                <span className="flex min-w-0 flex-1 flex-col">
+                  <span className="truncate font-medium">{item.name}</span>
+                  {item.description ? (
+                    <span className="truncate text-xs text-muted-foreground">{item.description}</span>
+                  ) : null}
+                </span>
+                {item.current ? (
+                  <span className="flex shrink-0 items-center gap-1 text-xs font-medium text-primary">
+                    <Check aria-hidden="true" />
+                    Estás aquí
+                  </span>
+                ) : null}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </header>
   )
