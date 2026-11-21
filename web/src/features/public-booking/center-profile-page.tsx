@@ -95,8 +95,8 @@ function CenterProfile({ center }: { center: PublicCenter }) {
           {photo ? (
             <img
               src={photo}
-              alt={`Foto de ${center.name}`}
-              className="aspect-[4/3] w-full rounded-2xl object-cover"
+              alt={`Logo de ${center.name}`}
+              className="aspect-[4/3] w-full rounded-2xl border bg-card object-contain p-8"
             />
           ) : null}
         </div>
