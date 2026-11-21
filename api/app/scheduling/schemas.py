@@ -47,7 +47,7 @@ class DaysOut(BaseModel):
     days: list[date]
 
 
-class PublicBookingIn(BaseModel):
+class PatientIn(BaseModel):
     model_config = ConfigDict(extra="ignore", str_strip_whitespace=True)
 
     service: Any
@@ -59,22 +59,6 @@ class PublicBookingIn(BaseModel):
     patient_rut: str
     patient_birth_date: date
     modality: Literal["in_person", "remote"] = "in_person"
-    accept_terms: bool = Field(default=False, validate_default=True)
-    data_consent: bool = Field(default=False, validate_default=True)
-
-    @field_validator("accept_terms")
-    @classmethod
-    def terms_accepted(cls, value: bool) -> bool:
-        if not value:
-            raise ValueError("Debes aceptar los términos y condiciones")
-        return value
-
-    @field_validator("data_consent")
-    @classmethod
-    def consent_given(cls, value: bool) -> bool:
-        if not value:
-            raise ValueError("Debes autorizar el tratamiento de tus datos personales")
-        return value
 
     @field_validator("patient_email", mode="wrap")
     @classmethod
@@ -109,6 +93,29 @@ class PublicBookingIn(BaseModel):
         if value.year < today.year - 120:
             raise ValueError("Revisa la fecha de nacimiento")
         return value
+
+
+class PublicBookingIn(PatientIn):
+    accept_terms: bool = Field(default=False, validate_default=True)
+    data_consent: bool = Field(default=False, validate_default=True)
+
+    @field_validator("accept_terms")
+    @classmethod
+    def terms_accepted(cls, value: bool) -> bool:
+        if not value:
+            raise ValueError("Debes aceptar los términos y condiciones")
+        return value
+
+    @field_validator("data_consent")
+    @classmethod
+    def consent_given(cls, value: bool) -> bool:
+        if not value:
+            raise ValueError("Debes autorizar el tratamiento de tus datos personales")
+        return value
+
+
+class StaffBookingIn(PatientIn):
+    pass
 
 
 class BookingCenterOut(BaseModel):

@@ -8,15 +8,15 @@ from app.accounts.deps import CurrentUser
 from app.centers.access import CenterDep, ManagerDep
 from app.centers.models import Role
 from app.db import SessionDep
-from app.errors import DomainError
+from app.errors import DomainError, field_error
 from app.scheduling import availability, repository, services
 from app.scheduling.models import Appointment
-from app.scheduling.schemas import AppointmentOut, CancelIn, DaysOut, RescheduleIn, SlotsOut
+from app.scheduling.resolve import SLOT_TAKEN, resolve_professional, resolve_service
+from app.scheduling.schemas import AppointmentOut, CancelIn, DaysOut, RescheduleIn, SlotsOut, StaffBookingIn
 
 router = APIRouter(prefix="/api/centers/{slug}/appointments", tags=["appointments"])
 
 NOT_FOUND = "No encontrado."
-SLOT_TAKEN = "La hora seleccionada ya no está disponible"
 LOCKED = "No se puede modificar una cita pasada"
 
 
@@ -51,6 +51,20 @@ def list_appointments(
         include_cancelled == "true",
     )
     return [AppointmentOut.from_appointment(row) for row in rows]
+
+
+@router.post("/", response_model=AppointmentOut, status_code=201)
+def create_appointment(session: SessionDep, user: CurrentUser, access: ManagerDep, data: StaffBookingIn) -> AppointmentOut:
+    service = resolve_service(session, access.center, data.service)
+    professional = resolve_professional(session, access.center, data.professional)
+    if access.membership.role == Role.MEMBER and professional.id != access.membership.id:
+        raise field_error("professional", "Solo puedes agendar horas para ti")
+    availability.ensure_in_window(data.start.date(), False, "start")
+    try:
+        appointment = services.create_appointment(session, access.center, data, professional, service, user)
+    except services.SlotUnavailable:
+        raise DomainError(409, SLOT_TAKEN) from None
+    return AppointmentOut.from_appointment(appointment)
 
 
 @router.patch("/{appointment_id}/", response_model=AppointmentOut)

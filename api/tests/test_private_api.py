@@ -150,3 +150,91 @@ def test_list_query_count_does_not_grow_with_changes(
         event.remove(session.get_bind(), "before_cursor_execute", count)
     assert len(response.json()) == 5
     assert len(statements) <= 8
+
+
+@pytest.fixture
+def booking_setup(membership_factory, service_factory, center_factory):
+    center = center_factory(opening_time=time(9, 0), closing_time=time(18, 0))
+    admin = membership_factory(role=Role.ADMIN, center=center)
+    member = membership_factory(center=center)
+    other = membership_factory(center=center)
+    viewer = membership_factory(role=Role.VIEWER, center=center)
+    service = service_factory(center, duration_minutes=60)
+    return center, admin, member, other, viewer, service
+
+
+def staff_body(professional, service, **overrides):
+    body = {
+        "service": service.id,
+        "professional": professional.id,
+        "start": at(2, 10).strftime(FORMAT),
+        "patient_name": "Ana Pérez",
+        "patient_email": "ana@example.com",
+        "patient_phone": "+56 9 1234 5678",
+        "patient_rut": "12.345.678-5",
+        "patient_birth_date": "1990-05-14",
+    }
+    body.update(overrides)
+    return body
+
+
+def test_admin_creates_appointment_for_another_professional(booking_setup, auth_client, session):
+    center, admin, member, _, _, service = booking_setup
+    response = auth_client(admin.user).post(url(center), json=staff_body(member, service, modality="remote"))
+    assert response.status_code == 201
+    body = response.json()
+    assert body["professional"]["id"] == member.id
+    assert body["modality"] == "remote"
+    assert body["status"] == "confirmed"
+    stored = session.get(Appointment, body["id"])
+    assert stored.created_by_id == admin.user.id
+    assert stored.terms_accepted_at is None
+    assert stored.data_consent_at is None
+
+
+def test_member_creates_appointment_for_self(booking_setup, auth_client, session):
+    center, _, member, _, _, service = booking_setup
+    response = auth_client(member.user).post(url(center), json=staff_body(member, service))
+    assert response.status_code == 201
+    assert session.get(Appointment, response.json()["id"]).created_by_id == member.user.id
+
+
+def test_member_cannot_create_for_someone_else(booking_setup, auth_client):
+    center, _, member, other, _, service = booking_setup
+    response = auth_client(member.user).post(url(center), json=staff_body(other, service))
+    assert response.status_code == 400
+    assert response.json()["professional"] == ["Solo puedes agendar horas para ti"]
+
+
+def test_viewer_cannot_create_appointment(booking_setup, auth_client):
+    center, _, member, _, viewer, service = booking_setup
+    assert auth_client(viewer.user).post(url(center), json=staff_body(member, service)).status_code == 403
+
+
+def test_creating_taken_slot_returns_409(booking_setup, auth_client):
+    center, admin, member, _, _, service = booking_setup
+    client = auth_client(admin.user)
+    assert client.post(url(center), json=staff_body(member, service)).status_code == 201
+    response = client.post(url(center), json=staff_body(member, service))
+    assert response.status_code == 409
+
+
+def test_creating_off_grid_slot_returns_409(booking_setup, auth_client):
+    center, admin, member, _, _, service = booking_setup
+    body = staff_body(member, service, start=at(2, 10, 10).strftime(FORMAT))
+    assert auth_client(admin.user).post(url(center), json=body).status_code == 409
+
+
+def test_creating_outside_window_returns_400(booking_setup, auth_client):
+    center, admin, member, _, _, service = booking_setup
+    response = auth_client(admin.user).post(url(center), json=staff_body(member, service, start=at(-1, 10).strftime(FORMAT)))
+    assert response.status_code == 400
+    assert "start" in response.json()
+
+
+def test_creating_with_invalid_patient_fields_returns_400_per_field(booking_setup, auth_client):
+    center, admin, member, _, _, service = booking_setup
+    body = staff_body(member, service, patient_name="A", patient_email="x", patient_phone="1", patient_rut="1-1")
+    response = auth_client(admin.user).post(url(center), json=body)
+    assert response.status_code == 400
+    assert {"patient_name", "patient_email", "patient_phone", "patient_rut"} <= set(response.json())

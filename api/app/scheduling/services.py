@@ -9,7 +9,7 @@ from app.centers import repository as centers_repository
 from app.centers.models import Center, Membership, Service
 from app.scheduling.availability import slots_for_day
 from app.scheduling.models import Appointment, AppointmentChange, AppointmentStatus, ChangeKind
-from app.scheduling.schemas import PublicBookingIn
+from app.scheduling.schemas import PatientIn
 
 
 class SlotUnavailable(Exception):
@@ -66,8 +66,13 @@ def cancel_for_center(
     return count
 
 
-def create_public_appointment(
-    session: Session, center: Center, data: PublicBookingIn, professional: Membership, service: Service
+def create_appointment(
+    session: Session,
+    center: Center,
+    data: PatientIn,
+    professional: Membership,
+    service: Service,
+    created_by: User | None = None,
 ) -> Appointment:
     lock_professional(session, professional)
     now = clock.local_now()
@@ -86,8 +91,9 @@ def create_public_appointment(
         patient_rut=data.patient_rut,
         patient_birth_date=data.patient_birth_date,
         modality=data.modality,
-        terms_accepted_at=now,
-        data_consent_at=now,
+        created_by_id=created_by.id if created_by else None,
+        terms_accepted_at=None if created_by else now,
+        data_consent_at=None if created_by else now,
     )
     session.add(appointment)
     session.commit()
