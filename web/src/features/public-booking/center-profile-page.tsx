@@ -1,16 +1,18 @@
 'use client'
 
-import { ChevronDown, Clock } from 'lucide-react'
+import { ChevronDown, Clock, Mail, MapPin, Navigation, Phone } from 'lucide-react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { NotFoundPage } from '@/components/layout/not-found-page'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { formatCLP, formatDuration, formatOpenDays } from '@/lib/format'
+import { WhatsAppIcon } from '@/components/brand-icons'
 import { SOCIAL_NETWORKS, socialHref } from '@/lib/social-links'
 import type { PublicCenter } from './api'
 import { isNotFound, usePublicCenter } from './hooks'
 import { centerPhoto } from './center-photos'
+import { mapsDirectionsUrl, mapsEmbedUrl, telHref } from './location'
 import { PublicHeader } from './public-header'
 import { ProfessionalAvatar } from './professional-avatar'
 import { ProfessionalProfileDialog, ProfessionalSubtitle } from './professional-profile-dialog'
@@ -174,6 +176,8 @@ function CenterProfile({ center }: { center: PublicCenter }) {
           )}
         </section>
 
+        <LocationSection center={center} />
+
         {center.terms ? (
           <details className="group rounded-xl border bg-card lg:col-span-2">
             <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 rounded-xl px-4 py-3 font-medium outline-none focus-visible:ring-3 focus-visible:ring-ring/50 [&::-webkit-details-marker]:hidden">
@@ -213,5 +217,88 @@ function SocialLinksList({ center }: { center: PublicCenter }) {
         </li>
       ))}
     </ul>
+  )
+}
+
+const contactLink =
+  'inline-flex min-h-9 items-center gap-2 text-sm font-medium underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none'
+
+function LocationSection({ center }: { center: PublicCenter }) {
+  const { address, commune, phone, email, whatsapp_number: whatsapp } = center
+  if (!address && !phone && !email && !whatsapp) return null
+  const embed = mapsEmbedUrl(address, commune)
+  const directions = mapsDirectionsUrl(address, commune)
+  return (
+    <section aria-labelledby="location-heading" className="space-y-4 lg:col-span-2">
+      <h2 id="location-heading" className="text-xl font-semibold tracking-tight">
+        Ubicación y contacto
+      </h2>
+      <div className={embed ? 'grid items-start gap-6 md:grid-cols-2' : ''}>
+        <div className="min-w-0 space-y-4">
+          {address ? (
+            <p className="flex items-start gap-2 [overflow-wrap:break-word]">
+              <MapPin className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
+              <span>
+                {address}
+                {commune ? <span className="block text-muted-foreground">{commune}</span> : null}
+              </span>
+            </p>
+          ) : null}
+          {directions ? (
+            <Button
+              variant="outline"
+              className="h-10 px-4 transition-transform duration-150 active:scale-[0.97] motion-reduce:transition-none"
+              nativeButton={false}
+              render={<a href={directions} target="_blank" rel="noopener noreferrer" />}
+            >
+              <Navigation aria-hidden="true" />
+              Cómo llegar
+              <span className="sr-only"> (se abre en una pestaña nueva)</span>
+            </Button>
+          ) : null}
+          <ul className="space-y-1">
+            {phone ? (
+              <li>
+                <a href={telHref(phone)} className={contactLink}>
+                  <Phone className="size-4 text-primary" aria-hidden="true" />
+                  {phone}
+                </a>
+              </li>
+            ) : null}
+            {email ? (
+              <li>
+                <a href={`mailto:${email}`} className={`${contactLink} [overflow-wrap:anywhere]`}>
+                  <Mail className="size-4 shrink-0 text-primary" aria-hidden="true" />
+                  {email}
+                </a>
+              </li>
+            ) : null}
+            {whatsapp ? (
+              <li>
+                <a
+                  href={socialHref('whatsapp_number', whatsapp)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={contactLink}
+                >
+                  <WhatsAppIcon className="size-4 text-primary" />
+                  WhatsApp
+                  <span className="sr-only"> (se abre en una pestaña nueva)</span>
+                </a>
+              </li>
+            ) : null}
+          </ul>
+        </div>
+        {embed ? (
+          <iframe
+            src={embed}
+            title={`Mapa de ${center.name}`}
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            className="h-72 w-full rounded-xl border bg-muted md:h-80"
+          />
+        ) : null}
+      </div>
+    </section>
   )
 }

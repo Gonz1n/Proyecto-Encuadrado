@@ -12,6 +12,10 @@ export type Center = {
   open_days: number[]
   lunch_start: string | null
   lunch_end: string | null
+  address: string
+  commune: string
+  phone: string
+  email: string
 } & SocialLinks
 
 export type CenterUpdate = Partial<Omit<Center, 'slug' | 'terms'>>

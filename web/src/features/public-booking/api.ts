@@ -35,6 +35,10 @@ export type PublicCenter = {
   open_days: number[]
   professionals: PublicProfessional[]
   services: PublicService[]
+  address: string
+  commune: string
+  phone: string
+  email: string
 } & SocialLinks
 
 export type SlotQuery = { service: number; professional: number }

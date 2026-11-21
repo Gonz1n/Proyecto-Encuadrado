@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { WEEKDAY_SHORT } from '@/lib/format'
+import { CONTACT_EMAIL_ERROR, CONTACT_PHONE_ERROR, CONTACT_PHONE_PATTERN } from '@/lib/phone'
 import { SOCIAL_NETWORKS, phoneError, socialLinkError } from '@/lib/social-links'
 import type { Center, CenterUpdate } from './api'
 import { cancelledMessage } from './cancelled-message'
@@ -48,6 +49,21 @@ const centerSchema = z
         const message = phoneError(value)
         if (message) ctx.addIssue({ code: 'custom', message })
       }),
+    address: z.string().trim().max(200, 'La dirección admite hasta 200 caracteres'),
+    commune: z.string().trim().max(80, 'La comuna admite hasta 80 caracteres'),
+    phone: z
+      .string()
+      .trim()
+      .refine(
+        (value) =>
+          !value ||
+          (CONTACT_PHONE_PATTERN.test(value) && value.replace(/\D/g, '').length >= 8),
+        CONTACT_PHONE_ERROR,
+      ),
+    email: z
+      .string()
+      .trim()
+      .refine((value) => !value || z.email().safeParse(value).success, CONTACT_EMAIL_ERROR),
   })
   .refine((v) => !v.opening_time || !v.closing_time || v.closing_time > v.opening_time, {
     path: ['closing_time'],
@@ -77,6 +93,17 @@ const FIELDS = [
   'facebook_url',
   'linkedin_url',
   'whatsapp_number',
+  'address',
+  'commune',
+  'phone',
+  'email',
+] as const
+
+const CONTACT_FIELDS = [
+  { field: 'address', label: 'Dirección', placeholder: 'Av. Providencia 1234, oficina 5', type: 'text', autoComplete: 'street-address' },
+  { field: 'commune', label: 'Comuna', placeholder: 'Providencia', type: 'text', autoComplete: 'address-level2' },
+  { field: 'phone', label: 'Teléfono', placeholder: '+56 2 2345 6789', type: 'tel', autoComplete: 'tel' },
+  { field: 'email', label: 'Correo', placeholder: 'contacto@tucentro.cl', type: 'email', autoComplete: 'email' },
 ] as const
 
 function toValues(center: Center): CenterValues {
@@ -93,6 +120,10 @@ function toValues(center: Center): CenterValues {
     facebook_url: center.facebook_url,
     linkedin_url: center.linkedin_url,
     whatsapp_number: center.whatsapp_number,
+    address: center.address,
+    commune: center.commune,
+    phone: center.phone,
+    email: center.email,
   }
 }
 
@@ -304,6 +335,33 @@ export function CenterForm({
                   type={phone ? 'tel' : 'url'}
                   inputMode={phone ? 'tel' : 'url'}
                   autoComplete={phone ? 'tel' : 'url'}
+                  placeholder={placeholder}
+                  aria-invalid={errors[field] ? true : undefined}
+                  aria-describedby={errors[field] ? `center-${field}-error` : undefined}
+                  {...register(field)}
+                />
+                <FieldError id={`center-${field}-error`} message={errors[field]?.message} />
+              </div>
+            ))}
+          </div>
+        </fieldset>
+        <fieldset className="space-y-4 border-t pt-5">
+          <legend className="sr-only">Contacto y ubicación</legend>
+          <div aria-hidden="true">
+            <h3 className="text-sm font-semibold">Contacto y ubicación</h3>
+            <p className="text-sm text-muted-foreground">
+              Opcionales. Se muestran en el perfil público del centro.
+            </p>
+          </div>
+          <div className="grid gap-5 sm:grid-cols-2">
+            {CONTACT_FIELDS.map(({ field, label, placeholder, type, autoComplete }) => (
+              <div key={field} className="space-y-2">
+                <Label htmlFor={`center-${field}`}>{label}</Label>
+                <Input
+                  id={`center-${field}`}
+                  type={type}
+                  inputMode={type === 'text' ? undefined : type}
+                  autoComplete={autoComplete}
                   placeholder={placeholder}
                   aria-invalid={errors[field] ? true : undefined}
                   aria-describedby={errors[field] ? `center-${field}-error` : undefined}
