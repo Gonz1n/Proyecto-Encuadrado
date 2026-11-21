@@ -17,6 +17,7 @@ export type PublicService = {
   name: string
   price_clp: number
   duration_minutes: number
+  description: string
 }
 
 export type PublicCenterSummary = {

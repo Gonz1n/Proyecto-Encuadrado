@@ -33,6 +33,7 @@ export type Service = {
   name: string
   price_clp: number
   duration_minutes: number
+  description: string
 }
 
 export type ServiceInput = Omit<Service, 'id'>

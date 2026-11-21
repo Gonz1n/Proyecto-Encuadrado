@@ -10,14 +10,16 @@ function initials(fullName: string): string {
 export function ProfessionalAvatar({
   professional,
   className,
+  fallbackClassName,
 }: {
   professional: PublicProfessional
   className?: string
+  fallbackClassName?: string
 }) {
   return (
     <Avatar className={cn('size-12', className)}>
       {professional.avatar_url ? <AvatarImage src={professional.avatar_url} alt="" /> : null}
-      <AvatarFallback className="bg-primary/10 font-medium text-primary">
+      <AvatarFallback className={cn('bg-primary/10 font-medium text-primary', fallbackClassName)}>
         {initials(professional.full_name)}
       </AvatarFallback>
     </Avatar>

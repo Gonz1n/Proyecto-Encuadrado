@@ -26,7 +26,7 @@ export function PublicHeader({ slug }: { slug: string }) {
   }
 
   return (
-    <header className="border-b bg-background">
+    <header className="border-b bg-[linear-gradient(90deg,var(--background),var(--cp-header,var(--background)))]">
       <div className="mx-auto flex h-14 max-w-5xl items-center justify-between gap-3 px-4 sm:px-6">
         <Link
           href={`/c/${slug}`}

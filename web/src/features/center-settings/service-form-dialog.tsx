@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { formatDuration } from '@/lib/format'
 import type { Service } from './api'
@@ -33,6 +34,7 @@ const serviceSchema = z.object({
     .regex(/^[1-9]\d*$/, 'Ingresa un precio entero mayor a 0')
     .refine((value) => Number(value) <= 10_000_000, 'El precio no puede superar $10.000.000'),
   duration_minutes: z.string().min(1, 'Selecciona la duración'),
+  description: z.string().trim().max(300, 'La descripción admite hasta 300 caracteres'),
 })
 
 type ServiceValues = z.infer<typeof serviceSchema>
@@ -60,6 +62,7 @@ function ServiceForm({
       name: service?.name ?? '',
       price_clp: service ? String(service.price_clp) : '',
       duration_minutes: service ? String(service.duration_minutes) : '60',
+      description: service?.description ?? '',
     },
   })
 
@@ -68,6 +71,7 @@ function ServiceForm({
       name: values.name,
       price_clp: Number(values.price_clp),
       duration_minutes: Number(values.duration_minutes),
+      description: values.description,
     }
     try {
       if (service) {
@@ -79,7 +83,7 @@ function ServiceForm({
       }
       onDone()
     } catch (error) {
-      handleMutationError(error, setError, ['name', 'price_clp', 'duration_minutes'])
+      handleMutationError(error, setError, ['name', 'price_clp', 'duration_minutes', 'description'])
     }
   })
 
@@ -149,6 +153,21 @@ function ServiceForm({
         {errors.duration_minutes ? (
           <p id="service-duration-error" className="text-sm text-destructive">
             {errors.duration_minutes.message}
+          </p>
+        ) : null}
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="service-description">Descripción (opcional)</Label>
+        <Textarea
+          id="service-description"
+          rows={3}
+          aria-invalid={errors.description ? true : undefined}
+          aria-describedby={errors.description ? 'service-description-error' : undefined}
+          {...register('description')}
+        />
+        {errors.description ? (
+          <p id="service-description-error" className="text-sm text-destructive">
+            {errors.description.message}
           </p>
         ) : null}
       </div>

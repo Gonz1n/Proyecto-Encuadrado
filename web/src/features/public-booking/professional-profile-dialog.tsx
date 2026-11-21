@@ -9,13 +9,14 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import type { PublicProfessional } from './api'
+import { professionalSubtitle } from './center-page'
 import { ProfessionalAvatar } from './professional-avatar'
 
 const REGISTRY_URL = 'https://rnpi.superdesalud.gob.cl/'
 
 export function ProfessionalSubtitle({ professional }: { professional: PublicProfessional }) {
-  const parts = [professional.title, professional.university].filter(Boolean)
-  return parts.length > 0 ? <span className="text-sm text-muted-foreground">{parts.join(' · ')}</span> : null
+  const text = professionalSubtitle(professional)
+  return text ? <span className="text-sm text-muted-foreground">{text}</span> : null
 }
 
 export function ProfessionalProfileDialog({ professional }: { professional: PublicProfessional }) {

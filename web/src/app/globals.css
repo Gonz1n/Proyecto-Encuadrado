@@ -132,3 +132,25 @@
     overflow-x: clip;
     }
 }
+.center-page {
+  --cp-granate: #5a322a;
+  --cp-terracota: #bc7b6f;
+  --cp-salmon: #e4a499;
+  --cp-header: #ebcfca;
+  --cp-card: #f6e2de;
+  --primary: var(--cp-granate);
+  --primary-foreground: #ffffff;
+  --ring: var(--cp-granate);
+  background: #ffffff;
+  color: var(--cp-granate);
+}
+
+.center-page [id] {
+  scroll-margin-top: 1.5rem;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:has(.center-page) {
+    scroll-behavior: smooth;
+  }
+}
