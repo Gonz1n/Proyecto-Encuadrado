@@ -61,9 +61,24 @@ CENTERS = [
             ("recepcion@aurora.cl", VIEWER),
         ],
         "services": [
-            ("Sesión psicológica", 35000, 45),
-            ("Terapia de parejas", 55000, 60),
-            ("Evaluación psicológica", 45000, 60),
+            (
+                "Sesión psicológica",
+                35000,
+                45,
+                "Atención individual para acompañar procesos emocionales, ansiedad o estrés.",
+            ),
+            (
+                "Terapia de parejas",
+                55000,
+                60,
+                "Espacio para mejorar la comunicación y resolver conflictos en pareja.",
+            ),
+            (
+                "Evaluación psicológica",
+                45000,
+                60,
+                "Evaluación clínica con informe para orientar el diagnóstico y el tratamiento.",
+            ),
         ],
     },
     {
@@ -97,9 +112,24 @@ CENTERS = [
             ("recepcion@nutrir.cl", VIEWER),
         ],
         "services": [
-            ("Consulta nutricional", 30000, 45),
-            ("Control nutricional", 20000, 30),
-            ("Plan deportivo", 40000, 60),
+            (
+                "Consulta nutricional",
+                30000,
+                45,
+                "Evaluación inicial de hábitos y un plan de alimentación personalizado.",
+            ),
+            (
+                "Control nutricional",
+                20000,
+                30,
+                "Seguimiento de avances y ajustes al plan de alimentación.",
+            ),
+            (
+                "Plan deportivo",
+                40000,
+                60,
+                "Plan de alimentación según tu entrenamiento y objetivos deportivos.",
+            ),
         ],
     },
 ]
@@ -148,10 +178,10 @@ def ensure_membership(session: Session, user: User, center: Center, role: Role) 
         session.add(Membership(user_id=user.id, center_id=center.id, role=role))
 
 
-def ensure_service(session: Session, center: Center, name: str, price: int, duration: int) -> None:
+def ensure_service(session: Session, center: Center, name: str, price: int, duration: int, description: str) -> None:
     exists = session.scalar(select(Service.id).where(Service.center_id == center.id, Service.name == name))
     if exists is None:
-        session.add(Service(center_id=center.id, name=name, price_clp=price, duration_minutes=duration))
+        session.add(Service(center_id=center.id, name=name, price_clp=price, duration_minutes=duration, description=description))
 
 
 def has_future_appointments(session: Session, center: Center, now: datetime.datetime) -> bool:
@@ -215,8 +245,8 @@ def run(session: Session) -> dict[str, int]:
         center = get_or_create_center(session, spec)
         for email, role in spec["members"]:
             ensure_membership(session, users[email], center, role)
-        for name, price, duration in spec["services"]:
-            ensure_service(session, center, name, price, duration)
+        for name, price, duration, description in spec["services"]:
+            ensure_service(session, center, name, price, duration, description)
         session.flush()
         if not has_future_appointments(session, center, now):
             created += create_appointments(session, center, now)

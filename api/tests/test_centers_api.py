@@ -259,7 +259,7 @@ def test_services_list_is_active_only_sorted_by_name(setup, service_factory):
     service_factory(center=center, name="Baja", is_active=False)
     response = client.get(url(center, "services/"))
     assert [s["name"] for s in response.json()] == ["Alfa", "Zeta"]
-    assert set(response.json()[0]) == {"id", "name", "price_clp", "duration_minutes"}
+    assert set(response.json()[0]) == {"id", "name", "price_clp", "duration_minutes", "description"}
 
 
 def test_members_lists_all_roles(setup, membership_factory):

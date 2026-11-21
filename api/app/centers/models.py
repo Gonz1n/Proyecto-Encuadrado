@@ -75,6 +75,7 @@ class Service(Base):
     name: Mapped[str] = mapped_column(String(120))
     price_clp: Mapped[int]
     duration_minutes: Mapped[int]
+    description: Mapped[str] = mapped_column(String(300), default="", server_default="")
     is_active: Mapped[bool] = mapped_column(default=True)
 
     center: Mapped[Center] = relationship(back_populates="services")

@@ -140,6 +140,7 @@ class ServiceIn(BaseModel):
     name: Annotated[str, Field(max_length=120)]
     price_clp: Annotated[int, Field(ge=1, le=10_000_000)]
     duration_minutes: Annotated[int, Field(ge=15, le=240)]
+    description: Annotated[str, Field(max_length=300)] = ""
 
     @field_validator("name")
     @classmethod
@@ -160,6 +161,7 @@ class ServiceUpdate(ServiceIn):
     name: Annotated[str, Field(max_length=120)] = Field(default=None)
     price_clp: Annotated[int, Field(ge=1, le=10_000_000)] = Field(default=None)
     duration_minutes: Annotated[int, Field(ge=15, le=240)] = Field(default=None)
+    description: Annotated[str, Field(max_length=300)] = Field(default=None)
 
 
 class ServiceOut(BaseModel):
@@ -169,6 +171,7 @@ class ServiceOut(BaseModel):
     name: str
     price_clp: int
     duration_minutes: int
+    description: str
 
 
 class MemberUserOut(BaseModel):
