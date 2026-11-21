@@ -2,6 +2,7 @@ export const queryKeys = {
   me: ['me'] as const,
   center: (slug: string) => ['center', slug] as const,
   services: (slug: string) => ['services', slug] as const,
+  closures: (slug: string) => ['closures', slug] as const,
   members: (slug: string) => ['members', slug] as const,
   appointments: (slug: string, filters: unknown) =>
     ['appointments', slug, filters] as const,

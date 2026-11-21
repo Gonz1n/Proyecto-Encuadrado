@@ -12,6 +12,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { WEEKDAY_SHORT } from '@/lib/format'
 import { SOCIAL_NETWORKS, phoneError, socialLinkError } from '@/lib/social-links'
 import type { Center, CenterUpdate } from './api'
+import { cancelledMessage } from './cancelled-message'
 import { handleMutationError, useUpdateCenter } from './hooks'
 
 const DESCRIPTION_MAX = 400
@@ -34,6 +35,8 @@ const centerSchema = z
     opening_time: z.string().min(1, 'Ingresa el horario de inicio'),
     closing_time: z.string().min(1, 'Ingresa el horario de término'),
     open_days: z.array(z.number()).min(1, 'Selecciona al menos un día de atención'),
+    lunch_start: z.string(),
+    lunch_end: z.string(),
     website_url: socialLink(),
     instagram_url: socialLink('instagram.com', 'Instagram'),
     facebook_url: socialLink('facebook.com', 'Facebook'),
@@ -50,6 +53,14 @@ const centerSchema = z
     path: ['closing_time'],
     message: 'El horario de término debe ser posterior al de inicio',
   })
+  .refine((v) => Boolean(v.lunch_start) === Boolean(v.lunch_end), {
+    path: ['lunch_end'],
+    message: 'Indica inicio y término de la colación',
+  })
+  .refine((v) => !v.lunch_start || !v.lunch_end || v.lunch_end > v.lunch_start, {
+    path: ['lunch_end'],
+    message: 'El término de la colación debe ser posterior al inicio',
+  })
 
 type CenterValues = z.infer<typeof centerSchema>
 
@@ -59,6 +70,8 @@ const FIELDS = [
   'opening_time',
   'closing_time',
   'open_days',
+  'lunch_start',
+  'lunch_end',
   'website_url',
   'instagram_url',
   'facebook_url',
@@ -73,6 +86,8 @@ function toValues(center: Center): CenterValues {
     opening_time: center.opening_time.slice(0, 5),
     closing_time: center.closing_time.slice(0, 5),
     open_days: center.open_days,
+    lunch_start: center.lunch_start?.slice(0, 5) ?? '',
+    lunch_end: center.lunch_end?.slice(0, 5) ?? '',
     website_url: center.website_url,
     instagram_url: center.instagram_url,
     facebook_url: center.facebook_url,
@@ -116,10 +131,19 @@ export function CenterForm({
     const body = Object.fromEntries(
       FIELDS.filter((field) => dirtyFields[field]).map((field) => [field, values[field]]),
     ) as CenterUpdate
+    const lunchChanged = Boolean(dirtyFields.lunch_start || dirtyFields.lunch_end)
+    if (lunchChanged) {
+      body.lunch_start = values.lunch_start || null
+      body.lunch_end = values.lunch_end || null
+    }
     try {
       const saved = await update.mutateAsync(body)
       reset(toValues(saved))
-      toast.success('Cambios guardados')
+      toast.success(
+        lunchChanged
+          ? cancelledMessage('Colación guardada.', saved.cancelled_appointments)
+          : 'Cambios guardados',
+      )
     } catch (error) {
       handleMutationError(error, setError, FIELDS)
     }
@@ -189,6 +213,34 @@ export function CenterForm({
               {...register('closing_time')}
             />
             <FieldError id="center-closing-error" message={errors.closing_time?.message} />
+          </div>
+        </div>
+        <div className="grid gap-5 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="center-lunch-start">Inicio de colación</Label>
+            <Input
+              id="center-lunch-start"
+              type="time"
+              aria-invalid={errors.lunch_end ? true : undefined}
+              aria-describedby={errors.lunch_end ? 'center-lunch-error' : undefined}
+              {...register('lunch_start')}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="center-lunch-end">Término de colación</Label>
+            <Input
+              id="center-lunch-end"
+              type="time"
+              aria-invalid={errors.lunch_end ? true : undefined}
+              aria-describedby={errors.lunch_end ? 'center-lunch-error' : undefined}
+              {...register('lunch_end')}
+            />
+          </div>
+          <div className="sm:col-span-2 -mt-3 space-y-1">
+            <p className="text-sm text-muted-foreground">
+              Opcional. En ese tramo no se agendan citas. Deja ambos campos vacíos para no tener colación.
+            </p>
+            <FieldError id="center-lunch-error" message={errors.lunch_end?.message} />
           </div>
         </div>
         <Controller

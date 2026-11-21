@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useCan } from '@/features/permissions/use-can'
 import { CenterForm } from './center-form'
+import { ClosuresCard } from './closures-card'
 import { useCenter } from './hooks'
 import { ServicesTable } from './services-table'
 
@@ -57,6 +58,17 @@ export function SettingsPage() {
           </p>
         </div>
         <ServicesTable slug={slug} canEdit={canEdit} />
+      </section>
+      <section aria-labelledby="closures-heading" className="max-w-3xl space-y-5">
+        <div className="space-y-1">
+          <h2 id="closures-heading" className="text-lg font-semibold tracking-tight">
+            Días sin atención
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Feriados o cierres puntuales. Las citas de ese día se cancelan.
+          </p>
+        </div>
+        <ClosuresCard slug={slug} canEdit={canEdit} />
       </section>
     </div>
   )

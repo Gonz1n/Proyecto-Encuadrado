@@ -10,9 +10,19 @@ export type Center = {
   closing_time: string
   terms: string
   open_days: number[]
+  lunch_start: string | null
+  lunch_end: string | null
 } & SocialLinks
 
 export type CenterUpdate = Partial<Omit<Center, 'slug' | 'terms'>>
+
+export type Closure = {
+  id: number
+  date: string
+  reason: string
+}
+
+export type ClosureCreated = Closure & { cancelled_appointments: number }
 
 export type Service = {
   id: number
@@ -33,7 +43,15 @@ export type Member = {
 export const centerApi = {
   get: (slug: string) => apiFetch<Center>(`/api/centers/${slug}/`),
   update: (slug: string, body: CenterUpdate) =>
-    apiFetch<Center>(`/api/centers/${slug}/`, { method: 'PATCH', body }),
+    apiFetch<Center & { cancelled_appointments: number }>(`/api/centers/${slug}/`, {
+      method: 'PATCH',
+      body,
+    }),
+  closures: (slug: string) => apiFetch<Closure[]>(`/api/centers/${slug}/closures/`),
+  createClosure: (slug: string, body: { date: string; reason: string }) =>
+    apiFetch<ClosureCreated>(`/api/centers/${slug}/closures/`, { method: 'POST', body }),
+  deleteClosure: (slug: string, id: number) =>
+    apiFetch<void>(`/api/centers/${slug}/closures/${id}/`, { method: 'DELETE' }),
   members: (slug: string) => apiFetch<Member[]>(`/api/centers/${slug}/members/`),
   services: (slug: string) => apiFetch<Service[]>(`/api/centers/${slug}/services/`),
   createService: (slug: string, body: ServiceInput) =>
