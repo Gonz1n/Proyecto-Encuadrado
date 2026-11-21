@@ -9,7 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { centersMenuItems } from './centers-menu'
+import { centersMenuItems, centersMenuState, shouldRefetchCenters } from './centers-menu'
 import { usePublicCenters } from './hooks'
 
 const menuMotion =
@@ -18,6 +18,12 @@ const menuMotion =
 export function PublicHeader({ slug }: { slug: string }) {
   const centers = usePublicCenters()
   const items = centersMenuItems(centers.data ?? [], slug)
+  const state = centersMenuState({ isError: centers.isError, hasData: Boolean(centers.data?.length) })
+  const handleOpenChange = (open: boolean) => {
+    if (open && shouldRefetchCenters({ isError: centers.isError, hasData: Boolean(centers.data?.length), isFetching: centers.isFetching })) {
+      void centers.refetch()
+    }
+  }
 
   return (
     <header className="border-b bg-background">
@@ -29,7 +35,7 @@ export function PublicHeader({ slug }: { slug: string }) {
           <img src="/logo-centradamente.svg" alt="" aria-hidden="true" className="h-8 w-auto shrink-0" />
           <span className="truncate">CentradaMente</span>
         </Link>
-        <DropdownMenu>
+        <DropdownMenu onOpenChange={handleOpenChange}>
           <DropdownMenuTrigger
             render={
               <Button
@@ -42,10 +48,30 @@ export function PublicHeader({ slug }: { slug: string }) {
             <ChevronDown aria-hidden="true" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" sideOffset={6} className={menuMotion}>
+            {state === 'loading' ? (
+              <DropdownMenuItem disabled className="min-h-11 px-2.5 py-2">
+                Cargando centros…
+              </DropdownMenuItem>
+            ) : null}
+            {state === 'error' ? (
+              <>
+                <DropdownMenuItem disabled className="min-h-11 px-2.5 py-2">
+                  No pudimos cargar los centros
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  closeOnClick={false}
+                  onClick={() => void centers.refetch()}
+                  className="min-h-11 px-2.5 py-2 font-medium"
+                >
+                  Reintentar
+                </DropdownMenuItem>
+              </>
+            ) : null}
             {items.map((item) => (
               <DropdownMenuItem
                 key={item.slug}
                 render={<Link href={`/c/${item.slug}`} />}
+                aria-current={item.current ? 'page' : undefined}
                 className="min-h-11 gap-3 px-2.5 py-2"
               >
                 <span className="flex min-w-0 flex-1 flex-col">
