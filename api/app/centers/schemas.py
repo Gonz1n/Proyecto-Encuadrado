@@ -36,6 +36,14 @@ class CenterOut(BaseModel):
     open_days: list[int]
 
 
+class CenterListItemOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    slug: str
+    name: str
+    description: str
+
+
 class CenterUpdatedOut(CenterOut):
     cancelled_appointments: int
 

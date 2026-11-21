@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from app import clock
 from app.centers import repository as centers
 from app.centers.models import Center, Membership, Service
-from app.centers.schemas import CenterOut, ServiceOut
+from app.centers.schemas import CenterListItemOut, CenterOut, ServiceOut
 from app.db import SessionDep
 from app.errors import DomainError, field_error
 from app.scheduling import availability, services
@@ -20,6 +20,7 @@ from app.scheduling.schemas import (
     SlotsOut,
 )
 
+list_router = APIRouter(prefix="/api/public/centers", tags=["public"])
 router = APIRouter(prefix="/api/public/centers/{slug}", tags=["public"])
 
 SLOT_TAKEN = "La hora seleccionada ya no está disponible"
@@ -33,6 +34,11 @@ def _center(session: SessionDep, slug: str) -> Center:
 
 
 PublicCenter = Annotated[Center, Depends(_center)]
+
+
+@list_router.get("/", response_model=list[CenterListItemOut])
+def list_centers(session: SessionDep) -> list[CenterListItemOut]:
+    return [CenterListItemOut.model_validate(c) for c in centers.all_centers(session)]
 
 
 BIGINT_MAX = 2**63 - 1

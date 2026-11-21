@@ -11,6 +11,10 @@ def get_center_by_slug(session: Session, slug: str) -> Center | None:
     return session.scalar(select(Center).where(Center.slug == slug))
 
 
+def all_centers(session: Session) -> list[Center]:
+    return list(session.scalars(select(Center).order_by(Center.name)))
+
+
 def get_membership(session: Session, user_id: int, center_id: int) -> Membership | None:
     return session.scalar(
         select(Membership).where(Membership.user_id == user_id, Membership.center_id == center_id)
