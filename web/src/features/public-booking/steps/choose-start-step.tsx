@@ -25,12 +25,12 @@ export function ChooseStartStep() {
       {OPTIONS.map(({ value, label, description, icon: Icon }) => (
         <li key={value}>
           <OptionButton onClick={() => state.update({ by: value })}>
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[var(--cp-salmon)] text-[var(--cp-granate)]">
               <Icon className="size-5" aria-hidden="true" />
             </span>
             <span className="flex flex-col">
               <span className="font-medium">{label}</span>
-              <span className="text-sm text-muted-foreground">{description}</span>
+              <span className="text-sm text-[var(--cp-granate)]/80">{description}</span>
             </span>
           </OptionButton>
         </li>

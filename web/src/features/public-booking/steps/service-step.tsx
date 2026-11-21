@@ -5,7 +5,7 @@ import { OptionButton } from '../option-button'
 export function ServiceStep() {
   const { center, state } = useBookingFlow()
   if (center.services.length === 0) {
-    return <p className="text-sm text-muted-foreground">Este centro aún no publica servicios.</p>
+    return <p className="text-sm text-[var(--cp-granate)]/80">Este centro aún no publica servicios.</p>
   }
   return (
     <ul className="grid gap-2">
@@ -17,7 +17,7 @@ export function ServiceStep() {
           >
             <span className="flex min-w-0 flex-1 flex-col">
               <span className="font-medium">{service.name}</span>
-              <span className="text-sm text-muted-foreground">
+              <span className="text-sm text-[var(--cp-granate)]/80">
                 {formatDuration(service.duration_minutes)}
               </span>
             </span>

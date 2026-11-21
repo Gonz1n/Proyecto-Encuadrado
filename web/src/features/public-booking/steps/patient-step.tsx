@@ -178,7 +178,7 @@ export function PatientStep() {
             <Label htmlFor={name}>{label}</Label>
             <Input
               id={name}
-              className="h-11 md:h-10"
+              className="h-11 border-[var(--cp-granate)]/60 bg-white md:h-10"
               spellCheck={false}
               aria-invalid={error ? true : undefined}
               aria-describedby={error ? `${name}-error` : undefined}
@@ -218,7 +218,7 @@ export function PatientStep() {
                     type="button"
                     variant={active ? 'default' : 'outline'}
                     aria-pressed={active}
-                    className="h-11 justify-start gap-2"
+                    className="h-11 justify-start gap-2 rounded-full border-[var(--cp-granate)] active:scale-[0.97] motion-reduce:active:scale-100 aria-pressed:bg-[var(--cp-granate)] aria-pressed:text-white [&:not([aria-pressed=true])]:bg-[var(--cp-card)] [&:not([aria-pressed=true])]:text-[var(--cp-granate)]"
                     onClick={() => field.onChange(value)}
                   >
                     <Icon aria-hidden="true" />
@@ -230,7 +230,7 @@ export function PatientStep() {
           </fieldset>
         )}
       />
-      <Button type="submit" size="lg" className="h-11 w-full" disabled={isSubmitting}>
+      <Button type="submit" size="lg" className="h-11 w-full rounded-full active:scale-[0.97] motion-reduce:active:scale-100" disabled={isSubmitting}>
         {isSubmitting ? (
           <>
             <Loader2 className="motion-safe:animate-spin" aria-hidden="true" />

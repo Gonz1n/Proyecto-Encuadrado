@@ -6,7 +6,7 @@ import { ProfessionalSubtitle } from '../professional-profile-dialog'
 export function ProfessionalStep() {
   const { center, state } = useBookingFlow()
   if (center.professionals.length === 0) {
-    return <p className="text-sm text-muted-foreground">Este centro aún no tiene profesionales con agenda.</p>
+    return <p className="text-sm text-[var(--cp-granate)]/80">Este centro aún no tiene profesionales con agenda.</p>
   }
   return (
     <ul className="grid gap-2">

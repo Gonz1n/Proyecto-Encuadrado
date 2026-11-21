@@ -18,7 +18,7 @@ export function BookingSuccessPage() {
   const [booking, setBooking] = useState<Booking | null | undefined>(undefined)
   useEffect(() => setBooking(readBooking(slug)), [slug])
   const backToProfile = (
-    <Button className="h-11 px-5" nativeButton={false} render={<Link href={`/c/${slug}`} />}>
+    <Button className="h-11 rounded-full px-5 active:scale-[0.97] motion-reduce:active:scale-100" nativeButton={false} render={<Link href={`/c/${slug}`} />}>
       Volver al perfil del centro
     </Button>
   )
@@ -47,21 +47,23 @@ export function BookingSuccessPage() {
   ]
 
   return (
-    <div className="min-h-svh bg-background">
+    <div className="center-page min-h-svh">
       <title>{`Hora agendada | ${booking.center.name}`}</title>
       <PublicHeader slug={booking.center.slug} />
       <main className="mx-auto max-w-lg px-4 py-10 sm:px-6 sm:py-16">
-        <CircleCheck className="size-10 text-primary" aria-hidden="true" />
-        <h1 className="mt-5 text-2xl font-semibold tracking-tight text-balance sm:text-3xl">
+        <span className="flex size-16 items-center justify-center rounded-full bg-[var(--cp-salmon)]">
+          <CircleCheck className="size-9 text-[var(--cp-granate)]" aria-hidden="true" />
+        </span>
+        <h1 className="mt-5 text-2xl font-bold tracking-tight text-balance sm:text-3xl">
           Tu hora quedó agendada
         </h1>
-        <p className="mt-2 text-muted-foreground text-pretty">
+        <p className="mt-2 text-[var(--cp-granate)]/80 text-pretty">
           Guarda estos datos para el día de tu atención.
         </p>
-        <dl className="mt-8 divide-y rounded-xl border bg-card px-4">
+        <dl className="mt-8 divide-y divide-[var(--cp-terracota)]/50 rounded-3xl border border-[var(--cp-granate)] bg-[var(--cp-card)] px-5">
           {rows.map(({ label, value }) => (
             <div key={label} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5 py-3">
-              <dt className="text-sm text-muted-foreground">{label}</dt>
+              <dt className="text-sm text-[var(--cp-granate)]/80">{label}</dt>
               <dd className="font-medium tabular-nums">{value}</dd>
             </div>
           ))}

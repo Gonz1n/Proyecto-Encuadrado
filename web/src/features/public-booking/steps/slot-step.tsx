@@ -18,6 +18,9 @@ function groupSlots(slots: string[]) {
   ].filter((group) => group.slots.length > 0)
 }
 
+const outlineAction =
+  'h-11 rounded-full border-[var(--cp-granate)] bg-[var(--cp-card)] px-5 text-[var(--cp-granate)] active:scale-[0.97] motion-reduce:active:scale-100 [@media(hover:hover)_and_(pointer:fine)]:hover:bg-[var(--cp-header)]'
+
 export function SlotStep() {
   const { slug, state } = useBookingFlow()
   const query = { service: state.service?.id, professional: state.professional?.id }
@@ -26,12 +29,12 @@ export function SlotStep() {
   const [today] = useState(() => startOfDay(new Date()))
   const selected = state.date ? parseISO(state.date) : undefined
 
-  if (days.isPending) return <Skeleton className="h-80 w-full max-w-sm rounded-xl" />
+  if (days.isPending) return <Skeleton className="h-80 w-full max-w-sm rounded-2xl" />
   if (days.isError) {
     return (
       <div className="space-y-3">
-        <p className="text-sm text-muted-foreground">No pudimos cargar los días disponibles.</p>
-        <Button variant="outline" onClick={() => days.refetch()}>
+        <p className="text-sm text-[var(--cp-granate)]/80">No pudimos cargar los días disponibles.</p>
+        <Button variant="outline" className={outlineAction} onClick={() => days.refetch()}>
           Reintentar
         </Button>
       </div>
@@ -39,12 +42,12 @@ export function SlotStep() {
   }
   if (days.data.days.length === 0) {
     return (
-      <div className="space-y-3 rounded-xl border border-dashed p-5">
+      <div className="space-y-3 rounded-3xl border border-dashed border-[var(--cp-granate)] bg-[var(--cp-card)] p-5">
         <p className="font-medium">No quedan horas en los próximos 30 días</p>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-[var(--cp-granate)]/80">
           Prueba con otro profesional o con otro servicio.
         </p>
-        <Button variant="outline" onClick={() => state.update({ professional: null })}>
+        <Button variant="outline" className={outlineAction} onClick={() => state.update({ professional: null })}>
           Elegir otro profesional
         </Button>
       </div>
@@ -55,7 +58,7 @@ export function SlotStep() {
 
   return (
     <div className="grid gap-6 md:grid-cols-[auto_minmax(0,1fr)] md:items-start">
-      <div className="w-fit max-w-full rounded-xl border bg-card p-2 sm:p-3">
+      <div className="w-fit max-w-full rounded-3xl border border-[var(--cp-granate)] bg-[var(--cp-card)] p-2 sm:p-3">
         <Calendar
           mode="single"
           locale={es}
@@ -66,13 +69,13 @@ export function SlotStep() {
           startMonth={addDays(today, 1)}
           endMonth={addDays(today, 30)}
           disabled={(day) => !available.has(toKey(day))}
-          className="bg-transparent p-0 [--cell-size:--spacing(10)] sm:[--cell-size:--spacing(11)]"
+          className="bg-transparent p-0 [--cell-size:--spacing(10)] sm:[--cell-size:--spacing(11)] [&_button:not(:disabled):not([data-selected-single=true])]:bg-[var(--cp-header)] [&_button:not(:disabled):not([data-selected-single=true])]:text-[var(--cp-granate)] [&_button[data-selected-single=true]]:bg-[var(--cp-granate)] [&_button[data-selected-single=true]]:text-white [&_button]:duration-150 [&_button]:active:scale-[0.97] motion-reduce:[&_button]:active:scale-100 [&_button]:focus-visible:ring-[var(--cp-granate)]/40"
         />
       </div>
       {state.date ? (
         <DaySlots date={state.date} />
       ) : (
-        <p className="text-sm text-muted-foreground md:pt-3">
+        <p className="text-sm text-[var(--cp-granate)]/80 md:pt-3">
           Elige un día disponible para ver sus horas.
         </p>
       )}
@@ -90,7 +93,7 @@ function DaySlots({ date }: { date: string }) {
 
   return (
     <section aria-labelledby="day-slots-heading" className="space-y-4">
-      <h2 id="day-slots-heading" className="font-medium">
+      <h2 id="day-slots-heading" className="border-b border-[var(--cp-terracota)] pb-2 font-semibold">
         {formatLongDate(parseISO(date))}
       </h2>
       {slots.isPending ? (
@@ -100,13 +103,13 @@ function DaySlots({ date }: { date: string }) {
           ))}
         </div>
       ) : slots.isError || slots.data.slots.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-[var(--cp-granate)]/80">
           Este día ya no tiene horas libres. Elige otro día.
         </p>
       ) : (
         groupSlots(slots.data.slots).map((group) => (
           <div key={group.label} className="space-y-2">
-            <p className="text-sm text-muted-foreground">{group.label}</p>
+            <p className="text-sm text-[var(--cp-granate)]/80">{group.label}</p>
             <ul className="grid grid-cols-3 gap-2 sm:grid-cols-4">
               {group.slots.map((slot) => (
                 <li key={slot}>
@@ -115,8 +118,8 @@ function DaySlots({ date }: { date: string }) {
                     aria-pressed={state.time === slot}
                     onClick={() => state.update({ time: slot })}
                     className={cn(
-                      'h-11 w-full rounded-lg border bg-card text-sm font-medium tabular-nums transition-colors outline-none hover:border-primary/40 hover:bg-accent focus-visible:ring-3 focus-visible:ring-ring/50',
-                      'aria-pressed:border-primary aria-pressed:bg-primary aria-pressed:text-primary-foreground',
+                      'h-11 w-full rounded-full border border-[var(--cp-granate)]/70 bg-[var(--cp-header)] text-sm font-medium text-[var(--cp-granate)] tabular-nums transition-[transform,background-color] duration-150 ease-out outline-none focus-visible:ring-3 focus-visible:ring-[var(--cp-granate)]/40 focus-visible:ring-offset-2 active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100 [@media(hover:hover)_and_(pointer:fine)]:hover:bg-[var(--cp-salmon)]',
+                      'aria-pressed:border-[var(--cp-granate)] aria-pressed:bg-[var(--cp-granate)] aria-pressed:text-white [@media(hover:hover)_and_(pointer:fine)]:aria-pressed:hover:bg-[var(--cp-granate)]',
                     )}
                   >
                     {slot}

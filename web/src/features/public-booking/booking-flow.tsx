@@ -72,17 +72,17 @@ function Steps() {
     <section aria-labelledby="booking-step-heading" className="space-y-6">
       <div className="space-y-1.5">
         {step === 'start' ? null : (
-          <p className="text-sm text-muted-foreground">Paso {stepNumber(step, state.first)} de 4</p>
+          <p className="text-sm font-medium text-[var(--cp-granate)]/80">Paso {stepNumber(step, state.first)} de 4</p>
         )}
         <h1
           id="booking-step-heading"
           ref={headingRef}
           tabIndex={-1}
-          className="scroll-mt-6 text-2xl font-semibold tracking-tight text-balance outline-none"
+          className="scroll-mt-6 border-b border-[var(--cp-terracota)] pb-2 text-2xl font-bold tracking-tight text-balance outline-none"
         >
           {copy.title}
         </h1>
-        <p className="text-muted-foreground text-pretty">{copy.description}</p>
+        <p className="pt-1 text-[var(--cp-granate)]/80 text-pretty">{copy.description}</p>
       </div>
       {step === 'start' ? <ChooseStartStep /> : null}
       {step === 'service' ? <ServiceStep /> : null}
@@ -101,11 +101,11 @@ export function BookingPage() {
 
   if (center.isPending) {
     return (
-      <div className="mx-auto max-w-5xl space-y-4 px-4 py-8 sm:px-6">
+      <div className="center-page min-h-svh"><div className="mx-auto max-w-5xl space-y-4 px-4 py-8 sm:px-6">
         <Skeleton className="h-8 w-56" />
         <Skeleton className="h-16 w-full max-w-xl" />
         <Skeleton className="h-16 w-full max-w-xl" />
-      </div>
+      </div></div>
     )
   }
   if (center.isError) {
@@ -125,7 +125,7 @@ export function BookingPage() {
   }
 
   return (
-    <div className="min-h-svh bg-background">
+    <div className="center-page min-h-svh">
       <title>{`Agendar en ${center.data.name}`}</title>
       <PublicHeader slug={slug} />
       <main className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-10">
