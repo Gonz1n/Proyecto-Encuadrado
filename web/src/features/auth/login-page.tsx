@@ -82,7 +82,7 @@ export function LoginPage() {
           <form onSubmit={onSubmit} noValidate className="space-y-5">
             <div className="space-y-2">
               <Label htmlFor="email" className="text-base font-semibold text-(--cp-granate)">
-                Correo electrónico del centro
+                Correo electrónico
               </Label>
               <Input
                 id="email"
