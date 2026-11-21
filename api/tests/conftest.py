@@ -44,3 +44,16 @@ def client(session):
     app.dependency_overrides[get_session] = lambda: session
     yield TestClient(app)
     app.dependency_overrides.clear()
+
+
+@pytest.fixture
+def auth_client(session, client):
+    def make(user) -> TestClient:
+        from app.accounts import repository
+
+        token = repository.get_or_create_token(session, user)
+        authed = TestClient(app)
+        authed.headers["Authorization"] = f"Bearer {token.key}"
+        return authed
+
+    return make

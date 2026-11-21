@@ -4,10 +4,17 @@ from itertools import count
 import pytest
 
 from app.accounts.models import User
+from app.accounts.security import hash_password
 from app.centers.models import Center, Membership, Role, Service
 from app.scheduling.models import Appointment
 
-PASSWORD_HASH = "placeholder-hash"
+_hashes: dict[str, str] = {}
+
+
+def _hash(password: str) -> str:
+    if password not in _hashes:
+        _hashes[password] = hash_password(password)
+    return _hashes[password]
 
 
 @pytest.fixture
@@ -18,7 +25,7 @@ def user_factory(session):
         n = next(counter)
         user = User(
             email=email or f"user{n}@example.com",
-            password=PASSWORD_HASH,
+            password=_hash(password),
             first_name=extra.pop("first_name", "Nombre"),
             last_name=extra.pop("last_name", f"Apellido{n}"),
             **extra,
