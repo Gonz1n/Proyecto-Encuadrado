@@ -18,7 +18,7 @@ export type Center = {
   email: string
 } & SocialLinks
 
-export type CenterUpdate = Partial<Omit<Center, 'slug' | 'terms'>>
+export type CenterUpdate = Partial<Omit<Center, 'slug'>>
 
 export type Closure = {
   id: number

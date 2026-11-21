@@ -17,6 +17,7 @@ import { cancelledMessage } from './cancelled-message'
 import { handleMutationError, useUpdateCenter } from './hooks'
 
 const DESCRIPTION_MAX = 400
+const TERMS_MAX = 5000
 
 const socialLink = (domain?: string, label?: string) =>
   z
@@ -33,6 +34,7 @@ const centerSchema = z
     description: z
       .string()
       .max(DESCRIPTION_MAX, `La descripción admite hasta ${DESCRIPTION_MAX} caracteres`),
+    terms: z.string().max(TERMS_MAX, `Los términos admiten hasta ${TERMS_MAX} caracteres`),
     opening_time: z.string().min(1, 'Ingresa el horario de inicio'),
     closing_time: z.string().min(1, 'Ingresa el horario de término'),
     open_days: z.array(z.number()).min(1, 'Selecciona al menos un día de atención'),
@@ -83,6 +85,7 @@ type CenterValues = z.infer<typeof centerSchema>
 const FIELDS = [
   'name',
   'description',
+  'terms',
   'opening_time',
   'closing_time',
   'open_days',
@@ -110,6 +113,7 @@ function toValues(center: Center): CenterValues {
   return {
     name: center.name,
     description: center.description,
+    terms: center.terms,
     opening_time: center.opening_time.slice(0, 5),
     closing_time: center.closing_time.slice(0, 5),
     open_days: center.open_days,
@@ -157,6 +161,7 @@ export function CenterForm({
     defaultValues: toValues(center),
   })
   const descriptionLength = useWatch({ control, name: 'description' }).length
+  const termsLength = useWatch({ control, name: 'terms' }).length
 
   const onSubmit = handleSubmit(async (values) => {
     const body = Object.fromEntries(
@@ -315,6 +320,28 @@ export function CenterForm({
             </div>
           )}
         />
+        <div className="space-y-2">
+          <div className="flex items-baseline justify-between gap-2">
+            <Label htmlFor="center-terms">Términos y condiciones</Label>
+            <span
+              className={
+                termsLength > TERMS_MAX
+                  ? 'text-xs text-destructive tabular-nums'
+                  : 'text-xs text-muted-foreground tabular-nums'
+              }
+            >
+              {termsLength}/{TERMS_MAX}
+            </span>
+          </div>
+          <Textarea
+            id="center-terms"
+            rows={8}
+            aria-invalid={errors.terms ? true : undefined}
+            aria-describedby={errors.terms ? 'center-terms-error' : undefined}
+            {...register('terms')}
+          />
+          <FieldError id="center-terms-error" message={errors.terms?.message} />
+        </div>
         <fieldset className="space-y-4 border-t pt-5">
           <legend className="sr-only">Redes sociales</legend>
           <div aria-hidden="true">

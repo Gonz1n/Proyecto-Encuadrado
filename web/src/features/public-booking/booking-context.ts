@@ -10,6 +10,8 @@ export type PatientDraft = {
   patient_rut: string
   patient_birth_date: string
   modality: Modality
+  accept_terms: boolean
+  data_consent: boolean
 }
 
 type BookingFlowContextValue = {

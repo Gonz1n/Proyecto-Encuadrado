@@ -24,6 +24,8 @@ const EMPTY_DRAFT: PatientDraft = {
   patient_rut: '',
   patient_birth_date: '',
   modality: 'in_person',
+  accept_terms: false,
+  data_consent: false,
 }
 
 const STEP_COPY: Record<BookingStep, { title: string; description: string }> = {

@@ -7,6 +7,15 @@ import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { format, subYears } from 'date-fns'
@@ -18,6 +27,9 @@ import { useBookingFlow, type PatientDraft } from '../booking-context'
 import { saveBooking } from '../booking-storage'
 import { useCreateBooking } from '../hooks'
 import { MODALITY_LABELS, type Modality } from '@/lib/modality'
+
+const TERMS_ERROR = 'Debes aceptar los términos y condiciones'
+const CONSENT_ERROR = 'Debes autorizar el tratamiento de tus datos personales'
 
 const buildPatientSchema = (today: string, oldest: string) =>
   z.object({
@@ -38,6 +50,8 @@ const buildPatientSchema = (today: string, oldest: string) =>
       .refine((value) => value <= today, 'La fecha de nacimiento no puede ser futura')
       .refine((value) => value >= oldest, 'Revisa la fecha de nacimiento'),
     modality: z.enum(['in_person', 'remote']),
+    accept_terms: z.boolean().refine(Boolean, TERMS_ERROR),
+    data_consent: z.boolean().refine(Boolean, CONSENT_ERROR),
   })
 
 const PATIENT_FIELDS = [
@@ -46,10 +60,12 @@ const PATIENT_FIELDS = [
   'patient_birth_date',
   'patient_email',
   'patient_phone',
+  'accept_terms',
+  'data_consent',
 ] as const
 
 const FIELDS: {
-  name: (typeof PATIENT_FIELDS)[number]
+  name: Exclude<(typeof PATIENT_FIELDS)[number], 'accept_terms' | 'data_consent'>
   label: string
   type: string
   autoComplete: string
@@ -96,8 +112,70 @@ function firstMessage(data: Record<string, unknown>, key: string): string | null
   return Array.isArray(messages) && messages.length > 0 ? String(messages[0]) : null
 }
 
+function ConsentCheckbox({
+  id,
+  checked,
+  onCheckedChange,
+  error,
+  children,
+}: {
+  id: string
+  checked: boolean
+  onCheckedChange: (checked: boolean) => void
+  error?: string
+  children: React.ReactNode
+}) {
+  return (
+    <div className="space-y-1">
+      <label htmlFor={id} className="flex min-h-11 cursor-pointer items-start gap-3 py-2 text-sm leading-snug">
+        <Checkbox
+          id={id}
+          checked={checked}
+          onCheckedChange={onCheckedChange}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error ? `${id}-error` : undefined}
+          className="mt-0.5 size-5 border-[var(--cp-granate)] bg-white data-checked:border-[var(--cp-granate)] data-checked:bg-[var(--cp-granate)] data-checked:text-white focus-visible:ring-[var(--cp-granate)]/40"
+        />
+        <span>{children}</span>
+      </label>
+      {error ? (
+        <p id={`${id}-error`} className="text-sm text-destructive">
+          {error}
+        </p>
+      ) : null}
+    </div>
+  )
+}
+
+function TermsDialog({ centerName, terms }: { centerName: string; terms: string }) {
+  return (
+    <Dialog>
+      <DialogTrigger
+        render={
+          <Button
+            type="button"
+            variant="link"
+            className="-mt-1 h-11 px-0 text-[var(--cp-granate)] underline underline-offset-4"
+          />
+        }
+      >
+        Ver términos
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Términos y condiciones</DialogTitle>
+          <DialogDescription>{centerName}</DialogDescription>
+        </DialogHeader>
+        <p className="max-h-[60vh] overflow-y-auto text-sm leading-relaxed whitespace-pre-line text-pretty">
+          {terms}
+        </p>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
 export function PatientStep() {
-  const { slug, state, patientDraft, savePatientDraft } = useBookingFlow()
+  const { slug, center, state, patientDraft, savePatientDraft } = useBookingFlow()
   const queryClient = useQueryClient()
   const router = useRouter()
   const today = format(new Date(), 'yyyy-MM-dd')
@@ -228,6 +306,37 @@ export function PatientStep() {
               })}
             </div>
           </fieldset>
+        )}
+      />
+      <Controller
+        control={control}
+        name="accept_terms"
+        render={({ field }) => (
+          <div>
+            <ConsentCheckbox
+              id="accept_terms"
+              checked={field.value}
+              onCheckedChange={field.onChange}
+              error={errors.accept_terms?.message}
+            >
+              Acepto los términos y condiciones de {center.name}
+            </ConsentCheckbox>
+            {center.terms ? <TermsDialog centerName={center.name} terms={center.terms} /> : null}
+          </div>
+        )}
+      />
+      <Controller
+        control={control}
+        name="data_consent"
+        render={({ field }) => (
+          <ConsentCheckbox
+            id="data_consent"
+            checked={field.value}
+            onCheckedChange={field.onChange}
+            error={errors.data_consent?.message}
+          >
+            Autorizo a {center.name} a tratar mis datos personales y de salud para gestionar mi atención, conforme a la Ley 21.719 de protección de datos personales.
+          </ConsentCheckbox>
         )}
       />
       <Button type="submit" size="lg" className="h-11 w-full rounded-full active:scale-[0.97] motion-reduce:active:scale-100" disabled={isSubmitting}>

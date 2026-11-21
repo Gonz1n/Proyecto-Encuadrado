@@ -52,6 +52,8 @@ export type BookingInput = SlotQuery & {
   patient_rut: string
   patient_birth_date: string
   modality: Modality
+  accept_terms: boolean
+  data_consent: boolean
 }
 
 export type Booking = {
