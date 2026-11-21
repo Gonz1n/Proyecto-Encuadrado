@@ -1,7 +1,8 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { CircleAlert, Loader2 } from 'lucide-react'
+import { CircleAlert, Eye, EyeOff, Loader2 } from 'lucide-react'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { z } from 'zod'
@@ -40,6 +41,7 @@ function Wordmark({ className }: { className?: string }) {
 export function LoginPage() {
   const { login } = useAuth()
   const router = useRouter()
+  const [showPassword, setShowPassword] = useState(false)
   const next = safeNextPath(useSearchParams().get('next'))
   const {
     register,
@@ -101,14 +103,31 @@ export function LoginPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Contraseña</Label>
-              <Input
-                id="password"
-                type="password"
-                autoComplete="current-password"
-                aria-invalid={errors.password ? true : undefined}
-                aria-describedby={errors.password ? 'password-error' : undefined}
-                {...register('password')}
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete="current-password"
+                  className="pr-11"
+                  aria-invalid={errors.password ? true : undefined}
+                  aria-describedby={errors.password ? 'password-error' : undefined}
+                  {...register('password')}
+                />
+                <button
+                  type="button"
+                  aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                  aria-pressed={showPassword}
+                  aria-controls="password"
+                  onClick={() => setShowPassword((visible) => !visible)}
+                  className="absolute inset-y-0 right-0 my-auto flex size-11 items-center justify-center rounded-lg border border-transparent text-muted-foreground outline-none hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:scale-[0.97] motion-reduce:transform-none motion-reduce:active:scale-100"
+                >
+                  {showPassword ? (
+                    <EyeOff className="size-4" aria-hidden="true" />
+                  ) : (
+                    <Eye className="size-4" aria-hidden="true" />
+                  )}
+                </button>
+              </div>
               {errors.password ? (
                 <p id="password-error" className="text-sm text-destructive">
                   {errors.password.message}
