@@ -1,14 +1,19 @@
+import re
 from datetime import date
 from typing import Annotated
 from urllib.parse import urlparse
 
-from pydantic import BaseModel, ConfigDict, Field, HttpUrl, TypeAdapter, field_validator
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, HttpUrl, TypeAdapter, field_validator
 
 from app.centers.models import ROLE_LABELS, Role
 from app.centers.phone import PHONE_ERROR, normalize_phone
 from app.formats import HourMinute
 
 _url = TypeAdapter(HttpUrl)
+_email = TypeAdapter(EmailStr)
+CONTACT_PHONE = re.compile(r"^\+?[0-9][0-9 -]{6,18}$")
+CONTACT_PHONE_ERROR = "Ingresa un teléfono válido, por ejemplo +56 2 2345 6789"
+CONTACT_EMAIL_ERROR = "Ingresa un correo válido"
 
 SOCIAL_NETWORKS = {
     "instagram_url": ("instagram.com", "Instagram"),
@@ -33,6 +38,10 @@ class CenterOut(BaseModel):
     facebook_url: str
     linkedin_url: str
     whatsapp_number: str
+    address: str
+    commune: str
+    phone: str
+    email: str
     open_days: list[int]
 
 
@@ -63,6 +72,10 @@ class CenterUpdate(BaseModel):
     facebook_url: Annotated[str, Field(max_length=200)] = Field(default=None)
     linkedin_url: Annotated[str, Field(max_length=200)] = Field(default=None)
     whatsapp_number: Annotated[str, Field(max_length=20)] = Field(default=None)
+    address: Annotated[str, Field(max_length=200)] = Field(default=None)
+    commune: Annotated[str, Field(max_length=80)] = Field(default=None)
+    phone: Annotated[str, Field(max_length=20)] = Field(default=None)
+    email: Annotated[str, Field(max_length=254)] = Field(default=None)
     open_days: list[Annotated[int, Field(ge=0, le=6)]] = Field(default=None)
 
     @field_validator("name")
@@ -95,6 +108,23 @@ class CenterUpdate(BaseModel):
         if not phone:
             raise ValueError(PHONE_ERROR)
         return phone
+
+    @field_validator("phone")
+    @classmethod
+    def valid_contact_phone(cls, value: str) -> str:
+        if value and not (CONTACT_PHONE.match(value) and sum(c.isdigit() for c in value) >= 8):
+            raise ValueError(CONTACT_PHONE_ERROR)
+        return value
+
+    @field_validator("email")
+    @classmethod
+    def valid_email(cls, value: str) -> str:
+        if value:
+            try:
+                _email.validate_python(value)
+            except ValueError:
+                raise ValueError(CONTACT_EMAIL_ERROR) from None
+        return value
 
     @field_validator("open_days")
     @classmethod

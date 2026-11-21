@@ -48,6 +48,12 @@ CENTERS = [
             "Los datos personales se tratan conforme a la Ley 21.719 y solo para la gestión "
             "de tu atención."
         ),
+        "contact": {
+            "address": "Av. Providencia 1234, oficina 502",
+            "commune": "Providencia",
+            "phone": "+56 2 2345 6789",
+            "email": "contacto@centroaurora.cl",
+        },
         "members": [
             ("camila@aurora.cl", ADMIN),
             ("matias@aurora.cl", MEMBER),
@@ -78,6 +84,12 @@ CENTERS = [
             "Los datos personales y de salud se tratan conforme a la Ley 21.719 y solo para "
             "la gestión de tu atención."
         ),
+        "contact": {
+            "address": "Av. Apoquindo 4500, piso 3",
+            "commune": "Las Condes",
+            "phone": "+56 2 2987 6543",
+            "email": "hola@clinicanutrir.cl",
+        },
         "members": [
             ("francisca@nutrir.cl", ADMIN),
             ("valentina@aurora.cl", ADMIN),
@@ -125,7 +137,7 @@ def get_or_create_center(session: Session, spec: dict) -> Center:
     center = centers.get_center_by_slug(session, spec["slug"])
     if center is None:
         fields = {key: spec[key] for key in ("name", "description", "opening_time", "closing_time", "terms")}
-        center = Center(slug=spec["slug"], **fields)
+        center = Center(slug=spec["slug"], **fields, **spec["contact"])
         session.add(center)
         session.flush()
     return center

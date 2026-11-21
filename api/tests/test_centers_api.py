@@ -62,6 +62,10 @@ def test_any_role_reads_center(setup, role):
         "facebook_url": "",
         "linkedin_url": "",
         "whatsapp_number": "",
+        "address": "",
+        "commune": "",
+        "phone": "",
+        "email": "",
         "open_days": [0, 1, 2, 3, 4, 5, 6],
     }
 
