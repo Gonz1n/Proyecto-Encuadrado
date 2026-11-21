@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from app import clock
 from app.accounts.models import User
+from app.centers import repository as centers_repository
 from app.centers.models import Center, Membership, Service
 from app.scheduling.availability import slots_for_day
 from app.scheduling.models import Appointment, AppointmentChange, AppointmentStatus, ChangeKind
@@ -25,6 +26,44 @@ class AppointmentNotFound(Exception):
 
 def lock_professional(session: Session, professional: Membership) -> None:
     session.execute(select(User.id).where(User.id == professional.user_id).with_for_update())
+
+
+def lock_center_professionals(session: Session, center: Center) -> None:
+    user_ids = [m.user_id for m in centers_repository.bookable_memberships(session, center.id)]
+    session.execute(select(User.id).where(User.id.in_(user_ids)).order_by(User.id).with_for_update())
+
+
+def cancel_for_center(
+    session: Session, center: Center, appointments: list[Appointment], note: str, user: User
+) -> int:
+    lock_center_professionals(session, center)
+    now = clock.local_now()
+    ids = [a.id for a in appointments]
+    locked = session.scalars(
+        select(Appointment)
+        .where(
+            Appointment.id.in_(ids),
+            Appointment.status == AppointmentStatus.CONFIRMED,
+            Appointment.start > now,
+        )
+        .with_for_update()
+        .execution_options(populate_existing=True)
+    )
+    count = 0
+    for appointment in locked:
+        session.add(
+            AppointmentChange(
+                appointment_id=appointment.id,
+                kind=ChangeKind.CANCELLED,
+                previous_start=appointment.start,
+                new_start=None,
+                note=note,
+                changed_by_id=user.id,
+            )
+        )
+        appointment.status = AppointmentStatus.CANCELLED
+        count += 1
+    return count
 
 
 def create_public_appointment(

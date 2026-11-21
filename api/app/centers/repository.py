@@ -62,3 +62,23 @@ def closure_dates(session: Session, center_id: int, start: date, end: date) -> s
             )
         )
     )
+
+
+def upcoming_closures(session: Session, center_id: int, today: date) -> list[CenterClosure]:
+    return list(
+        session.scalars(
+            select(CenterClosure)
+            .where(CenterClosure.center_id == center_id, CenterClosure.date >= today)
+            .order_by(CenterClosure.date)
+        )
+    )
+
+
+def get_closure(session: Session, center_id: int, closure_id: int) -> CenterClosure | None:
+    return session.scalar(
+        select(CenterClosure).where(CenterClosure.id == closure_id, CenterClosure.center_id == center_id)
+    )
+
+
+def closure_exists(session: Session, center_id: int, day: date) -> bool:
+    return day in closure_dates(session, center_id, day, day)

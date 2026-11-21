@@ -68,3 +68,17 @@ def get_manageable(session: Session, access: CenterAccess, appointment_id: int) 
     if access.membership.role == Role.MEMBER:
         query = query.where(Appointment.professional_id == access.membership.id)
     return session.scalar(query)
+
+
+def confirmed_future_on_day(session: Session, center_id: int, day: date, now: datetime) -> list[Appointment]:
+    return list(
+        session.scalars(
+            select(Appointment).where(
+                Appointment.center_id == center_id,
+                Appointment.status == AppointmentStatus.CONFIRMED,
+                Appointment.start > now,
+                Appointment.start >= datetime.combine(day, time.min),
+                Appointment.start < datetime.combine(day + timedelta(days=1), time.min),
+            )
+        )
+    )

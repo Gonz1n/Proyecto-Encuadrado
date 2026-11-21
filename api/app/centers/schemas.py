@@ -1,3 +1,4 @@
+from datetime import date
 from typing import Annotated
 from urllib.parse import urlparse
 
@@ -147,3 +148,22 @@ class MemberOut(BaseModel):
             role_label=ROLE_LABELS[Role(membership.role)],
             user=MemberUserOut.model_validate(membership.user),
         )
+
+
+class ClosureIn(BaseModel):
+    model_config = ConfigDict(extra="ignore", str_strip_whitespace=True)
+
+    date: date
+    reason: Annotated[str, Field(min_length=1, max_length=120)]
+
+
+class ClosureOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    date: date
+    reason: str
+
+
+class ClosureCreatedOut(ClosureOut):
+    cancelled_appointments: int
