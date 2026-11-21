@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -7,7 +7,7 @@ from app import clock
 from app.accounts.models import User
 from app.centers.models import Center, Membership, Service
 from app.scheduling.availability import slots_for_day
-from app.scheduling.models import Appointment
+from app.scheduling.models import Appointment, AppointmentChange, AppointmentStatus, ChangeKind
 from app.scheduling.schemas import PublicBookingIn
 
 
@@ -48,5 +48,61 @@ def create_public_appointment(
         modality=data.modality,
     )
     session.add(appointment)
+    session.commit()
+    return appointment
+
+
+def _lock_editable(session: Session, appointment: Appointment, now: datetime) -> Appointment:
+    lock_professional(session, appointment.professional)
+    locked = session.scalar(
+        select(Appointment)
+        .where(Appointment.id == appointment.id, Appointment.status == AppointmentStatus.CONFIRMED)
+        .with_for_update()
+        .execution_options(populate_existing=True)
+    )
+    if locked is None:
+        raise AppointmentNotFound
+    if locked.start <= now:
+        raise AppointmentLocked
+    return locked
+
+
+def reschedule_appointment(
+    session: Session, appointment: Appointment, start: datetime, note: str, user: User, now: datetime
+) -> Appointment:
+    appointment = _lock_editable(session, appointment, now)
+    if start == appointment.start:
+        return appointment
+    slots = slots_for_day(session, appointment.professional, appointment.service, start.date(), now, appointment.id)
+    if start not in slots:
+        raise SlotUnavailable
+    session.add(
+        AppointmentChange(
+            appointment_id=appointment.id,
+            kind=ChangeKind.RESCHEDULED,
+            previous_start=appointment.start,
+            new_start=start,
+            note=note,
+            changed_by_id=user.id,
+        )
+    )
+    appointment.start = start
+    appointment.end = start + timedelta(minutes=appointment.service.duration_minutes)
+    session.commit()
+    return appointment
+
+
+def cancel_appointment(session: Session, appointment: Appointment, note: str, user: User, now: datetime) -> Appointment:
+    appointment = _lock_editable(session, appointment, now)
+    session.add(
+        AppointmentChange(
+            appointment_id=appointment.id,
+            kind=ChangeKind.CANCELLED,
+            previous_start=appointment.start,
+            note=note,
+            changed_by_id=user.id,
+        )
+    )
+    appointment.status = AppointmentStatus.CANCELLED
     session.commit()
     return appointment

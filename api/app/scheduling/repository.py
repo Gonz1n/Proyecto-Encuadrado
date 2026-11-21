@@ -1,10 +1,11 @@
 from datetime import date, datetime, time, timedelta
 
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload, selectinload
 
-from app.centers.models import Membership
-from app.scheduling.models import Appointment, AppointmentStatus
+from app.centers.access import CenterAccess
+from app.centers.models import Membership, Role
+from app.scheduling.models import Appointment, AppointmentChange, AppointmentStatus
 
 
 def busy_ranges(
@@ -23,3 +24,47 @@ def busy_ranges(
     if exclude_id is not None:
         query = query.where(Appointment.id != exclude_id)
     return [(row.start, row.end) for row in session.execute(query)]
+
+
+def list_appointments(
+    session: Session,
+    center_id: int,
+    from_day: date,
+    to_day: date,
+    professional_id: int | None,
+    include_cancelled: bool,
+) -> list[Appointment]:
+    query = (
+        select(Appointment)
+        .options(
+            joinedload(Appointment.service),
+            joinedload(Appointment.professional).joinedload(Membership.user),
+            selectinload(Appointment.changes).joinedload(AppointmentChange.changed_by),
+        )
+        .where(
+            Appointment.center_id == center_id,
+            Appointment.start >= datetime.combine(from_day, time.min),
+            Appointment.start < datetime.combine(to_day + timedelta(days=1), time.min),
+        )
+        .order_by(Appointment.start, Appointment.id)
+    )
+    if not include_cancelled:
+        query = query.where(Appointment.status == AppointmentStatus.CONFIRMED)
+    if professional_id is not None:
+        query = query.where(Appointment.professional_id == professional_id)
+    return list(session.scalars(query))
+
+
+def get_manageable(session: Session, access: CenterAccess, appointment_id: int) -> Appointment | None:
+    query = (
+        select(Appointment)
+        .options(joinedload(Appointment.service), joinedload(Appointment.professional).joinedload(Membership.user))
+        .where(
+            Appointment.id == appointment_id,
+            Appointment.center_id == access.center.id,
+            Appointment.status == AppointmentStatus.CONFIRMED,
+        )
+    )
+    if access.membership.role == Role.MEMBER:
+        query = query.where(Appointment.professional_id == access.membership.id)
+    return session.scalar(query)
