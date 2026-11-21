@@ -12,7 +12,7 @@ import { Label } from '@/components/ui/label'
 import { format, subYears } from 'date-fns'
 import { ApiError } from '@/lib/api-client'
 import { PHONE_ERROR, PHONE_PATTERN } from '@/lib/phone'
-import { normalizeRut } from '@/lib/rut'
+import { formatRutInput, normalizeRut } from '@/lib/rut'
 import { queryKeys } from '@/lib/query-keys'
 import { useBookingFlow, type PatientDraft } from '../booking-context'
 import { saveBooking } from '../booking-storage'
@@ -53,11 +53,20 @@ const FIELDS: {
   label: string
   type: string
   autoComplete: string
-  inputMode?: 'email' | 'tel'
+  inputMode?: 'email' | 'tel' | 'text'
+  maxLength?: number
   placeholder?: string
 }[] = [
   { name: 'patient_name', label: 'Nombre y apellido', type: 'text', autoComplete: 'name' },
-  { name: 'patient_rut', label: 'RUT', type: 'text', autoComplete: 'off', placeholder: '12.345.678-5' },
+  {
+    name: 'patient_rut',
+    label: 'RUT',
+    type: 'text',
+    autoComplete: 'off',
+    inputMode: 'text',
+    maxLength: 12,
+    placeholder: '12.345.678-5',
+  },
   {
     name: 'patient_birth_date',
     label: 'Fecha de nacimiento',
@@ -176,6 +185,14 @@ export function PatientStep() {
               {...input}
               {...(name === 'patient_birth_date' ? { min: oldest, max: today } : {})}
               {...register(name)}
+              {...(name === 'patient_rut'
+                ? {
+                    onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
+                      event.target.value = formatRutInput(event.target.value)
+                      return register(name).onChange(event)
+                    },
+                  }
+                : {})}
             />
             {error ? (
               <p id={`${name}-error`} className="text-sm text-destructive">
