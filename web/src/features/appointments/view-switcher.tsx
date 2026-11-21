@@ -20,7 +20,7 @@ type ViewSwitcherProps = {
 export function ViewSwitcher({ value, viewAll, onChange }: ViewSwitcherProps) {
   const views = viewAll ? VIEWS : VIEWS.filter((view) => view.value !== 'dia')
   return (
-    <div role="group" aria-label="Vista de la agenda" className="inline-flex w-fit gap-0.5 rounded-lg bg-muted p-0.5">
+    <div role="group" aria-label="Vista de la agenda" className="inline-flex w-fit gap-0.5 rounded-lg bg-accent p-0.5">
       {views.map(({ value: view, label, icon: Icon }) => (
         <Button
           key={view}
@@ -30,7 +30,7 @@ export function ViewSwitcher({ value, viewAll, onChange }: ViewSwitcherProps) {
           onClick={() => onChange(view)}
           className={cn(
             'text-muted-foreground',
-            view === value && 'bg-background text-foreground shadow-xs hover:bg-background dark:bg-input/50',
+            view === value && 'bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground',
           )}
         >
           <Icon aria-hidden="true" />

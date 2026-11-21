@@ -30,7 +30,7 @@ export function CenterSwitcher({ memberships, current }: CenterSwitcherProps) {
         render={
           <Button
             variant="ghost"
-            className="h-9 max-w-full min-w-0 gap-2 px-2 text-base font-semibold"
+            className="h-9 max-w-full min-w-0 gap-2 px-2 text-base font-bold text-primary"
             aria-label={`Centro actual: ${current.center.name}. Cambiar de centro`}
           />
         }

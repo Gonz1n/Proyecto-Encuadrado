@@ -11,12 +11,12 @@ type Span = { start: string; end: string }
 export const DATE_FORMAT = 'yyyy-MM-dd'
 
 const PALETTE = [
-  'bg-sky-100 border-sky-400 text-sky-950 dark:bg-sky-950 dark:border-sky-700 dark:text-sky-100',
-  'bg-emerald-100 border-emerald-400 text-emerald-950 dark:bg-emerald-950 dark:border-emerald-700 dark:text-emerald-100',
-  'bg-amber-100 border-amber-400 text-amber-950 dark:bg-amber-950 dark:border-amber-700 dark:text-amber-100',
-  'bg-rose-100 border-rose-400 text-rose-950 dark:bg-rose-950 dark:border-rose-700 dark:text-rose-100',
-  'bg-violet-100 border-violet-400 text-violet-950 dark:bg-violet-950 dark:border-violet-700 dark:text-violet-100',
-  'bg-teal-100 border-teal-400 text-teal-950 dark:bg-teal-950 dark:border-teal-700 dark:text-teal-100',
+  'bg-[#f8dcd6] border-[#bc7b6f] text-[#4a2620]',
+  'bg-[#5a322a] border-[#2f1814] text-white',
+  'bg-[#e4a499] border-[#9a5f53] text-[#3a1d18]',
+  'bg-[#dde6ee] border-[#718a9e] text-[#1f2f3c]',
+  'bg-[#4f6779] border-[#2f4352] text-white',
+  'bg-[#d3e0cf] border-[#7f9a78] text-[#25331f]',
 ]
 
 export function parseDateParam(value: string | null, fallback: Date): Date {

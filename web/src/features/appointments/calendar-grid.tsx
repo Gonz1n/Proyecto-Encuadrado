@@ -49,17 +49,17 @@ export function CalendarGrid({ columns, range, blocksByColumn, colorFor, showPro
   const template = { gridTemplateColumns: `repeat(${columns.length}, minmax(0, 1fr))` }
 
   return (
-    <div className="overflow-x-auto rounded-lg border bg-card">
+    <div className="overflow-x-auto rounded-xl border border-border bg-card">
       <div style={{ minWidth }}>
         <div className="flex">
           <div className="sticky left-0 z-30 w-14 shrink-0 bg-card" />
-          <div className="grid flex-1 border-b" style={template}>
+          <div className="grid flex-1 border-b bg-muted" style={template}>
             {columns.map((column) => (
               <div
                 key={column.key}
                 id={`columna-${column.key}`}
                 ref={column.key === todayKey ? todayHeader : undefined}
-                className="flex min-w-0 items-center gap-1.5 border-l px-2 py-2.5"
+                className={cn('flex min-w-0 items-center gap-1.5 border-l px-2 py-2.5', column.isToday && 'bg-accent')}
               >
                 {column.color && (
                   <span aria-hidden="true" className={cn('h-3.5 w-3 shrink-0 rounded-[3px] border-l-[3px]', column.color)} />
@@ -113,7 +113,7 @@ export function CalendarGrid({ columns, range, blocksByColumn, colorFor, showPro
                   key={column.key}
                   role="group"
                   aria-labelledby={`columna-${column.key}`}
-                  className={cn('relative border-l', column.isToday && 'bg-primary/[0.03]')}
+                  className={cn('relative border-l', column.isToday && 'bg-accent/50')}
                 >
                   {assignLanes(blocksByColumn[column.key] ?? []).map(({ item, lane, lanes }) => {
                     const { top, height: blockHeight } = blockPosition(item.start, item.end, range)

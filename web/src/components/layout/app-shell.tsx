@@ -50,7 +50,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-svh bg-background">
       <title>{`${membership.center.name} | CentradaMente`}</title>
-      <header className="sticky top-0 z-40 border-b bg-background">
+      <header className="sticky top-0 z-40 border-b border-border bg-gradient-to-r from-accent to-white">
         <div className="mx-auto flex h-14 max-w-6xl items-center gap-2 px-4 sm:gap-3 sm:px-6">
           <Link
             href="/"
@@ -63,7 +63,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             {user.memberships.length > 1 ? (
               <CenterSwitcher memberships={user.memberships} current={membership} />
             ) : (
-              <span className="truncate px-2 text-base font-semibold">
+              <span className="truncate px-2 text-base font-bold text-primary">
                 {membership.center.name}
               </span>
             )}
@@ -100,8 +100,8 @@ export function AppShell({ children }: { children: ReactNode }) {
                       'inline-flex h-10 items-center gap-2 border-b-2 text-sm font-medium transition-colors',
                       focusRing,
                       isActive
-                        ? 'border-primary text-foreground'
-                        : 'border-transparent text-muted-foreground hover:text-foreground',
+                        ? 'border-primary font-semibold text-primary'
+                        : 'border-transparent text-muted-foreground hover:border-secondary hover:text-primary',
                     )}
                   >
                     <Icon className="size-4" aria-hidden="true" />

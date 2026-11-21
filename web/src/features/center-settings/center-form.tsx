@@ -318,7 +318,7 @@ export function CenterForm({
         <fieldset className="space-y-4 border-t pt-5">
           <legend className="sr-only">Redes sociales</legend>
           <div aria-hidden="true">
-            <h3 className="text-sm font-semibold">Redes sociales</h3>
+            <h3 className="text-sm font-bold text-primary">Redes sociales</h3>
             <p className="text-sm text-muted-foreground">
               Opcionales. Se muestran en el perfil público del centro.
             </p>
@@ -348,7 +348,7 @@ export function CenterForm({
         <fieldset className="space-y-4 border-t pt-5">
           <legend className="sr-only">Contacto y ubicación</legend>
           <div aria-hidden="true">
-            <h3 className="text-sm font-semibold">Contacto y ubicación</h3>
+            <h3 className="text-sm font-bold text-primary">Contacto y ubicación</h3>
             <p className="text-sm text-muted-foreground">
               Opcionales. Se muestran en el perfil público del centro.
             </p>

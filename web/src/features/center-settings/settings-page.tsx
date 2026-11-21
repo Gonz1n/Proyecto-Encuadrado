@@ -18,7 +18,7 @@ export function SettingsPage() {
     <div className="space-y-12">
       <title>Configuración | CentradaMente</title>
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold tracking-tight">Configuración</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-primary border-b-2 border-primary pb-1.5">Configuración</h1>
         <a
           href={`/c/${slug}`}
           target="_blank"
@@ -31,7 +31,7 @@ export function SettingsPage() {
       </div>
       <section aria-labelledby="center-heading" className="max-w-2xl space-y-5">
         <div className="space-y-1">
-          <h2 id="center-heading" className="text-lg font-semibold tracking-tight">
+          <h2 id="center-heading" className="text-lg font-bold tracking-tight text-primary">
             Datos del centro
           </h2>
           <p className="text-sm text-muted-foreground">
@@ -50,7 +50,7 @@ export function SettingsPage() {
       </section>
       <section aria-labelledby="services-heading" className="max-w-3xl space-y-5">
         <div className="space-y-1">
-          <h2 id="services-heading" className="text-lg font-semibold tracking-tight">
+          <h2 id="services-heading" className="text-lg font-bold tracking-tight text-primary">
             Servicios
           </h2>
           <p className="text-sm text-muted-foreground">
@@ -61,7 +61,7 @@ export function SettingsPage() {
       </section>
       <section aria-labelledby="closures-heading" className="max-w-3xl space-y-5">
         <div className="space-y-1">
-          <h2 id="closures-heading" className="text-lg font-semibold tracking-tight">
+          <h2 id="closures-heading" className="text-lg font-bold tracking-tight text-primary">
             Días sin atención
           </h2>
           <p className="text-sm text-muted-foreground">

@@ -68,11 +68,11 @@ export function ServicesTable({ slug, canEdit }: { slug: string; canEdit: boolea
           No pudimos cargar los servicios. Intenta de nuevo.
         </p>
       ) : services.length === 0 ? (
-        <p className="rounded-lg border border-dashed px-4 py-8 text-center text-sm text-muted-foreground">
+        <p className="rounded-xl border border-dashed bg-muted px-4 py-8 text-center text-sm text-muted-foreground">
           Aún no hay servicios.
         </p>
       ) : (
-        <div className="rounded-lg border">
+        <div className="overflow-hidden rounded-xl border bg-card">
           <Table>
             <TableHeader>
               <TableRow>

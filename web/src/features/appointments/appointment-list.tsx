@@ -48,7 +48,7 @@ export function AppointmentList({ appointments, showProfessional }: AppointmentL
         return (
           <section key={day} aria-labelledby={headingId} className="space-y-2">
             <div className="flex items-baseline gap-2">
-              <h2 id={headingId} className="text-base font-semibold tracking-tight">
+              <h2 id={headingId} className="text-base font-bold tracking-tight text-primary">
                 {capitalize(format(date, "EEEE d 'de' MMMM", { locale: es }))}
               </h2>
               {hint && (
@@ -60,7 +60,7 @@ export function AppointmentList({ appointments, showProfessional }: AppointmentL
                 {countLabel(items)}
               </span>
             </div>
-            <ul className="divide-y rounded-lg border">
+            <ul className="divide-y overflow-hidden rounded-xl border bg-card">
               {items.map((appointment) => (
                 <AppointmentRow
                   key={appointment.id}

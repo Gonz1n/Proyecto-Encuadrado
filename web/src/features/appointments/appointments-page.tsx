@@ -60,7 +60,7 @@ export function AppointmentsPage() {
     <div className="space-y-6">
       <title>{`${title} | CentradaMente`}</title>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-primary border-b-2 border-primary pb-1.5">{title}</h1>
         <ViewSwitcher
           value={view}
           viewAll={viewAll}

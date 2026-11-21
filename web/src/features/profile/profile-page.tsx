@@ -103,7 +103,7 @@ function ProfileForm({ user }: { user: CurrentUser }) {
     <div className="space-y-6">
       <title>Mi perfil | CentradaMente</title>
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Mi perfil</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-primary border-b-2 border-primary pb-1.5">Mi perfil</h1>
         <p className="text-sm text-muted-foreground">
           Así te ven los pacientes en el perfil público de los centros donde atiendes.
         </p>
