@@ -7,11 +7,15 @@ from app.db import Base, get_session
 from app.main import app
 from app.settings import settings
 
+pytest_plugins = ["tests.factories"]
+
 
 @pytest.fixture(scope="session")
 def test_engine():
     if not settings.test_database_url:
         pytest.exit("TEST_DATABASE_URL no esta definida en api/.env", returncode=2)
+    if settings.test_database_url == settings.database_url:
+        pytest.exit("TEST_DATABASE_URL no puede ser igual a DATABASE_URL: se abortan las pruebas", returncode=2)
     engine = create_engine(settings.test_database_url, pool_pre_ping=True)
     Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)

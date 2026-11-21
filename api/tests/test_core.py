@@ -15,7 +15,16 @@ class Probe(BaseModel):
     name: str
 
 
+class MinuteProbe(BaseModel):
+    start: Minute
+
+
 router = APIRouter()
+
+
+@router.post("/api/_minute/")
+def minute(body: MinuteProbe):
+    return {}
 
 
 @router.post("/api/_probe/")
@@ -32,7 +41,7 @@ def domain():
 def probe_routes():
     app.include_router(router)
     yield
-    app.router.routes[:] = [r for r in app.router.routes if getattr(r, "path", "") not in ("/api/_probe/", "/api/_domain/")]
+    app.router.routes[:] = [r for r in app.router.routes if getattr(r, "path", "") not in ("/api/_probe/", "/api/_domain/", "/api/_minute/")]
 
 
 def test_local_now_is_santiago_time():
@@ -72,3 +81,9 @@ def test_domain_error_shape(client):
     r = client.get("/api/_domain/")
     assert r.status_code == 409
     assert r.json() == {"detail": "Conflicto."}
+
+
+def test_invalid_minute_returns_spanish_message(client):
+    r = client.post("/api/_minute/", json={"start": "2026-12-01"})
+    assert r.status_code == 400
+    assert r.json() == {"start": ["Formato de fecha y hora inválido. Usa AAAA-MM-DDTHH:MM."]}
