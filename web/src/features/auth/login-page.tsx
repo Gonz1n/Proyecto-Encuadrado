@@ -10,9 +10,10 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ApiError } from '@/lib/api-client'
-import { cn } from '@/lib/utils'
 import { useAuth } from './auth-context'
 import { safeNextPath } from '@/lib/safe-next-path'
+import { centerPhoto } from '@/features/public-booking/center-photos'
+import { centerSlugFromNext } from './center-slug'
 
 const loginSchema = z.object({
   email: z.email('Ingresa un correo válido'),
@@ -29,20 +30,13 @@ function loginErrorMessage(error: unknown): string {
   return 'No pudimos conectar con el servidor. Intenta de nuevo.'
 }
 
-function Wordmark({ className }: { className?: string }) {
-  return (
-    <div className={cn('flex items-center gap-2.5 font-semibold', className)}>
-      <img src="/logo-centradamente.svg" alt="" aria-hidden="true" className="h-8 w-auto" />
-      CentradaMente
-    </div>
-  )
-}
-
 export function LoginPage() {
   const { login } = useAuth()
   const router = useRouter()
   const [showPassword, setShowPassword] = useState(false)
   const next = safeNextPath(useSearchParams().get('next'))
+  const slug = centerSlugFromNext(next)
+  const centerLogo = slug ? centerPhoto(slug) : null
   const {
     register,
     handleSubmit,
@@ -64,32 +58,39 @@ export function LoginPage() {
   })
 
   return (
-    <div className="grid min-h-svh lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+    <div className="center-page min-h-svh">
       <title>Ingresar | CentradaMente</title>
-      <aside className="hidden flex-col justify-between bg-primary p-10 text-primary-foreground lg:flex">
-        <Wordmark />
-        <p className="max-w-sm text-2xl leading-snug font-semibold tracking-tight text-balance">
-          La agenda de tu centro, ordenada para todo el equipo.
-        </p>
-      </aside>
-      <main className="flex items-center justify-center px-4 py-12 sm:px-6">
-        <div className="w-full max-w-sm space-y-8">
-          <Wordmark className="text-primary lg:hidden" />
-          <div className="space-y-1.5">
-            <h1 className="text-2xl font-semibold tracking-tight">Ingresa a tu cuenta</h1>
-            <p className="text-sm text-muted-foreground">
-              Usa el correo con el que te registraron en tu centro.
-            </p>
-          </div>
+      <header className="bg-gradient-to-r from-(--cp-card) to-white">
+        <div className="flex items-center gap-3 px-4 py-3 sm:px-6">
+          <img src="/logo-centradamente.svg" alt="" aria-hidden="true" className="h-12 w-auto" />
+          <span className="text-3xl font-bold tracking-tight sm:text-4xl">
+            <span className="text-(--cp-terracota-text)">Centrada</span>
+            <span>Mente</span>
+          </span>
+        </div>
+      </header>
+      <main className="mx-auto flex w-full max-w-md flex-col px-4 py-10 sm:py-14">
+        <img
+          src={centerLogo ?? '/logo-centradamente.svg'}
+          alt={centerLogo ? 'Logo del centro' : 'CentradaMente'}
+          className="mx-auto mb-8 h-40 w-auto max-w-full object-contain"
+        />
+        <h1 className="border-b-2 border-(--cp-granate) pb-3 text-center text-2xl font-bold tracking-tight">
+          Ingresa a tu cuenta
+        </h1>
+        <div className="mt-8">
           <form onSubmit={onSubmit} noValidate className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="email">Correo</Label>
+              <Label htmlFor="email" className="text-base font-semibold text-(--cp-granate)">
+                Correo electrónico del centro
+              </Label>
               <Input
                 id="email"
                 type="email"
                 autoComplete="email"
                 inputMode="email"
                 spellCheck={false}
+                className="h-11 rounded-xl border-(--cp-granate) px-3 placeholder:text-neutral-600"
                 placeholder="nombre@centro.cl"
                 aria-invalid={errors.email ? true : undefined}
                 aria-describedby={errors.email ? 'email-error' : undefined}
@@ -102,13 +103,15 @@ export function LoginPage() {
               ) : null}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Contraseña</Label>
+              <Label htmlFor="password" className="text-base font-semibold text-(--cp-granate)">
+                Contraseña
+              </Label>
               <div className="relative">
                 <Input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   autoComplete="current-password"
-                  className="pr-11"
+                  className="h-11 rounded-xl border-(--cp-granate) px-3 placeholder:text-neutral-600 pr-12"
                   aria-invalid={errors.password ? true : undefined}
                   aria-describedby={errors.password ? 'password-error' : undefined}
                   {...register('password')}
@@ -119,7 +122,7 @@ export function LoginPage() {
                   aria-pressed={showPassword}
                   aria-controls="password"
                   onClick={() => setShowPassword((visible) => !visible)}
-                  className="absolute inset-y-0 right-0 my-auto flex size-11 items-center justify-center rounded-lg border border-transparent text-muted-foreground outline-none hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:scale-[0.97] motion-reduce:transform-none motion-reduce:active:scale-100"
+                  className="absolute inset-y-0 right-0 my-auto flex size-11 items-center justify-center rounded-lg border border-transparent text-neutral-600 outline-none hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:scale-[0.97] motion-reduce:transform-none motion-reduce:active:scale-100"
                 >
                   {showPassword ? (
                     <EyeOff className="size-4" aria-hidden="true" />
@@ -143,7 +146,7 @@ export function LoginPage() {
                 {errors.root.message}
               </p>
             ) : null}
-            <Button type="submit" size="lg" className="h-10 w-full" disabled={isSubmitting}>
+            <Button type="submit" size="lg" className="h-11 w-full rounded-xl text-base active:scale-[0.97] motion-reduce:active:scale-100" disabled={isSubmitting}>
               {isSubmitting ? (
                 <>
                   <Loader2 className="motion-safe:animate-spin" aria-hidden="true" />
