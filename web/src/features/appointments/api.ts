@@ -33,6 +33,18 @@ export type AppointmentFilters = {
   include_cancelled?: boolean
 }
 
+export type CreateAppointmentInput = {
+  service: number
+  professional: number
+  start: string
+  modality: Modality
+  patient_name: string
+  patient_email: string
+  patient_phone: string
+  patient_rut: string
+  patient_birth_date: string
+}
+
 export type RescheduleInput = { start: string; note?: string }
 
 const detailPath = (slug: string, id: number) => `/api/centers/${slug}/appointments/${id}/`
@@ -44,6 +56,8 @@ export const appointmentsApi = {
     if (filters.include_cancelled) params.set('include_cancelled', 'true')
     return apiFetch<Appointment[]>(`/api/centers/${slug}/appointments/?${params}`)
   },
+  create: (slug: string, body: CreateAppointmentInput) =>
+    apiFetch<Appointment>(`/api/centers/${slug}/appointments/`, { method: 'POST', body }),
   reschedule: (slug: string, id: number, body: RescheduleInput) =>
     apiFetch<Appointment>(detailPath(slug, id), { method: 'PATCH', body }),
   cancel: (slug: string, id: number, note: string) =>

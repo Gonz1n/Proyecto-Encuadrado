@@ -16,12 +16,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { format, subYears } from 'date-fns'
 import { ApiError } from '@/lib/api-client'
-import { PHONE_ERROR, PHONE_PATTERN } from '@/lib/phone'
-import { formatRutInput, normalizeRut } from '@/lib/rut'
+import { buildPatientShape, firstMessage, PATIENT_FIELD_NAMES } from '@/features/patient/patient-fields'
+import { PatientInputs } from '@/features/patient/patient-inputs'
 import { queryKeys } from '@/lib/query-keys'
 import { useBookingFlow, type PatientDraft } from '../booking-context'
 import { saveBooking } from '../booking-storage'
@@ -33,84 +31,13 @@ const CONSENT_ERROR = 'Debes autorizar el tratamiento de tus datos personales'
 
 const buildPatientSchema = (today: string, oldest: string) =>
   z.object({
-    patient_name: z
-      .string()
-      .trim()
-      .min(3, 'Ingresa tu nombre y apellido')
-      .max(120, 'Usa como máximo 120 caracteres'),
-    patient_email: z.string().trim().pipe(z.email('Ingresa un correo válido')),
-    patient_phone: z.string().trim().regex(PHONE_PATTERN, PHONE_ERROR),
-    patient_rut: z
-      .string()
-      .trim()
-      .refine((value) => normalizeRut(value) !== null, 'Ingresa un RUT válido, por ejemplo 12.345.678-5'),
-    patient_birth_date: z
-      .string()
-      .min(1, 'Ingresa tu fecha de nacimiento')
-      .refine((value) => value <= today, 'La fecha de nacimiento no puede ser futura')
-      .refine((value) => value >= oldest, 'Revisa la fecha de nacimiento'),
+    ...buildPatientShape(today, oldest),
     modality: z.enum(['in_person', 'remote']),
     accept_terms: z.boolean().refine(Boolean, TERMS_ERROR),
     data_consent: z.boolean().refine(Boolean, CONSENT_ERROR),
   })
 
-const PATIENT_FIELDS = [
-  'patient_name',
-  'patient_rut',
-  'patient_birth_date',
-  'patient_email',
-  'patient_phone',
-  'accept_terms',
-  'data_consent',
-] as const
-
-const FIELDS: {
-  name: Exclude<(typeof PATIENT_FIELDS)[number], 'accept_terms' | 'data_consent'>
-  label: string
-  type: string
-  autoComplete: string
-  inputMode?: 'email' | 'tel' | 'text'
-  maxLength?: number
-  placeholder?: string
-}[] = [
-  { name: 'patient_name', label: 'Nombre y apellido', type: 'text', autoComplete: 'name' },
-  {
-    name: 'patient_rut',
-    label: 'RUT',
-    type: 'text',
-    autoComplete: 'off',
-    inputMode: 'text',
-    maxLength: 12,
-    placeholder: '12.345.678-5',
-  },
-  {
-    name: 'patient_birth_date',
-    label: 'Fecha de nacimiento',
-    type: 'date',
-    autoComplete: 'bday',
-  },
-  {
-    name: 'patient_email',
-    label: 'Correo',
-    type: 'email',
-    autoComplete: 'email',
-    inputMode: 'email',
-    placeholder: 'nombre@correo.cl',
-  },
-  {
-    name: 'patient_phone',
-    label: 'Celular',
-    type: 'tel',
-    autoComplete: 'tel',
-    inputMode: 'tel',
-    placeholder: '+56 9 1234 5678',
-  },
-]
-
-function firstMessage(data: Record<string, unknown>, key: string): string | null {
-  const messages = data[key]
-  return Array.isArray(messages) && messages.length > 0 ? String(messages[0]) : null
-}
+const PATIENT_FIELDS = [...PATIENT_FIELD_NAMES, 'accept_terms', 'data_consent'] as const
 
 function ConsentCheckbox({
   id,
@@ -249,37 +176,13 @@ export function PatientStep() {
 
   return (
     <form onSubmit={onSubmit} noValidate className="max-w-md space-y-5">
-      {FIELDS.map(({ name, label, ...input }) => {
-        const error = errors[name]
-        return (
-          <div key={name} className="space-y-2">
-            <Label htmlFor={name}>{label}</Label>
-            <Input
-              id={name}
-              className="h-11 border-[var(--cp-granate)]/60 bg-white md:h-10"
-              spellCheck={false}
-              aria-invalid={error ? true : undefined}
-              aria-describedby={error ? `${name}-error` : undefined}
-              {...input}
-              {...(name === 'patient_birth_date' ? { min: oldest, max: today } : {})}
-              {...register(name)}
-              {...(name === 'patient_rut'
-                ? {
-                    onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
-                      event.target.value = formatRutInput(event.target.value)
-                      return register(name).onChange(event)
-                    },
-                  }
-                : {})}
-            />
-            {error ? (
-              <p id={`${name}-error`} className="text-sm text-destructive">
-                {error.message}
-              </p>
-            ) : null}
-          </div>
-        )
-      })}
+      <PatientInputs
+        register={register}
+        errors={errors}
+        today={today}
+        oldest={oldest}
+        inputClassName="h-11 border-[var(--cp-granate)]/60 bg-white md:h-10"
+      />
       <Controller
         control={control}
         name="modality"

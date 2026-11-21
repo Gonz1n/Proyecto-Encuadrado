@@ -6,10 +6,12 @@ import { useParams, useSearchParams } from 'next/navigation'
 import { useSetSearchParams } from '@/lib/use-set-search-params'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Button } from '@/components/ui/button'
-import { useCan } from '@/features/permissions/use-can'
+import { CalendarPlus } from 'lucide-react'
+import { useCan, useCurrentMembership } from '@/features/permissions/use-can'
 import { CalendarNavigation } from './calendar-navigation'
 import { formatLongDate } from '@/lib/format'
 import { DATE_FORMAT, parseDateParam, resolveView, weekDays, weekRangeLabel } from './calendar-layout'
+import { CreateAppointmentDialog } from './create-appointment-dialog'
 import { DayView } from './day-view'
 import { ListView } from './list-view'
 import { ProfessionalFilter } from './professional-filter'
@@ -27,6 +29,9 @@ export function AppointmentsPage() {
   const searchParams = useSearchParams()
   const setSearchParams = useSetSearchParams()
   const [today] = useState(() => new Date())
+  const membership = useCurrentMembership()
+  const [creating, setCreating] = useState(false)
+  const canCreate = membership !== undefined && membership.role !== 'viewer'
 
   const view = resolveView(searchParams.get('vista'), viewAll)
   const reference = parseDateParam(searchParams.get('fecha'), today)
@@ -61,11 +66,19 @@ export function AppointmentsPage() {
       <title>{`${title} | CentradaMente`}</title>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-bold tracking-tight text-primary border-b-2 border-primary pb-1.5">{title}</h1>
-        <ViewSwitcher
-          value={view}
-          viewAll={viewAll}
-          onChange={(next) => updateParams({ vista: next === 'lista' ? undefined : next })}
-        />
+        <div className="flex flex-wrap items-center gap-3">
+          <ViewSwitcher
+            value={view}
+            viewAll={viewAll}
+            onChange={(next) => updateParams({ vista: next === 'lista' ? undefined : next })}
+          />
+          {canCreate && (
+            <Button onClick={() => setCreating(true)}>
+              <CalendarPlus aria-hidden="true" />
+              Agendar hora
+            </Button>
+          )}
+        </div>
       </div>
       <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
         {view === 'lista' ? (
@@ -115,6 +128,7 @@ export function AppointmentsPage() {
       ) : (
         <WeekView slug={slug} reference={reference} professional={professional} viewAll={viewAll} includeCancelled={includeCancelled} />
       )}
+      {canCreate && <CreateAppointmentDialog slug={slug} membership={membership} open={creating} onOpenChange={setCreating} />}
     </div>
   )
 }

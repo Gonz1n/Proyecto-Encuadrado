@@ -2,7 +2,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { ApiError } from '@/lib/api-client'
 import { queryKeys } from '@/lib/query-keys'
-import { appointmentsApi, type AppointmentFilters, type RescheduleInput } from './api'
+import { appointmentsApi, type AppointmentFilters,
+  type CreateAppointmentInput, type RescheduleInput } from './api'
 
 export function useAppointments(slug: string, filters: AppointmentFilters) {
   return useQuery({
@@ -93,5 +94,21 @@ export function useAppointmentAvailability(slug: string, id: number, date: strin
     queryKey: queryKeys.appointmentSlots(slug, id, date ?? ''),
     queryFn: () => appointmentsApi.availability(slug, id, date!),
     enabled: date !== undefined,
+  })
+}
+
+export function useCreateAppointment(slug: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (body: CreateAppointmentInput) => appointmentsApi.create(slug, body),
+    onSuccess: () => {
+      toast.success('Hora agendada')
+    },
+    onSettled: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['appointments', slug] }),
+        queryClient.invalidateQueries({ queryKey: ['available-days', slug] }),
+        queryClient.invalidateQueries({ queryKey: ['availability', slug] }),
+      ]),
   })
 }

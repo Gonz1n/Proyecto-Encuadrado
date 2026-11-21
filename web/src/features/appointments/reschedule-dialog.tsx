@@ -1,10 +1,7 @@
 'use client'
 
-import { useMemo, useState } from 'react'
-import { addDays, format, parseISO, startOfDay } from 'date-fns'
-import { es } from 'react-day-picker/locale'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Calendar } from '@/components/ui/calendar'
 import {
   Dialog,
   DialogContent,
@@ -14,10 +11,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
-import { formatLongDate } from '@/lib/format'
-import { cn } from '@/lib/utils'
 import type { Appointment } from './api'
-import { DATE_FORMAT } from './calendar-layout'
+import { DayTimePicker } from './day-time-picker'
 import { useAppointmentAvailability, useAppointmentAvailableDays, useRescheduleAppointment } from './hooks'
 import { NoteField } from './note-field'
 
@@ -33,15 +28,12 @@ export function RescheduleDialog({ slug, appointment, open, onOpenChange, onDone
   const [date, setDate] = useState<string>()
   const [time, setTime] = useState<string>()
   const [note, setNote] = useState('')
-  const [today] = useState(() => startOfDay(new Date()))
   const days = useAppointmentAvailableDays(slug, appointment.id)
   const slots = useAppointmentAvailability(slug, appointment.id, date)
-  const available = useMemo(() => new Set(days.data?.days), [days.data])
   const reschedule = useRescheduleAppointment(slug, appointment.id, onDone, () => setTime(undefined))
 
-  const chooseDate = (day: Date | undefined) => {
-    if (!day) return
-    setDate(format(day, DATE_FORMAT))
+  const chooseDate = (day: string) => {
+    setDate(day)
     setTime(undefined)
   }
 
@@ -68,55 +60,14 @@ export function RescheduleDialog({ slug, appointment, open, onOpenChange, onDone
             No quedan horas libres en los próximos 30 días para este profesional.
           </p>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-[auto_minmax(0,1fr)] sm:items-start">
-            <div className="w-fit max-w-full rounded-xl border bg-card p-2">
-              <Calendar
-                mode="single"
-                locale={es}
-                showOutsideDays={false}
-                selected={date ? parseISO(date) : undefined}
-                onSelect={chooseDate}
-                defaultMonth={parseISO(days.data.days[0])}
-                startMonth={today}
-                endMonth={addDays(today, 30)}
-                disabled={(day) => !available.has(format(day, DATE_FORMAT))}
-                className="bg-transparent p-0 [--cell-size:--spacing(9)]"
-              />
-            </div>
-            <section aria-labelledby="reschedule-slots" className="space-y-2">
-              <h3 id="reschedule-slots" className="text-sm font-medium">
-                {date ? formatLongDate(parseISO(date)) : 'Elige un día disponible para ver sus horas.'}
-              </h3>
-              {date &&
-                (slots.isPending ? (
-                  <div className="grid grid-cols-3 gap-2">
-                    {Array.from({ length: 6 }, (_, index) => (
-                      <Skeleton key={index} className="h-10 rounded-lg" />
-                    ))}
-                  </div>
-                ) : slots.isError || slots.data.slots.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">Este día ya no tiene horas libres. Elige otro día.</p>
-                ) : (
-                  <ul className="grid grid-cols-3 gap-2">
-                    {slots.data.slots.map((slot) => (
-                      <li key={slot}>
-                        <button
-                          type="button"
-                          aria-pressed={time === slot}
-                          onClick={() => setTime(slot)}
-                          className={cn(
-                            'h-10 w-full rounded-lg border bg-card text-sm font-medium tabular-nums transition-colors outline-none hover:border-primary/40 hover:bg-accent focus-visible:ring-3 focus-visible:ring-ring/50',
-                            'aria-pressed:border-primary aria-pressed:bg-primary aria-pressed:text-primary-foreground',
-                          )}
-                        >
-                          {slot}
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                ))}
-            </section>
-          </div>
+          <DayTimePicker
+            days={days.data.days}
+            slots={slots}
+            date={date}
+            time={time}
+            onDateChange={chooseDate}
+            onTimeChange={setTime}
+          />
         )}
         <NoteField value={note} onChange={setNote} />
         <DialogFooter>
