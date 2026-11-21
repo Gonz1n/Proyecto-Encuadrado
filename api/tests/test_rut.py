@@ -17,6 +17,15 @@ def test_invalid_rut(raw):
     assert normalize_rut(raw) is None
 
 
+@pytest.mark.parametrize("raw", ["1-9", "999.999-K"])
+def test_short_rut_with_valid_check_digit_is_rejected(raw):
+    assert normalize_rut(raw) is None
+
+
+def test_smallest_seven_digit_rut():
+    assert normalize_rut("1.000.000-9") == "1.000.000-9"
+
+
 def test_check_digit_and_format():
     assert check_digit(12345678) == "5"
     assert format_rut(12345678) == "12.345.678-5"
