@@ -1,9 +1,12 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Response
 from fastapi.exceptions import RequestValidationError
 
-from app.centers.access import AdminDep, CenterDep
-from app.centers.schemas import CenterOut, CenterUpdate
+from app.centers import repository
+from app.centers.access import NOT_FOUND, AdminDep, CenterDep
+from app.centers.models import Service
+from app.centers.schemas import CenterOut, CenterUpdate, MemberOut, ServiceIn, ServiceOut, ServiceUpdate
 from app.db import SessionDep
+from app.errors import DomainError
 
 router = APIRouter(prefix="/api/centers/{slug}", tags=["centers"])
 
@@ -29,3 +32,44 @@ def update_center(session: SessionDep, access: AdminDep, data: CenterUpdate) -> 
         setattr(center, field, value)
     session.commit()
     return CenterOut.model_validate(center)
+
+
+@router.get("/services/", response_model=list[ServiceOut])
+def list_services(session: SessionDep, access: CenterDep) -> list[Service]:
+    return repository.active_services(session, access.center.id)
+
+
+@router.post("/services/", response_model=ServiceOut, status_code=201)
+def create_service(session: SessionDep, access: AdminDep, data: ServiceIn) -> Service:
+    service = Service(center_id=access.center.id, **data.model_dump())
+    session.add(service)
+    session.commit()
+    return service
+
+
+def _active_service(session: SessionDep, access: AdminDep, service_id: int) -> Service:
+    service = repository.get_active_service(session, access.center.id, service_id)
+    if service is None:
+        raise DomainError(404, NOT_FOUND)
+    return service
+
+
+@router.patch("/services/{service_id}/", response_model=ServiceOut)
+def update_service(session: SessionDep, access: AdminDep, service_id: int, data: ServiceUpdate) -> Service:
+    service = _active_service(session, access, service_id)
+    for field, value in data.model_dump(exclude_unset=True).items():
+        setattr(service, field, value)
+    session.commit()
+    return service
+
+
+@router.delete("/services/{service_id}/", status_code=204)
+def delete_service(session: SessionDep, access: AdminDep, service_id: int) -> Response:
+    _active_service(session, access, service_id).is_active = False
+    session.commit()
+    return Response(status_code=204)
+
+
+@router.get("/members/", response_model=list[MemberOut])
+def list_members(session: SessionDep, access: CenterDep) -> list[MemberOut]:
+    return [MemberOut.from_membership(m) for m in repository.members(session, access.center.id)]

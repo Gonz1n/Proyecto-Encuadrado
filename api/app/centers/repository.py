@@ -1,7 +1,8 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
 
-from app.centers.models import Center, Membership, Role
+from app.accounts.models import User
+from app.centers.models import Center, Membership, Role, Service
 
 
 def get_center_by_slug(session: Session, slug: str) -> Center | None:
@@ -21,5 +22,31 @@ def bookable_memberships(session: Session, center_id: int) -> list[Membership]:
             .options(joinedload(Membership.user))
             .where(Membership.center_id == center_id, Membership.role != Role.VIEWER)
             .order_by(Membership.id)
+        )
+    )
+
+
+def active_services(session: Session, center_id: int) -> list[Service]:
+    return list(
+        session.scalars(
+            select(Service).where(Service.center_id == center_id, Service.is_active).order_by(Service.name)
+        )
+    )
+
+
+def get_active_service(session: Session, center_id: int, service_id: int) -> Service | None:
+    return session.scalar(
+        select(Service).where(Service.id == service_id, Service.center_id == center_id, Service.is_active)
+    )
+
+
+def members(session: Session, center_id: int) -> list[Membership]:
+    return list(
+        session.scalars(
+            select(Membership)
+            .join(Membership.user)
+            .options(joinedload(Membership.user))
+            .where(Membership.center_id == center_id)
+            .order_by(Membership.role, User.last_name, User.first_name)
         )
     )

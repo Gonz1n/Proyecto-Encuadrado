@@ -1,7 +1,7 @@
 import pytest
 
 from app.centers import repository
-from app.centers.models import Role
+from app.centers.models import Role, Service
 from app.centers.phone import normalize_phone
 
 ADMIN = Role.ADMIN
@@ -193,3 +193,78 @@ def test_invalid_whatsapp_is_rejected_and_blank_clears(setup):
     assert response.status_code == 400
     assert response.json()["whatsapp_number"] == ["Ingresa un celular chileno válido"]
     assert client.patch(url(center), json={"whatsapp_number": ""}).json()["whatsapp_number"] == ""
+
+
+def test_member_cannot_create_service(setup):
+    center, client = setup(MEMBER)
+    payload = {"name": "Consulta", "price_clp": 1000, "duration_minutes": 30}
+    assert client.post(url(center, "services/"), json=payload).status_code == 403
+
+
+def test_admin_creates_edits_and_deletes_service(setup, session):
+    center, client = setup(ADMIN)
+    payload = {"name": "Consulta", "price_clp": 1000, "duration_minutes": 30}
+    created = client.post(url(center, "services/"), json=payload)
+    assert created.status_code == 201
+    service_id = created.json()["id"]
+    edited = client.patch(url(center, f"services/{service_id}/"), json={"price_clp": 2000})
+    assert edited.status_code == 200
+    assert edited.json()["price_clp"] == 2000
+    assert edited.json()["name"] == "Consulta"
+    assert client.delete(url(center, f"services/{service_id}/")).status_code == 204
+    listing = client.get(url(center, "services/"))
+    assert [s["id"] for s in listing.json()] == []
+    assert session.get(Service, service_id).is_active is False
+    assert client.patch(url(center, f"services/{service_id}/"), json={"price_clp": 5}).status_code == 404
+    assert client.delete(url(center, f"services/{service_id}/")).status_code == 404
+
+
+def test_service_of_other_center_is_404(setup, service_factory):
+    center, client = setup(ADMIN)
+    foreign = service_factory()
+    assert client.patch(url(center, f"services/{foreign.id}/"), json={"price_clp": 5}).status_code == 404
+    assert client.delete(url(center, f"services/{foreign.id}/")).status_code == 404
+
+
+def test_service_duration_must_be_multiple_of_15(setup):
+    center, client = setup(ADMIN)
+    payload = {"name": "Consulta", "price_clp": 1000, "duration_minutes": 20}
+    response = client.post(url(center, "services/"), json=payload)
+    assert response.status_code == 400
+    assert response.json()["duration_minutes"] == ["La duración debe ser múltiplo de 15 minutos"]
+
+
+def test_service_price_must_be_positive(setup):
+    center, client = setup(ADMIN)
+    payload = {"name": "Consulta", "price_clp": 0, "duration_minutes": 30}
+    assert client.post(url(center, "services/"), json=payload).status_code == 400
+
+
+def test_service_price_above_cap_is_rejected(setup):
+    center, client = setup(ADMIN)
+    payload = {"name": "Consulta", "price_clp": 10_000_001, "duration_minutes": 30}
+    assert client.post(url(center, "services/"), json=payload).status_code == 400
+
+
+def test_services_list_is_active_only_sorted_by_name(setup, service_factory):
+    center, client = setup(VIEWER)
+    service_factory(center=center, name="Zeta")
+    service_factory(center=center, name="Alfa")
+    service_factory(center=center, name="Baja", is_active=False)
+    response = client.get(url(center, "services/"))
+    assert [s["name"] for s in response.json()] == ["Alfa", "Zeta"]
+    assert set(response.json()[0]) == {"id", "name", "price_clp", "duration_minutes"}
+
+
+def test_members_lists_all_roles(setup, membership_factory):
+    center, client = setup(VIEWER)
+    membership_factory(role=ADMIN, center=center)
+    membership_factory(role=MEMBER, center=center)
+    response = client.get(url(center, "members/"))
+    assert response.status_code == 200
+    data = response.json()
+    assert [m["role"] for m in data] == ["admin", "member", "viewer"]
+    first = data[0]
+    assert first["role_label"] == "Administrador"
+    assert set(first) == {"id", "role", "role_label", "user"}
+    assert set(first["user"]) == {"full_name", "email", "title", "avatar_url"}

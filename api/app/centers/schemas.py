@@ -3,6 +3,7 @@ from urllib.parse import urlparse
 
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, TypeAdapter, field_validator
 
+from app.centers.models import ROLE_LABELS, Role
 from app.centers.phone import PHONE_ERROR, normalize_phone
 from app.formats import HourMinute
 
@@ -84,3 +85,65 @@ class CenterUpdate(BaseModel):
         if not value:
             raise ValueError("Selecciona al menos un día de atención")
         return sorted(set(value))
+
+
+class ServiceIn(BaseModel):
+    model_config = ConfigDict(extra="ignore", str_strip_whitespace=True)
+
+    name: Annotated[str, Field(max_length=120)]
+    price_clp: Annotated[int, Field(ge=1, le=10_000_000)]
+    duration_minutes: Annotated[int, Field(ge=15, le=240)]
+
+    @field_validator("name")
+    @classmethod
+    def not_blank(cls, value: str) -> str:
+        if not value:
+            raise ValueError("Este campo no puede estar en blanco.")
+        return value
+
+    @field_validator("duration_minutes")
+    @classmethod
+    def multiple_of_15(cls, value: int) -> int:
+        if value % 15:
+            raise ValueError("La duración debe ser múltiplo de 15 minutos")
+        return value
+
+
+class ServiceUpdate(ServiceIn):
+    name: Annotated[str, Field(max_length=120)] = Field(default=None)
+    price_clp: Annotated[int, Field(ge=1, le=10_000_000)] = Field(default=None)
+    duration_minutes: Annotated[int, Field(ge=15, le=240)] = Field(default=None)
+
+
+class ServiceOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    name: str
+    price_clp: int
+    duration_minutes: int
+
+
+class MemberUserOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    full_name: str
+    email: str
+    title: str
+    avatar_url: str
+
+
+class MemberOut(BaseModel):
+    id: int
+    role: str
+    role_label: str
+    user: MemberUserOut
+
+    @classmethod
+    def from_membership(cls, membership) -> "MemberOut":
+        return cls(
+            id=membership.id,
+            role=membership.role,
+            role_label=ROLE_LABELS[Role(membership.role)],
+            user=MemberUserOut.model_validate(membership.user),
+        )
