@@ -10,6 +10,12 @@ class DomainError(Exception):
         self.detail = detail
 
 
+def field_error(field: str, message: str) -> RequestValidationError:
+    return RequestValidationError(
+        [{"type": "value_error", "loc": ("body", field), "msg": message, "input": None}]
+    )
+
+
 def _message(error: dict) -> str:
     ctx = error.get("ctx") or {}
     match error["type"]:

@@ -1,12 +1,11 @@
 from fastapi import APIRouter, Response
-from fastapi.exceptions import RequestValidationError
 
 from app.centers import repository
 from app.centers.access import NOT_FOUND, AdminDep, CenterDep
 from app.centers.models import Service
 from app.centers.schemas import CenterOut, CenterUpdate, MemberOut, ServiceIn, ServiceOut, ServiceUpdate
 from app.db import SessionDep
-from app.errors import DomainError
+from app.errors import DomainError, field_error
 
 router = APIRouter(prefix="/api/centers/{slug}", tags=["centers"])
 
@@ -25,9 +24,7 @@ def update_center(session: SessionDep, access: AdminDep, data: CenterUpdate) -> 
     opening = changes.get("opening_time", center.opening_time)
     closing = changes.get("closing_time", center.closing_time)
     if closing <= opening:
-        raise RequestValidationError(
-            [{"type": "value_error", "loc": ("body", "closing_time"), "msg": CLOSING_ERROR, "input": None}]
-        )
+        raise field_error("closing_time", CLOSING_ERROR)
     for field, value in changes.items():
         setattr(center, field, value)
     session.commit()
