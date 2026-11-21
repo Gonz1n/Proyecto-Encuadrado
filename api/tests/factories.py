@@ -5,7 +5,7 @@ import pytest
 
 from app.accounts.models import User
 from app.accounts.security import hash_password
-from app.centers.models import Center, Membership, Role, Service
+from app.centers.models import Center, CenterClosure, Membership, Role, Service
 from app.scheduling.models import Appointment
 
 _hashes: dict[str, str] = {}
@@ -101,5 +101,16 @@ def appointment_factory(session):
         session.add(appointment)
         session.flush()
         return appointment
+
+    return make
+
+
+@pytest.fixture
+def closure_factory(session):
+    def make(center, day, reason="Feriado") -> CenterClosure:
+        closure = CenterClosure(center=center, date=day, reason=reason)
+        session.add(closure)
+        session.flush()
+        return closure
 
     return make

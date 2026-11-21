@@ -146,3 +146,67 @@ def test_ensure_in_window(monkeypatch, offset, include_today, ok):
     error = info.value.errors()[0]
     assert error["loc"] == ("body", "start")
     assert error["msg"] == "La fecha está fuera del período de reserva"
+
+
+def test_closed_day_offers_no_slots(session, setup, closure_factory):
+    professional, service = setup
+    closure_factory(professional.center, D)
+    assert slots_for_day(session, professional, service, D, NOW) == []
+    assert slots_for_day(session, professional, service, date(2026, 12, 2), NOW)
+
+
+def test_days_with_slots_skips_closed_days(session, setup, closure_factory):
+    professional, service = setup
+    closure_factory(professional.center, date(2026, 12, 2))
+    days = days_with_slots(session, professional, service, D, date(2026, 12, 3), NOW)
+    assert days == [D, date(2026, 12, 3)]
+
+
+def lunch_setup(membership_factory, service_factory, minutes):
+    professional = membership_factory()
+    center = professional.center
+    center.lunch_start, center.lunch_end = time(13, 0), time(14, 0)
+    return professional, service_factory(center=center, duration_minutes=minutes)
+
+
+def test_lunch_blocks_slots(session, membership_factory, service_factory):
+    professional, service = lunch_setup(membership_factory, service_factory, 30)
+    slots = slots_for_day(session, professional, service, D, NOW)
+    assert at(13) not in slots and at(13, 30) not in slots
+    assert at(12, 30) in slots and at(14) in slots
+
+
+def test_lunch_blocks_overlapping_service(session, membership_factory, service_factory):
+    professional, service = lunch_setup(membership_factory, service_factory, 60)
+    slots = slots_for_day(session, professional, service, D, NOW)
+    assert at(12, 30) not in slots
+    assert at(12) in slots
+
+
+def test_center_without_lunch_unchanged(session, setup):
+    professional, service = setup
+    assert at(13) in slots_for_day(session, professional, service, D, NOW)
+
+
+def test_days_with_slots_applies_lunch(session, membership_factory, service_factory):
+    professional, service = lunch_setup(membership_factory, service_factory, 60)
+    professional.center.opening_time = time(13, 0)
+    professional.center.closing_time = time(14, 0)
+    assert days_with_slots(session, professional, service, D, D, NOW) == []
+
+
+def test_days_with_slots_runs_one_closure_query(session, setup, closure_factory):
+    professional, service = setup
+    closure_factory(professional.center, D)
+    statements = []
+
+    def count(conn, cursor, statement, *args):
+        if "center_closures" in statement:
+            statements.append(statement)
+
+    event.listen(session.get_bind(), "before_cursor_execute", count)
+    try:
+        days_with_slots(session, professional, service, D, date(2026, 12, 10), NOW)
+    finally:
+        event.remove(session.get_bind(), "before_cursor_execute", count)
+    assert len(statements) == 1

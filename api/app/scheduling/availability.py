@@ -4,7 +4,8 @@ from datetime import date, datetime, time, timedelta
 from sqlalchemy.orm import Session
 
 from app import clock
-from app.centers.models import Membership, Service
+from app.centers import repository as centers_repository
+from app.centers.models import Center, Membership, Service
 from app.errors import field_error
 from app.scheduling import repository
 
@@ -45,6 +46,12 @@ def ensure_in_window(day: date, include_today: bool, field: str) -> None:
         raise field_error(field, OUT_OF_WINDOW)
 
 
+def with_lunch(center: Center, day: date, busy: list[tuple[datetime, datetime]]) -> list[tuple[datetime, datetime]]:
+    if center.lunch_start is None or center.lunch_end is None:
+        return busy
+    return [*busy, (datetime.combine(day, center.lunch_start), datetime.combine(day, center.lunch_end))]
+
+
 def slots_for_day(
     session: Session,
     professional: Membership,
@@ -56,12 +63,14 @@ def slots_for_day(
     center = professional.center
     if day.weekday() not in center.open_days:
         return []
+    if centers_repository.closure_dates(session, center.id, day, day):
+        return []
     return free_slots(
         day,
         center.opening_time,
         center.closing_time,
         service.duration_minutes,
-        repository.busy_ranges(session, professional, day, day, exclude_id),
+        with_lunch(center, day, repository.busy_ranges(session, professional, day, day, exclude_id)),
         not_before=now,
     )
 
@@ -81,17 +90,19 @@ def days_with_slots(
         busy_by_day[b_start.date()].append((b_start, b_end))
         if b_end.date() != b_start.date():
             busy_by_day[b_end.date()].append((b_start, b_end))
+    closed = centers_repository.closure_dates(session, center.id, start, end)
     days = (start + timedelta(days=n) for n in range((end - start).days + 1))
     return [
         day
         for day in days
         if day.weekday() in center.open_days
+        and day not in closed
         and free_slots(
             day,
             center.opening_time,
             center.closing_time,
             service.duration_minutes,
-            busy_by_day[day],
+            with_lunch(center, day, busy_by_day[day]),
             not_before=now,
         )
     ]

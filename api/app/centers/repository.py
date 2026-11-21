@@ -1,8 +1,10 @@
+from datetime import date
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
 
 from app.accounts.models import User
-from app.centers.models import Center, Membership, Role, Service
+from app.centers.models import Center, CenterClosure, Membership, Role, Service
 
 
 def get_center_by_slug(session: Session, slug: str) -> Center | None:
@@ -48,5 +50,15 @@ def members(session: Session, center_id: int) -> list[Membership]:
             .options(joinedload(Membership.user))
             .where(Membership.center_id == center_id)
             .order_by(Membership.role, User.last_name, User.first_name)
+        )
+    )
+
+
+def closure_dates(session: Session, center_id: int, start: date, end: date) -> set[date]:
+    return set(
+        session.scalars(
+            select(CenterClosure.date).where(
+                CenterClosure.center_id == center_id, CenterClosure.date >= start, CenterClosure.date <= end
+            )
         )
     )
