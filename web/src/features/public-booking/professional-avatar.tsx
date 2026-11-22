@@ -1,4 +1,4 @@
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
 import type { PublicProfessional } from './api'
 
@@ -18,7 +18,6 @@ export function ProfessionalAvatar({
 }) {
   return (
     <Avatar className={cn('size-12', className)}>
-      {professional.avatar_url ? <AvatarImage src={professional.avatar_url} alt="" /> : null}
       <AvatarFallback className={cn('bg-[var(--cp-salmon,var(--primary))]/60 font-medium text-[var(--cp-granate,var(--primary))]', fallbackClassName)}>
         {initials(professional.full_name)}
       </AvatarFallback>

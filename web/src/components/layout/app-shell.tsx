@@ -4,7 +4,7 @@ import { CalendarDays, LogOut, Settings, UserRound, type LucideIcon } from 'luci
 import Link from 'next/link'
 import { useParams, usePathname } from 'next/navigation'
 import type { ReactNode } from 'react'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/features/auth/auth-context'
 import type { CurrentUser } from '@/features/auth/api'
@@ -71,7 +71,6 @@ export function AppShell({ children }: { children: ReactNode }) {
           <RoleBadge role={membership.role} />
           <div className="hidden items-center gap-2.5 border-l pl-3 md:flex">
             <Avatar size="sm">
-              {user.avatar_url ? <AvatarImage src={user.avatar_url} alt="" /> : null}
               <AvatarFallback>{initials(user)}</AvatarFallback>
             </Avatar>
             <div className="flex flex-col leading-tight">

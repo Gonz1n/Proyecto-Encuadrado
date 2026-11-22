@@ -6,7 +6,7 @@ import { Loader2 } from 'lucide-react'
 import { useForm, useWatch } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -108,7 +108,6 @@ function ProfileForm({ user }: { user: CurrentUser }) {
       <form onSubmit={onSubmit} noValidate className="max-w-2xl space-y-5">
         <div className="flex items-center gap-4">
           <Avatar className="size-16">
-            {user.avatar_url ? <AvatarImage src={user.avatar_url} alt="" /> : null}
             <AvatarFallback className="bg-primary/10 text-lg font-medium text-primary">
               {`${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase()}
             </AvatarFallback>

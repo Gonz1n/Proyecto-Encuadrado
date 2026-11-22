@@ -42,7 +42,7 @@ export type Member = {
   id: number
   role: Role
   role_label: string
-  user: { full_name: string; email: string; title: string; avatar_url: string }
+  user: { full_name: string; email: string; title: string }
 }
 
 export const centerApi = {

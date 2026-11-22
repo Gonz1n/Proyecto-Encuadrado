@@ -15,7 +15,6 @@ export type CurrentUser = {
   last_name: string
   full_name: string
   title: string
-  avatar_url: string
   university: string
   bio: string
   health_registry: string
