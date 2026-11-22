@@ -13,7 +13,7 @@ export type SocialLinks = {
   whatsapp_number: string
 }
 
-export type SocialField = keyof SocialLinks
+type SocialField = keyof SocialLinks
 
 export const SOCIAL_NETWORKS: {
   field: SocialField

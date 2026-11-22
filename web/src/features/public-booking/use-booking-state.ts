@@ -22,13 +22,13 @@ function readId(params: URLSearchParams, key: string): number | null {
   return Number.isInteger(value) && value > 0 ? value : null
 }
 
-export function validDate(value: string | null): string | null {
+function validDate(value: string | null): string | null {
   if (!value || !DATE_PATTERN.test(value)) return null
   const parsed = parseISO(value)
   return isValid(parsed) && format(parsed, 'yyyy-MM-dd') === value ? value : null
 }
 
-export function validTime(value: string | null): string | null {
+function validTime(value: string | null): string | null {
   return value && TIME_PATTERN.test(value) ? value : null
 }
 
@@ -37,7 +37,7 @@ function readBy(params: URLSearchParams): BookingStart | null {
   return value === 'service' || value === 'professional' ? value : null
 }
 
-export function applyPatch(current: URLSearchParams, patch: BookingPatch): URLSearchParams {
+function applyPatch(current: URLSearchParams, patch: BookingPatch): URLSearchParams {
   const next = new URLSearchParams(current)
   const changes: BookingPatch =
     'service' in patch || 'professional' in patch ? { date: null, time: null, ...patch } : { ...patch }
@@ -49,15 +49,7 @@ export function applyPatch(current: URLSearchParams, patch: BookingPatch): URLSe
   return next
 }
 
-export function firstChoice(
-  by: BookingStart | null,
-  service: PublicService | undefined,
-  professional: PublicProfessional | undefined,
-): BookingStart | null {
-  return by ?? (service ? 'service' : professional ? 'professional' : null)
-}
-
-export function deriveStep(
+function deriveStep(
   first: BookingStart | null,
   service: PublicService | undefined,
   professional: PublicProfessional | undefined,
@@ -81,7 +73,7 @@ export function useBookingState(center: PublicCenter) {
   const professional = center.professionals.find((item) => item.id === readId(params, 'professional'))
   const date = validDate(params.get('date'))
   const time = validTime(params.get('time'))
-  const first = firstChoice(by, service, professional)
+  const first = by ?? (service ? 'service' : professional ? 'professional' : null)
   const step = deriveStep(first, service, professional, date, time)
 
   const update = (patch: BookingPatch, options?: { replace?: boolean }) =>

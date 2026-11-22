@@ -1,6 +1,6 @@
 import type { PublicCenterSummary } from './api'
 
-export type CentersMenuItem = PublicCenterSummary & { current: boolean }
+type CentersMenuItem = PublicCenterSummary & { current: boolean }
 
 export function centersMenuItems(centers: PublicCenterSummary[], currentSlug: string): CentersMenuItem[] {
   return centers
@@ -8,7 +8,7 @@ export function centersMenuItems(centers: PublicCenterSummary[], currentSlug: st
     .sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }))
 }
 
-export type CentersMenuState = 'items' | 'loading' | 'error'
+type CentersMenuState = 'items' | 'loading' | 'error'
 
 export function centersMenuState(query: { isError: boolean; hasData: boolean }): CentersMenuState {
   if (query.hasData) return 'items'

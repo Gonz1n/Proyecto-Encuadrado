@@ -20,13 +20,13 @@ export type Center = {
 
 export type CenterUpdate = Partial<Omit<Center, 'slug'>>
 
-export type Closure = {
+type Closure = {
   id: number
   date: string
   reason: string
 }
 
-export type ClosureCreated = Closure & { cancelled_appointments: number }
+type ClosureCreated = Closure & { cancelled_appointments: number }
 
 export type Service = {
   id: number
@@ -38,7 +38,7 @@ export type Service = {
 
 export type ServiceInput = Omit<Service, 'id'>
 
-export type Member = {
+type Member = {
   id: number
   role: Role
   role_label: string

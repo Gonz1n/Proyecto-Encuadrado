@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, use, useCallback, useEffect, useMemo, type ReactNode } from 'react'
+import { createContext, use, useEffect, useMemo, type ReactNode } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query-keys'
 import { authApi, type CurrentUser } from './api'
@@ -8,20 +8,19 @@ import { isUnauthorized, useMeQuery } from './hooks'
 
 type AuthContextValue = {
   user: CurrentUser | undefined
-  isLoading: boolean
   login: (email: string, password: string) => Promise<void>
   logout: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
 
+function endSession() {
+  window.location.replace('/login')
+}
+
 export function AuthProvider({ hasSession, children }: { hasSession: boolean; children: ReactNode }) {
   const queryClient = useQueryClient()
   const me = useMeQuery(hasSession)
-
-  const endSession = useCallback(() => {
-    window.location.replace('/login')
-  }, [])
 
   useEffect(() => {
     const onCacheEvent = (event: { type: string; action?: { type: string; error?: unknown } }) => {
@@ -38,12 +37,11 @@ export function AuthProvider({ hasSession, children }: { hasSession: boolean; ch
       unsubscribeQueries()
       unsubscribeMutations()
     }
-  }, [queryClient, endSession, hasSession])
+  }, [queryClient, hasSession])
 
   const value = useMemo<AuthContextValue>(
     () => ({
       user: me.data,
-      isLoading: me.isLoading,
       login: async (email, password) => {
         const { user } = await authApi.login(email, password)
         queryClient.setQueryData(queryKeys.me, user)
@@ -53,7 +51,7 @@ export function AuthProvider({ hasSession, children }: { hasSession: boolean; ch
         endSession()
       },
     }),
-    [me.data, me.isLoading, queryClient, endSession],
+    [me.data, queryClient],
   )
 
   return <AuthContext value={value}>{children}</AuthContext>
