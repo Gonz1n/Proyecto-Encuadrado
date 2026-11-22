@@ -7,11 +7,11 @@ import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { NotFoundPage } from '@/components/layout/not-found-page'
 import { Button } from '@/components/ui/button'
-import { formatCLP, formatLongDate } from '@/lib/format'
+import { formatCLP, formatLongDate } from '@/utils/format'
 import type { Booking } from './api'
 import { readBooking } from './booking-storage'
 import { PublicHeader } from './public-header'
-import { MODALITY_LABELS } from '@/lib/modality'
+import { MODALITY_LABELS } from '@/constants/modality'
 
 export function BookingSuccessPage() {
   const { slug } = useParams<{ slug: string }>()

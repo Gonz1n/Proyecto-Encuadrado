@@ -1,6 +1,6 @@
 import { format, isValid, parseISO } from 'date-fns'
 import { useSearchParams } from 'next/navigation'
-import { useSetSearchParams } from '@/lib/use-set-search-params'
+import { useSetSearchParams } from '@/hooks/use-set-search-params'
 import type { PublicCenter, PublicProfessional, PublicService } from './api'
 
 export type BookingStart = 'service' | 'professional'

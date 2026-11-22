@@ -6,13 +6,13 @@ import { Mail, Phone } from 'lucide-react'
 import { useParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { formatCLP, formatLongDate } from '@/lib/format'
+import { formatCLP, formatLongDate } from '@/utils/format'
 import { useCanManageAppointment } from '@/features/permissions/use-can'
 import type { Appointment } from './api'
 import { AppointmentHistory } from './appointment-history'
 import { CancelAppointmentDialog } from './cancel-appointment-dialog'
 import { RescheduleDialog } from './reschedule-dialog'
-import { MODALITY_LABELS } from '@/lib/modality'
+import { MODALITY_LABELS } from '@/constants/modality'
 
 type AppointmentDetailDialogProps = {
   appointment: Appointment | null

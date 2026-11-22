@@ -2,8 +2,8 @@
 
 import type { FieldErrors, Path, UseFormRegister } from 'react-hook-form'
 import { Input } from '@/components/ui/input'
-import { Field } from '@/components/form-field'
-import { formatRutInput } from '@/lib/rut'
+import { Field } from '@/components/form/field'
+import { formatRutInput } from './utils/rut'
 import { PATIENT_FIELDS, type PatientFieldName } from './patient-fields'
 
 type PatientValues = Record<PatientFieldName, string>

@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { format, isToday, parseISO } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { capitalize } from '@/lib/format'
+import { capitalize } from '@/utils/format'
 import { useCenter } from '@/features/center-settings/hooks'
 import { AgendaError } from './agenda-error'
 import type { Appointment } from './api'

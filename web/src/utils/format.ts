@@ -1,10 +1,10 @@
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-
-const clpFormatter = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' })
+import { CLP_FORMATTER } from '@/constants/currency'
+import { WEEKDAY_NAMES, WEEKDAY_PLURAL } from '@/constants/dates'
 
 export function formatCLP(n: number): string {
-  return clpFormatter.format(n)
+  return CLP_FORMATTER.format(n)
 }
 
 export function formatDuration(min: number): string {
@@ -22,10 +22,6 @@ export function capitalize(text: string): string {
 export function formatLongDate(date: Date): string {
   return capitalize(format(date, "EEEE d 'de' MMMM", { locale: es }))
 }
-
-export const WEEKDAY_SHORT = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
-const WEEKDAY_NAMES = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo']
-const WEEKDAY_PLURAL = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábados', 'domingos']
 
 export function formatOpenDays(days: number[]): string {
   const sorted = [...new Set(days)].sort((a, b) => a - b)

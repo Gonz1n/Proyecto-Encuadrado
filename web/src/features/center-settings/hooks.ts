@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tansta
 import { toast } from 'sonner'
 import type { FieldValues, Path, UseFormSetError } from 'react-hook-form'
 import { ApiError } from '@/lib/api-client'
-import { setFieldErrors } from '@/lib/form-errors'
+import { setFieldErrors } from '@/utils/form-errors'
 import { queryKeys } from '@/lib/query-keys'
 import { centerApi, type CenterUpdate, type ServiceInput } from './api'
 

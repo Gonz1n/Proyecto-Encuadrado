@@ -1,6 +1,6 @@
 import { z } from 'zod'
-import { PHONE_ERROR, PHONE_PATTERN } from '@/lib/phone'
-import { normalizeRut } from '@/lib/rut'
+import { PHONE_ERROR, PHONE_PATTERN } from '@/constants/phone'
+import { normalizeRut } from './utils/rut'
 
 export const buildPatientShape = (today: string, oldest: string) => ({
   patient_name: z.string().trim().min(3, 'Ingresa tu nombre y apellido').max(120, 'Usa como máximo 120 caracteres'),

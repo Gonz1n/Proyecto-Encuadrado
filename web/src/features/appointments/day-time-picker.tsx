@@ -7,7 +7,7 @@ import { es } from 'react-day-picker/locale'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import { Skeleton } from '@/components/ui/skeleton'
-import { formatLongDate } from '@/lib/format'
+import { formatLongDate } from '@/utils/format'
 import { cn } from '@/lib/utils'
 import { DATE_FORMAT } from './calendar-layout'
 

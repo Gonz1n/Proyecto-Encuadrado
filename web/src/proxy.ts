@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import { safeNextPath } from '@/lib/safe-next-path'
+import { safeNextPath } from '@/utils/safe-next-path'
 import { hasSession } from '@/lib/session'
 
 export function proxy(request: NextRequest) {

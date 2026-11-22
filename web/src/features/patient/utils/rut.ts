@@ -1,4 +1,4 @@
-const RUT_PATTERN = /^(\d{7,8})-?([\dK])$/
+import { RUT_PATTERN } from '../constants/rut'
 
 function checkDigit(number: number): string {
   let total = 0

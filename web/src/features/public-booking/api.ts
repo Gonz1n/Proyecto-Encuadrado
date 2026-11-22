@@ -1,6 +1,6 @@
 import { apiFetch } from '@/lib/api-client'
-import type { SocialLinks } from '@/lib/social-links'
-import type { Modality } from '@/lib/modality'
+import type { SocialLinks } from '@/types/social-links'
+import type { Modality } from '@/types/modality'
 import type { PatientFieldName } from '@/features/patient/patient-fields'
 
 export type PublicProfessional = {

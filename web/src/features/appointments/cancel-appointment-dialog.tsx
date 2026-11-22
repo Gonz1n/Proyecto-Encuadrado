@@ -12,7 +12,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { formatLongDate } from '@/lib/format'
+import { formatLongDate } from '@/utils/format'
 import type { Appointment } from './api'
 import { useCancelAppointment } from './hooks'
 import { NoteField } from './note-field'

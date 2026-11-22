@@ -1,6 +1,6 @@
 import { apiFetch } from '@/lib/api-client'
 import type { PatientFieldName } from '@/features/patient/patient-fields'
-import type { Modality } from '@/lib/modality'
+import type { Modality } from '@/types/modality'
 
 export type AppointmentChange = {
   kind: 'rescheduled' | 'cancelled'

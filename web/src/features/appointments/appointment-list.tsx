@@ -4,7 +4,7 @@ import { format, isToday, isTomorrow, parseISO } from 'date-fns'
 import { Mail, Phone, Video } from 'lucide-react'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
-import { formatCLP, formatLongDate } from '@/lib/format'
+import { formatCLP, formatLongDate } from '@/utils/format'
 import type { Appointment } from './api'
 import { AppointmentDetailDialog } from './appointment-detail-dialog'
 

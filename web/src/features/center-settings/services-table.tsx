@@ -16,7 +16,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { formatCLP, formatDuration } from '@/lib/format'
+import { formatCLP, formatDuration } from '@/utils/format'
 import type { Service } from './api'
 import { notifyDeleteError, useDeleteService, useServices } from './hooks'
 import { ServiceFormDialog } from './service-form-dialog'

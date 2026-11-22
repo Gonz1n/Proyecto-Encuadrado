@@ -1,4 +1,4 @@
-import { formatCLP, formatDuration } from '@/lib/format'
+import { formatCLP, formatDuration } from '@/utils/format'
 import { useBookingFlow } from '../booking-context'
 import { OptionButton } from '../option-button'
 

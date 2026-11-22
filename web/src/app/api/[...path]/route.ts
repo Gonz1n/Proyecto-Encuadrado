@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import { SESSION_COOKIE, sessionCookieOptions } from '@/lib/session'
+import { SESSION_COOKIE, SESSION_COOKIE_OPTIONS } from '@/constants/session'
 
 type Context = { params: Promise<{ path: string[] }> }
 
@@ -35,7 +35,7 @@ async function proxy(request: NextRequest, { params }: Context): Promise<Respons
   if (route === 'auth/login' && upstream.status === 200) {
     const body = await upstream.json()
     const res = NextResponse.json({ user: body.user })
-    res.cookies.set(SESSION_COOKIE, body.token, sessionCookieOptions)
+    res.cookies.set(SESSION_COOKIE, body.token, SESSION_COOKIE_OPTIONS)
     return res
   }
 

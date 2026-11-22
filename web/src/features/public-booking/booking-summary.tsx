@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { addMinutes, format, parseISO } from 'date-fns'
 import Link from 'next/link'
-import { formatCLP, formatDuration, formatLongDate } from '@/lib/format'
+import { formatCLP, formatDuration, formatLongDate } from '@/utils/format'
 import { useBookingFlow } from './booking-context'
 import type { BookingPatch } from './use-booking-state'
 
