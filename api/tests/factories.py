@@ -11,7 +11,7 @@ from app.centers.models.center import Center
 from app.centers.models.closure import CenterClosure
 from app.centers.models.membership import Membership
 from app.centers.models.service import Service
-from app.scheduling.models import Appointment
+from app.scheduling.models.appointment import Appointment
 
 _hash = cache(hash_password)
 

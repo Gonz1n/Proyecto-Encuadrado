@@ -1,30 +1,14 @@
 from datetime import date, datetime
-from enum import StrEnum
 
-from sqlalchemy import BigInteger, Date, DateTime, ForeignKey, Index, String, desc
+from sqlalchemy import BigInteger, Date, DateTime, ForeignKey, Index, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.accounts.models.user import User
 from app.centers.models.center import Center
 from app.centers.models.membership import Membership
 from app.centers.models.service import Service
 from app.core import clock
 from app.db.base import Base
-
-
-class AppointmentStatus(StrEnum):
-    CONFIRMED = "confirmed"
-    CANCELLED = "cancelled"
-
-
-class Modality(StrEnum):
-    IN_PERSON = "in_person"
-    REMOTE = "remote"
-
-
-class ChangeKind(StrEnum):
-    RESCHEDULED = "rescheduled"
-    CANCELLED = "cancelled"
+from app.scheduling.constants.statuses import AppointmentStatus, Modality
 
 
 class Appointment(Base):
@@ -54,21 +38,5 @@ class Appointment(Base):
     service: Mapped[Service] = relationship()
     changes: Mapped[list["AppointmentChange"]] = relationship(
         back_populates="appointment",
-        order_by=lambda: (desc(AppointmentChange.created_at), desc(AppointmentChange.id)),
+        order_by="(desc(AppointmentChange.created_at), desc(AppointmentChange.id))",
     )
-
-
-class AppointmentChange(Base):
-    __tablename__ = "appointment_changes"
-
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
-    appointment_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("appointments.id", ondelete="CASCADE"))
-    kind: Mapped[str] = mapped_column(String(12))
-    previous_start: Mapped[datetime] = mapped_column(DateTime)
-    new_start: Mapped[datetime | None] = mapped_column(DateTime)
-    note: Mapped[str] = mapped_column(String(300), default="")
-    changed_by_id: Mapped[int | None] = mapped_column(BigInteger, ForeignKey("users.id", ondelete="SET NULL"))
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=clock.local_now)
-
-    appointment: Mapped[Appointment] = relationship(back_populates="changes")
-    changed_by: Mapped[User | None] = relationship()

@@ -4,7 +4,8 @@ import pytest
 from sqlalchemy.exc import IntegrityError
 
 from app.core import clock
-from app.scheduling.models import AppointmentChange, ChangeKind
+from app.scheduling.constants.statuses import ChangeKind
+from app.scheduling.models.appointment_change import AppointmentChange
 
 
 def test_user_cannot_have_two_memberships_in_same_center(session, user_factory, center_factory, membership_factory):

@@ -15,8 +15,9 @@ from app.centers.models.service import Service
 from app.centers.repositories import centers, memberships, services
 from app.core import clock
 from app.db.seed.data import CENTERS, PASSWORD, PATIENTS, USERS
-from app.scheduling.availability import slots_for_day
-from app.scheduling.models import Appointment, AppointmentStatus, Modality
+from app.scheduling.constants.statuses import AppointmentStatus, Modality
+from app.scheduling.models.appointment import Appointment
+from app.scheduling.services.availability import slots_for_day
 from app.shared.validators.rut import format_rut
 
 

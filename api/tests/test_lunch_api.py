@@ -5,7 +5,8 @@ from sqlalchemy import select
 
 from app.centers.constants.roles import Role
 from app.core import clock
-from app.scheduling.models import AppointmentChange, AppointmentStatus
+from app.scheduling.constants.statuses import AppointmentStatus
+from app.scheduling.models.appointment_change import AppointmentChange
 
 LUNCH = {"lunch_start": "13:00", "lunch_end": "14:00"}
 

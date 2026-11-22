@@ -9,7 +9,7 @@ from app.centers.models.membership import Membership
 from app.centers.models.service import Service
 from app.core import clock
 from app.db.seed.loaders import run as run_seed
-from app.scheduling.models import Appointment
+from app.scheduling.models.appointment import Appointment
 
 
 def count(session, model):

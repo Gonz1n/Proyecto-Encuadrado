@@ -1,0 +1,8 @@
+OUT_OF_WINDOW = "La fecha está fuera del período de reserva"
+SLOT_UNAVAILABLE = "La hora seleccionada ya no está disponible"
+APPOINTMENT_LOCKED = "No se puede modificar una cita pasada"
+OWN_BOOKINGS_ONLY = "Solo puedes agendar horas para ti"
+INVALID_SERVICE = "El servicio no es válido"
+UNAVAILABLE_SERVICE = "El servicio no está disponible"
+INVALID_PROFESSIONAL = "El profesional no es válido"
+UNAVAILABLE_PROFESSIONAL = "El profesional no está disponible"

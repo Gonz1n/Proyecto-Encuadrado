@@ -5,7 +5,7 @@ import pytest
 from app.centers.constants.roles import Role
 from app.centers.models.membership import Membership
 from app.core import clock
-from app.scheduling.models import Appointment
+from app.scheduling.models.appointment import Appointment
 
 
 def day(days):

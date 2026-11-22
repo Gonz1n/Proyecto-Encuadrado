@@ -8,8 +8,9 @@ from app.centers.repositories import closures
 from app.centers.schemas.closure import ClosureCreatedOut, ClosureIn
 from app.core import clock
 from app.core.errors.exceptions import DomainError, field_error
-from app.scheduling import repository as scheduling_repository
-from app.scheduling.services import cancel_for_center, lock_center_professionals
+from app.scheduling.repositories import appointments as scheduling_repository
+from app.scheduling.services.changes import cancel_for_center
+from app.scheduling.services.locks import lock_center_professionals
 from app.shared.constants.messages import NOT_FOUND
 
 

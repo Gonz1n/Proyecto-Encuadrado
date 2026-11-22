@@ -3,10 +3,11 @@ from datetime import date, datetime, time, timedelta
 from sqlalchemy import Time, func, literal, select
 from sqlalchemy.orm import Session, joinedload, selectinload
 
-from app.centers.api.dependencies import CenterAccess
 from app.centers.constants.roles import Role
 from app.centers.models.membership import Membership
-from app.scheduling.models import Appointment, AppointmentChange, AppointmentStatus
+from app.scheduling.constants.statuses import AppointmentStatus
+from app.scheduling.models.appointment import Appointment
+from app.scheduling.models.appointment_change import AppointmentChange
 
 
 def busy_ranges(
@@ -56,18 +57,18 @@ def list_appointments(
     return session.scalars(query).all()
 
 
-def get_manageable(session: Session, access: CenterAccess, appointment_id: int) -> Appointment | None:
+def get_manageable(session: Session, membership: Membership, appointment_id: int) -> Appointment | None:
     query = (
         select(Appointment)
         .options(joinedload(Appointment.service), joinedload(Appointment.professional).joinedload(Membership.user))
         .where(
             Appointment.id == appointment_id,
-            Appointment.center_id == access.center.id,
+            Appointment.center_id == membership.center_id,
             Appointment.status == AppointmentStatus.CONFIRMED,
         )
     )
-    if access.membership.role == Role.MEMBER:
-        query = query.where(Appointment.professional_id == access.membership.id)
+    if membership.role == Role.MEMBER:
+        query = query.where(Appointment.professional_id == membership.id)
     return session.scalar(query)
 
 

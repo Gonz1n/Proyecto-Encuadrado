@@ -5,14 +5,10 @@ from sqlalchemy import func, select
 
 from app.centers.constants.roles import Role
 from app.core import clock
-from app.scheduling.models import AppointmentChange, AppointmentStatus, ChangeKind
-from app.scheduling.services import (
-    AppointmentLocked,
-    AppointmentNotFound,
-    SlotUnavailable,
-    cancel_appointment,
-    reschedule_appointment,
-)
+from app.scheduling.constants.statuses import AppointmentStatus, ChangeKind
+from app.scheduling.exceptions import AppointmentLocked, AppointmentNotFound, SlotUnavailable
+from app.scheduling.models.appointment_change import AppointmentChange
+from app.scheduling.services.changes import cancel_appointment, reschedule_appointment
 
 FORMAT = "%Y-%m-%dT%H:%M"
 LOCKED = "No se puede modificar una cita pasada"

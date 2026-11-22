@@ -1,5 +1,5 @@
 from collections import defaultdict
-from datetime import date, datetime, time, timedelta
+from datetime import date, datetime, timedelta
 
 from sqlalchemy.orm import Session
 
@@ -9,37 +9,9 @@ from app.centers.models.service import Service
 from app.centers.repositories import closures
 from app.core import clock
 from app.core.errors.exceptions import field_error
-from app.scheduling import repository
-
-SLOT_STEP_MINUTES = 30
-WINDOW_DAYS = 30
-OUT_OF_WINDOW = "La fecha está fuera del período de reserva"
-
-
-def free_slots(
-    day: date,
-    opening: time,
-    closing: time,
-    duration: int,
-    busy: list[tuple[datetime, datetime]],
-    not_before: datetime | None = None,
-) -> list[datetime]:
-    length = timedelta(minutes=duration)
-    step = timedelta(minutes=SLOT_STEP_MINUTES)
-    limit = datetime.combine(day, closing)
-    candidate = datetime.combine(day, opening)
-    slots = []
-    while candidate + length <= limit:
-        free = not any(b_start < candidate + length and candidate < b_end for b_start, b_end in busy)
-        if free and (not_before is None or candidate > not_before):
-            slots.append(candidate)
-        candidate += step
-    return slots
-
-
-def booking_window(today: date, include_today: bool = False) -> tuple[date, date]:
-    start = today if include_today else today + timedelta(days=1)
-    return start, today + timedelta(days=WINDOW_DAYS)
+from app.scheduling.constants.messages import OUT_OF_WINDOW
+from app.scheduling.repositories import appointments
+from app.scheduling.services.slots import booking_window, free_slots
 
 
 def ensure_in_window(day: date, include_today: bool, field: str) -> None:
@@ -69,7 +41,8 @@ def slots_for_day(
         return []
     if closures.closure_dates(session, center.id, day, day):
         return []
-    return _center_slots(center, service, day, repository.busy_ranges(session, professional, day, day, exclude_id), now)
+    busy = appointments.busy_ranges(session, professional, day, day, exclude_id)
+    return _center_slots(center, service, day, busy, now)
 
 
 def days_with_slots(
@@ -83,7 +56,7 @@ def days_with_slots(
 ) -> list[date]:
     center = professional.center
     busy_by_day = defaultdict(list)
-    for b_start, b_end in repository.busy_ranges(session, professional, start, end, exclude_id):
+    for b_start, b_end in appointments.busy_ranges(session, professional, start, end, exclude_id):
         busy_by_day[b_start.date()].append((b_start, b_end))
         if b_end.date() != b_start.date():
             busy_by_day[b_end.date()].append((b_start, b_end))

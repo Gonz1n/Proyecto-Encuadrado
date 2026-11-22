@@ -4,14 +4,9 @@ import pytest
 from fastapi.exceptions import RequestValidationError
 
 from app.core import clock
-from app.scheduling import repository
-from app.scheduling.availability import (
-    booking_window,
-    days_with_slots,
-    ensure_in_window,
-    free_slots,
-    slots_for_day,
-)
+from app.scheduling.repositories import appointments
+from app.scheduling.services.availability import days_with_slots, ensure_in_window, slots_for_day
+from app.scheduling.services.slots import booking_window, free_slots
 
 D = date(2026, 12, 1)
 
@@ -105,7 +100,7 @@ def test_busy_ranges_cover_every_center_of_the_user(session, membership_factory,
     second = membership_factory(user=first.user)
     other_service = service_factory(center=second.center, duration_minutes=60)
     appointment_factory(second, other_service, at(10))
-    assert repository.busy_ranges(session, first, D, D) == [(at(10), at(11))]
+    assert appointments.busy_ranges(session, first, D, D) == [(at(10), at(11))]
 
 
 def test_days_with_slots_runs_one_busy_query(session, setup, appointment_factory, capture_sql):

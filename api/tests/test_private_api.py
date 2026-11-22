@@ -6,7 +6,9 @@ from sqlalchemy import select
 
 from app.centers.constants.roles import Role
 from app.core import clock
-from app.scheduling.models import Appointment, AppointmentChange, ChangeKind
+from app.scheduling.constants.statuses import ChangeKind
+from app.scheduling.models.appointment import Appointment
+from app.scheduling.models.appointment_change import AppointmentChange
 
 FORMAT = "%Y-%m-%dT%H:%M"
 
