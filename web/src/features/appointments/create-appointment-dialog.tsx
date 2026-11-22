@@ -36,6 +36,35 @@ type CreateAppointmentDialogProps = {
   onOpenChange: (open: boolean) => void
 }
 
+type FieldSelectProps = {
+  label: string
+  placeholder?: string
+  items: { value: string; label: string }[]
+  value: string | null
+  disabled?: boolean
+  onValueChange: (value: string | null) => void
+}
+
+function FieldSelect({ label, placeholder, items, value, disabled, onValueChange }: FieldSelectProps) {
+  return (
+    <div className="space-y-2">
+      <Label>{label}</Label>
+      <Select items={items} value={value} disabled={disabled} onValueChange={onValueChange}>
+        <SelectTrigger aria-label={label} className="w-full">
+          <SelectValue placeholder={placeholder} />
+        </SelectTrigger>
+        <SelectContent>
+          {items.map((item) => (
+            <SelectItem key={item.value} value={item.value}>
+              {item.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  )
+}
+
 const emptyPatient = {
   patient_name: '',
   patient_email: '',
@@ -142,91 +171,41 @@ export function CreateAppointmentDialog({ slug, membership, open, onOpenChange }
         ) : (
           <form onSubmit={onSubmit} noValidate className="space-y-5">
             <div className="grid gap-4 sm:grid-cols-3">
-              <div className="space-y-2">
-                <Label>Servicio</Label>
-                <Select
-                  items={serviceItems}
-                  value={serviceId === undefined ? null : String(serviceId)}
-                  onValueChange={(next) => {
-                    setServiceId(next ? Number(next) : undefined)
-                    resetSlot()
-                  }}
-                >
-                  <SelectTrigger aria-label="Servicio" className="w-full">
-                    <SelectValue placeholder="Elige un servicio" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {serviceItems.map((item) => (
-                      <SelectItem key={item.value} value={item.value}>
-                        {item.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Profesional</Label>
-                <Select
-                  items={professionalItems}
-                  value={professionalId === undefined ? null : String(professionalId)}
-                  disabled={professionals.length === 1}
-                  onValueChange={(next) => {
-                    setProfessionalId(next ? Number(next) : undefined)
-                    resetSlot()
-                  }}
-                >
-                  <SelectTrigger aria-label="Profesional" className="w-full">
-                    <SelectValue placeholder="Elige un profesional" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {professionalItems.map((item) => (
-                      <SelectItem key={item.value} value={item.value}>
-                        {item.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Modalidad</Label>
-                <Select
-                  items={modalityItems}
-                  value={modality}
-                  onValueChange={(next) => next && setModality(next as Modality)}
-                >
-                  <SelectTrigger aria-label="Modalidad" className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {modalityItems.map((item) => (
-                      <SelectItem key={item.value} value={item.value}>
-                        {item.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              <FieldSelect
+                label="Servicio"
+                placeholder="Elige un servicio"
+                items={serviceItems}
+                value={serviceId === undefined ? null : String(serviceId)}
+                onValueChange={(next) => {
+                  setServiceId(next ? Number(next) : undefined)
+                  resetSlot()
+                }}
+              />
+              <FieldSelect
+                label="Profesional"
+                placeholder="Elige un profesional"
+                items={professionalItems}
+                value={professionalId === undefined ? null : String(professionalId)}
+                disabled={professionals.length === 1}
+                onValueChange={(next) => {
+                  setProfessionalId(next ? Number(next) : undefined)
+                  resetSlot()
+                }}
+              />
+              <FieldSelect
+                label="Modalidad"
+                items={modalityItems}
+                value={modality}
+                onValueChange={(next) => next && setModality(next as Modality)}
+              />
             </div>
             {!ready ? (
               <p className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
                 Elige un servicio y un profesional para ver los días disponibles.
               </p>
-            ) : days.isPending ? (
-              <Skeleton className="h-72 w-full rounded-xl" />
-            ) : days.isError ? (
-              <div className="space-y-3">
-                <p className="text-sm text-muted-foreground">No pudimos cargar los días disponibles.</p>
-                <Button type="button" variant="outline" onClick={() => days.refetch()}>
-                  Reintentar
-                </Button>
-              </div>
-            ) : days.data.days.length === 0 ? (
-              <p className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
-                No quedan horas libres en los próximos 30 días para este profesional.
-              </p>
             ) : (
               <DayTimePicker
-                days={days.data.days}
+                days={days}
                 slots={slots}
                 date={date}
                 time={time}

@@ -1,13 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import { format, isToday, parseISO } from 'date-fns'
-import { Skeleton } from '@/components/ui/skeleton'
+import { format, isToday } from 'date-fns'
 import { useCenter, useMembers } from '@/features/center-settings/hooks'
 import { AgendaError } from './agenda-error'
 import type { Appointment } from './api'
 import { AppointmentDetailDialog } from './appointment-detail-dialog'
-import { CalendarGrid } from './calendar-grid'
+import { CalendarGrid, CalendarSkeleton } from './calendar-grid'
 import { DATE_FORMAT, dayColumns, professionalColor, visibleHourRange } from './calendar-layout'
 import { useAppointments } from './hooks'
 
@@ -21,14 +20,7 @@ export function DayView({ slug, date, includeCancelled }: { slug: string; date: 
   const members = useMembers(slug)
   const center = useCenter(slug)
 
-  if (appointments.isPending || members.isPending || center.isPending) {
-    return (
-      <div className="space-y-3" aria-busy="true">
-        <Skeleton className="h-5 w-64" />
-        <Skeleton className="h-[30rem] w-full rounded-lg" />
-      </div>
-    )
-  }
+  if (appointments.isPending || members.isPending || center.isPending) return <CalendarSkeleton />
   if (appointments.isError || members.isError || center.isError) {
     return (
       <AgendaError
@@ -48,12 +40,7 @@ export function DayView({ slug, date, includeCancelled }: { slug: string; date: 
       .map((member) => ({ id: member.id, full_name: member.user.full_name })),
     data,
   )
-  const blocksByColumn: Record<string, Appointment[]> = {}
-  for (const appointment of data) {
-    const key = String(appointment.professional.id)
-    blocksByColumn[key] = [...(blocksByColumn[key] ?? []), appointment]
-  }
-  const today = isToday(parseISO(day))
+  const today = isToday(date)
 
   return (
     <div className="space-y-3">
@@ -66,7 +53,8 @@ export function DayView({ slug, date, includeCancelled }: { slug: string; date: 
           isToday: today,
         }))}
         range={visibleHourRange(center.data.opening_time, center.data.closing_time, data)}
-        blocksByColumn={blocksByColumn}
+        appointments={data}
+        columnOf={(appointment) => String(appointment.professional.id)}
         colorFor={(appointment) => professionalColor(appointment.professional.id)}
         showProfessional={false}
         minWidth={`max(44rem, ${professionals.length * COLUMN_MIN_WIDTH_REM + AXIS_WIDTH_REM}rem)`}

@@ -4,12 +4,11 @@ import { useState } from 'react'
 import { format, isToday, parseISO } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { capitalize } from '@/lib/format'
-import { Skeleton } from '@/components/ui/skeleton'
 import { useCenter } from '@/features/center-settings/hooks'
 import { AgendaError } from './agenda-error'
 import type { Appointment } from './api'
 import { AppointmentDetailDialog } from './appointment-detail-dialog'
-import { CalendarGrid } from './calendar-grid'
+import { CalendarGrid, CalendarSkeleton } from './calendar-grid'
 import { DATE_FORMAT, professionalColor, visibleHourRange, weekDays } from './calendar-layout'
 import { useAppointments } from './hooks'
 import { ProfessionalLegend } from './professional-legend'
@@ -35,14 +34,7 @@ export function WeekView({ slug, reference, professional, viewAll, includeCancel
   })
   const center = useCenter(slug)
 
-  if (appointments.isPending || center.isPending) {
-    return (
-      <div className="space-y-3" aria-busy="true">
-        <Skeleton className="h-5 w-64" />
-        <Skeleton className="h-[30rem] w-full rounded-lg" />
-      </div>
-    )
-  }
+  if (appointments.isPending || center.isPending) return <CalendarSkeleton />
   if (appointments.isError || center.isError) {
     return (
       <AgendaError
@@ -56,11 +48,6 @@ export function WeekView({ slug, reference, professional, viewAll, includeCancel
 
   const data = appointments.data
   const byProfessional = viewAll && !professional
-  const blocksByColumn: Record<string, Appointment[]> = {}
-  for (const appointment of data) {
-    const key = format(parseISO(appointment.start), DATE_FORMAT)
-    blocksByColumn[key] = [...(blocksByColumn[key] ?? []), appointment]
-  }
   const professionals = [...new Map(data.map((a) => [a.professional.id, a.professional])).values()].sort((a, b) =>
     a.full_name.localeCompare(b.full_name, 'es'),
   )
@@ -82,7 +69,8 @@ export function WeekView({ slug, reference, professional, viewAll, includeCancel
           muted: !isToday(day),
         }))}
         range={visibleHourRange(center.data.opening_time, center.data.closing_time, data)}
-        blocksByColumn={blocksByColumn}
+        appointments={data}
+        columnOf={(appointment) => format(parseISO(appointment.start), DATE_FORMAT)}
         colorFor={byProfessional ? (appointment) => professionalColor(appointment.professional.id) : () => ACCENT}
         showProfessional={byProfessional}
         onSelect={setSelected}

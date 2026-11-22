@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 import type { Appointment } from './api'
 import { AppointmentBlock } from './appointment-block'
@@ -22,7 +23,8 @@ type Range = { startMinutes: number; endMinutes: number }
 type CalendarGridProps = {
   columns: CalendarColumn[]
   range: Range
-  blocksByColumn: Record<string, Appointment[]>
+  appointments: Appointment[]
+  columnOf: (appointment: Appointment) => string
   colorFor: (appointment: Appointment) => string
   showProfessional: boolean
   minWidth?: string
@@ -37,7 +39,18 @@ function percentOf(minutes: number, range: Range) {
   return ((minutes - range.startMinutes) / (range.endMinutes - range.startMinutes)) * 100
 }
 
-export function CalendarGrid({ columns, range, blocksByColumn, colorFor, showProfessional, minWidth = '44rem', onSelect }: CalendarGridProps) {
+export function CalendarSkeleton() {
+  return (
+    <div className="space-y-3" aria-busy="true">
+      <Skeleton className="h-5 w-64" />
+      <Skeleton className="h-[30rem] w-full rounded-lg" />
+    </div>
+  )
+}
+
+export function CalendarGrid({ columns, range, appointments, columnOf, colorFor, showProfessional, minWidth = '44rem', onSelect }: CalendarGridProps) {
+  const blocksByColumn: Record<string, Appointment[]> = {}
+  for (const appointment of appointments) (blocksByColumn[columnOf(appointment)] ??= []).push(appointment)
   const height = ((range.endMinutes - range.startMinutes) / 60) * HOUR_HEIGHT
   const slots: number[] = []
   for (let minutes = range.startMinutes; minutes < range.endMinutes; minutes += SLOT_MINUTES) slots.push(minutes)

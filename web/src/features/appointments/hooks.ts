@@ -22,15 +22,17 @@ function useManageMutation<TVariables>(
   onConflict?: () => void,
 ) {
   const queryClient = useQueryClient()
+  const invalidate = () =>
+    Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['appointments', slug] }),
+      queryClient.invalidateQueries({ queryKey: ['appointment-availability', slug] }),
+    ])
   return useMutation({
     mutationFn,
     onSuccess: async () => {
       toast.success(successMessage)
       onDone()
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['appointments', slug] }),
-        queryClient.invalidateQueries({ queryKey: ['appointment-availability', slug] }),
-      ])
+      await invalidate()
     },
     onError: (error) => {
       if (error instanceof ApiError && error.status === 409) {
@@ -41,10 +43,7 @@ function useManageMutation<TVariables>(
       if (error instanceof ApiError && error.status === 404) {
         toast.error('La cita ya fue modificada o cancelada')
         onDone()
-        void Promise.all([
-          queryClient.invalidateQueries({ queryKey: ['appointments', slug] }),
-          queryClient.invalidateQueries({ queryKey: ['appointment-availability', slug] }),
-        ])
+        void invalidate()
         return
       }
       if (error instanceof ApiError && error.status === 400) {

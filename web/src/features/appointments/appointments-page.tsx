@@ -56,8 +56,8 @@ export function AppointmentsPage() {
       { replace: true },
     )
 
-  const moveWeek = (amount: number) => updateParams({ fecha: format(addWeeks(reference, amount), DATE_FORMAT) })
-  const moveDay = (amount: number) => updateParams({ fecha: format(addDays(reference, amount), DATE_FORMAT) })
+  const move = (amount: number) =>
+    updateParams({ fecha: format((view === 'dia' ? addDays : addWeeks)(reference, amount), DATE_FORMAT) })
   const week = weekDays(reference)
   const title = viewAll ? 'Agenda del centro' : 'Mi agenda'
 
@@ -99,9 +99,9 @@ export function AppointmentsPage() {
             label={view === 'dia' ? formatLongDate(reference) : weekRangeLabel(week[0], week[6])}
             previousLabel={view === 'dia' ? 'Día anterior' : 'Semana anterior'}
             nextLabel={view === 'dia' ? 'Día siguiente' : 'Semana siguiente'}
-            onPrevious={() => (view === 'dia' ? moveDay(-1) : moveWeek(-1))}
+            onPrevious={() => move(-1)}
             onToday={() => updateParams({ fecha: undefined })}
-            onNext={() => (view === 'dia' ? moveDay(1) : moveWeek(1))}
+            onNext={() => move(1)}
           />
         )}
         <div className="flex flex-wrap items-center gap-4">

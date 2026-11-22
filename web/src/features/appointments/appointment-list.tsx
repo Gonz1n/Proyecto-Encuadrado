@@ -1,11 +1,10 @@
 'use client'
 
 import { format, isToday, isTomorrow, parseISO } from 'date-fns'
-import { es } from 'date-fns/locale'
 import { Mail, Phone, Video } from 'lucide-react'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
-import { capitalize, formatCLP } from '@/lib/format'
+import { formatCLP, formatLongDate } from '@/lib/format'
 import type { Appointment } from './api'
 import { AppointmentDetailDialog } from './appointment-detail-dialog'
 
@@ -49,7 +48,7 @@ export function AppointmentList({ appointments, showProfessional }: AppointmentL
           <section key={day} aria-labelledby={headingId} className="space-y-2">
             <div className="flex items-baseline gap-2">
               <h2 id={headingId} className="text-base font-bold tracking-tight text-primary">
-                {capitalize(format(date, "EEEE d 'de' MMMM", { locale: es }))}
+                {formatLongDate(date)}
               </h2>
               {hint && (
                 <span className="rounded-md bg-primary/10 px-1.5 py-0.5 text-xs font-medium text-primary">
