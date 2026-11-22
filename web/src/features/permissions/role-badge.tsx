@@ -14,9 +14,7 @@ export function RoleBadge({ role }: { role: Role }) {
   const { icon: Icon, className } = ROLE_STYLES[role]
   return (
     <Tooltip>
-      <TooltipTrigger
-        className={cn(badgeVariants(), 'h-6 cursor-default px-2.5 outline-none', className)}
-      >
+      <TooltipTrigger className={cn(badgeVariants(), 'h-6 cursor-default px-2.5 outline-none', className)}>
         <Icon aria-hidden="true" />
         {ROLE_LABELS[role]}
       </TooltipTrigger>

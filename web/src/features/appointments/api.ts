@@ -1,4 +1,5 @@
 import { apiFetch } from '@/lib/api-client'
+import type { PatientFieldName } from '@/features/patient/patient-fields'
 import type { Modality } from '@/lib/modality'
 
 export type AppointmentChange = {
@@ -33,16 +34,11 @@ export type AppointmentFilters = {
   include_cancelled?: boolean
 }
 
-export type CreateAppointmentInput = {
+export type CreateAppointmentInput = Record<PatientFieldName, string> & {
   service: number
   professional: number
   start: string
   modality: Modality
-  patient_name: string
-  patient_email: string
-  patient_phone: string
-  patient_rut: string
-  patient_birth_date: string
 }
 
 export type RescheduleInput = { start: string; note?: string }

@@ -20,11 +20,7 @@ export function ProfessionalFilter({ slug, value, onChange }: ProfessionalFilter
   ]
 
   return (
-    <Select
-      items={items}
-      value={value ? String(value) : ALL}
-      onValueChange={(next) => onChange(next && next !== ALL ? Number(next) : undefined)}
-    >
+    <Select items={items} value={value ? String(value) : ALL} onValueChange={(next) => onChange(next && next !== ALL ? Number(next) : undefined)}>
       <SelectTrigger aria-label="Profesional" className="w-full sm:w-60">
         <SelectValue />
       </SelectTrigger>

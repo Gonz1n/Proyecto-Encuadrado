@@ -17,9 +17,7 @@ export function AppointmentHistory({ changes }: { changes: AppointmentChange[] }
   if (changes.length === 0) return null
   return (
     <section aria-labelledby="appointment-history" className="space-y-2 border-t pt-4">
-      <h3 id="appointment-history" className="text-sm font-medium">
-        Historial
-      </h3>
+      <h3 id="appointment-history" className="text-sm font-medium">Historial</h3>
       <ul className="space-y-2 text-sm">
         {changes.map((change, index) => (
           <li key={index}>

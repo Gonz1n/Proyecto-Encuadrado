@@ -46,11 +46,7 @@ export function CenterSwitcher({ memberships, current }: CenterSwitcherProps) {
             onValueChange={(slug: string) => router.push(`/app/${slug}/${section}`)}
           >
             {memberships.map((membership) => (
-              <DropdownMenuRadioItem
-                key={membership.id}
-                value={membership.center.slug}
-                className="flex-col items-start gap-0 py-1.5"
-              >
+              <DropdownMenuRadioItem key={membership.id} value={membership.center.slug} className="flex-col items-start gap-0 py-1.5">
                 <span>{membership.center.name}</span>
                 <span className="text-xs text-muted-foreground">{membership.role_label}</span>
               </DropdownMenuRadioItem>

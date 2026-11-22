@@ -62,9 +62,7 @@ export function blockPosition(start: string, end: string, range: Range): { top: 
   }
 }
 
-export function assignLanes<T extends { id: number; start: string; end: string }>(
-  items: T[],
-): { item: T; lane: number; lanes: number }[] {
+export function assignLanes<T extends { id: number; start: string; end: string }>(items: T[]): { item: T; lane: number; lanes: number }[] {
   const sorted = [...items].sort((a, b) => a.start.localeCompare(b.start) || a.end.localeCompare(b.end))
   const result: { item: T; lane: number; lanes: number }[] = []
   let group: typeof result = []
@@ -108,10 +106,7 @@ export function resolveView(param: string | null, viewAll: boolean): View {
 
 type DayColumnSource = { id: number; full_name: string }
 
-export function dayColumns(
-  members: DayColumnSource[],
-  appointments: { professional: DayColumnSource }[],
-): { id: number; name: string }[] {
+export function dayColumns(members: DayColumnSource[], appointments: { professional: DayColumnSource }[]): { id: number; name: string }[] {
   const columns = new Map<number, string>()
   for (const member of members) columns.set(member.id, member.full_name)
   for (const { professional } of appointments) {

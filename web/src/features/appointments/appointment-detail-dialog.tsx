@@ -5,14 +5,7 @@ import { differenceInYears, format, parseISO } from 'date-fns'
 import { Mail, Phone } from 'lucide-react'
 import { useParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { formatCLP, formatLongDate } from '@/lib/format'
 import { useCanManageAppointment } from '@/features/permissions/use-can'
 import type { Appointment } from './api'
@@ -46,6 +39,7 @@ function AppointmentDetail({ appointment, onClose }: { appointment: Appointment;
   const start = parseISO(appointment.start)
   const editable = canManage && appointment.status === 'confirmed' && start > now
   const linkClass = 'inline-flex min-w-0 items-center gap-1.5 hover:underline'
+  const ModeDialog = mode === 'reschedule' ? RescheduleDialog : CancelAppointmentDialog
 
   return (
     <>
@@ -93,23 +87,8 @@ function AppointmentDetail({ appointment, onClose }: { appointment: Appointment;
             </Button>
             <Button onClick={() => setMode('reschedule')}>Reagendar</Button>
           </DialogFooter>
-          {mode === 'reschedule' && (
-            <RescheduleDialog
-              slug={slug}
-              appointment={appointment}
-              open
-              onOpenChange={(open) => !open && setMode(null)}
-              onDone={onClose}
-            />
-          )}
-          {mode === 'cancel' && (
-            <CancelAppointmentDialog
-              slug={slug}
-              appointment={appointment}
-              open
-              onOpenChange={(open) => !open && setMode(null)}
-              onDone={onClose}
-            />
+          {mode && (
+            <ModeDialog slug={slug} appointment={appointment} open onOpenChange={(open) => !open && setMode(null)} onDone={onClose} />
           )}
         </>
       )}

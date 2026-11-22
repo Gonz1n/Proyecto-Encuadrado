@@ -1,10 +1,7 @@
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 
-const clpFormatter = new Intl.NumberFormat('es-CL', {
-  style: 'currency',
-  currency: 'CLP',
-})
+const clpFormatter = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' })
 
 export function formatCLP(n: number): string {
   return clpFormatter.format(n)

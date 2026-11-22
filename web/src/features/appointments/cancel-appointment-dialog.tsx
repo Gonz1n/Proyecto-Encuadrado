@@ -25,13 +25,7 @@ type CancelAppointmentDialogProps = {
   onDone: () => void
 }
 
-export function CancelAppointmentDialog({
-  slug,
-  appointment,
-  open,
-  onOpenChange,
-  onDone,
-}: CancelAppointmentDialogProps) {
+export function CancelAppointmentDialog({ slug, appointment, open, onOpenChange, onDone }: CancelAppointmentDialogProps) {
   const [note, setNote] = useState('')
   const cancel = useCancelAppointment(slug, appointment.id, onDone)
   const start = parseISO(appointment.start)

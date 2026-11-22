@@ -2,14 +2,7 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import type { Appointment } from './api'
 import { DayTimePicker } from './day-time-picker'
 import { useAppointmentAvailability, useAppointmentAvailableDays, useRescheduleAppointment } from './hooks'
@@ -45,14 +38,7 @@ export function RescheduleDialog({ slug, appointment, open, onOpenChange, onDone
             {appointment.patient_name} · {appointment.service.name} · {appointment.professional.full_name}
           </DialogDescription>
         </DialogHeader>
-        <DayTimePicker
-          days={days}
-          slots={slots}
-          date={date}
-          time={time}
-          onDateChange={chooseDate}
-          onTimeChange={setTime}
-        />
+        <DayTimePicker days={days} slots={slots} date={date} time={time} onDateChange={chooseDate} onTimeChange={setTime} />
         <NoteField value={note} onChange={setNote} />
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={reschedule.isPending}>

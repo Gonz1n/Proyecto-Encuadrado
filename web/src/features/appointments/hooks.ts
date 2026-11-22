@@ -2,14 +2,10 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { ApiError } from '@/lib/api-client'
 import { queryKeys } from '@/lib/query-keys'
-import { appointmentsApi, type AppointmentFilters,
-  type CreateAppointmentInput, type RescheduleInput } from './api'
+import { appointmentsApi, type AppointmentFilters, type CreateAppointmentInput, type RescheduleInput } from './api'
 
 export function useAppointments(slug: string, filters: AppointmentFilters) {
-  return useQuery({
-    queryKey: queryKeys.appointments(slug, filters),
-    queryFn: () => appointmentsApi.list(slug, filters),
-  })
+  return useQuery({ queryKey: queryKeys.appointments(slug, filters), queryFn: () => appointmentsApi.list(slug, filters) })
 }
 
 export const NOTE_MAX = 300
@@ -82,10 +78,7 @@ export function useCancelAppointment(slug: string, id: number, onDone: () => voi
 }
 
 export function useAppointmentAvailableDays(slug: string, id: number) {
-  return useQuery({
-    queryKey: queryKeys.appointmentDays(slug, id),
-    queryFn: () => appointmentsApi.availabilityDays(slug, id),
-  })
+  return useQuery({ queryKey: queryKeys.appointmentDays(slug, id), queryFn: () => appointmentsApi.availabilityDays(slug, id) })
 }
 
 export function useAppointmentAvailability(slug: string, id: number, date: string | undefined) {

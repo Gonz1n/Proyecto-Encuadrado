@@ -48,10 +48,7 @@ type Member = {
 export const centerApi = {
   get: (slug: string) => apiFetch<Center>(`/api/centers/${slug}/`),
   update: (slug: string, body: CenterUpdate) =>
-    apiFetch<Center & { cancelled_appointments: number }>(`/api/centers/${slug}/`, {
-      method: 'PATCH',
-      body,
-    }),
+    apiFetch<Center & { cancelled_appointments: number }>(`/api/centers/${slug}/`, { method: 'PATCH', body }),
   closures: (slug: string) => apiFetch<Closure[]>(`/api/centers/${slug}/closures/`),
   createClosure: (slug: string, body: { date: string; reason: string }) =>
     apiFetch<ClosureCreated>(`/api/centers/${slug}/closures/`, { method: 'POST', body }),

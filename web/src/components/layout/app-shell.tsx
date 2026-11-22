@@ -52,20 +52,14 @@ export function AppShell({ children }: { children: ReactNode }) {
       <title>{`${membership.center.name} | CentradaMente`}</title>
       <header className="sticky top-0 z-40 border-b border-border bg-gradient-to-r from-accent to-white">
         <div className="mx-auto flex h-14 max-w-6xl items-center gap-2 px-4 sm:gap-3 sm:px-6">
-          <Link
-            href="/"
-            aria-label="CentradaMente, ir al inicio"
-            className={cn('flex shrink-0 items-center rounded-lg', focusRing)}
-          >
+          <Link href="/" aria-label="CentradaMente, ir al inicio" className={cn('flex shrink-0 items-center rounded-lg', focusRing)}>
             <img src="/logo-centradamente.svg" alt="" aria-hidden="true" className="h-8 w-auto" />
           </Link>
           <div className="flex min-w-0 flex-1 items-center">
             {user.memberships.length > 1 ? (
               <CenterSwitcher memberships={user.memberships} current={membership} />
             ) : (
-              <span className="truncate px-2 text-base font-bold text-primary">
-                {membership.center.name}
-              </span>
+              <span className="truncate px-2 text-base font-bold text-primary">{membership.center.name}</span>
             )}
           </div>
           <RoleBadge role={membership.role} />
@@ -75,9 +69,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </Avatar>
             <div className="flex flex-col leading-tight">
               <span className="text-sm font-medium">{user.full_name}</span>
-              {user.title ? (
-                <span className="text-xs text-muted-foreground">{user.title}</span>
-              ) : null}
+              {user.title ? <span className="text-xs text-muted-foreground">{user.title}</span> : null}
             </div>
           </div>
           <Button variant="ghost" size="sm" onClick={logout}>
@@ -112,9 +104,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </ul>
         </nav>
       </header>
-      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
-        {children}
-      </main>
+      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">{children}</main>
     </div>
   )
 }

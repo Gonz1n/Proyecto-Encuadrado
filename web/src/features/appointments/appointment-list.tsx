@@ -55,18 +55,11 @@ export function AppointmentList({ appointments, showProfessional }: AppointmentL
                   {hint}
                 </span>
               )}
-              <span className="text-sm text-muted-foreground">
-                {countLabel(items)}
-              </span>
+              <span className="text-sm text-muted-foreground">{countLabel(items)}</span>
             </div>
             <ul className="divide-y overflow-hidden rounded-xl border bg-card">
               {items.map((appointment) => (
-                <AppointmentRow
-                  key={appointment.id}
-                  appointment={appointment}
-                  showProfessional={showProfessional}
-                  onSelect={setSelected}
-                />
+                <AppointmentRow key={appointment.id} appointment={appointment} showProfessional={showProfessional} onSelect={setSelected} />
               ))}
             </ul>
           </section>
@@ -77,15 +70,9 @@ export function AppointmentList({ appointments, showProfessional }: AppointmentL
   )
 }
 
-function AppointmentRow({
-  appointment,
-  showProfessional,
-  onSelect,
-}: {
-  appointment: Appointment
-  showProfessional: boolean
-  onSelect: (appointment: Appointment) => void
-}) {
+type AppointmentRowProps = { appointment: Appointment; showProfessional: boolean; onSelect: (appointment: Appointment) => void }
+
+function AppointmentRow({ appointment, showProfessional, onSelect }: AppointmentRowProps) {
   const cancelled = appointment.status === 'cancelled'
   const { patient_name: name, patient_phone: phone, patient_email: email } = appointment
   return (

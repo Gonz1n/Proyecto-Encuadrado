@@ -12,14 +12,7 @@ type CalendarNavigationProps = {
   onNext: () => void
 }
 
-export function CalendarNavigation({
-  label,
-  previousLabel,
-  nextLabel,
-  onPrevious,
-  onToday,
-  onNext,
-}: CalendarNavigationProps) {
+export function CalendarNavigation({ label, previousLabel, nextLabel, onPrevious, onToday, onNext }: CalendarNavigationProps) {
   return (
     <div className="flex items-center gap-3">
       <div className="flex items-center gap-1">
@@ -33,9 +26,7 @@ export function CalendarNavigation({
           <ChevronRight aria-hidden="true" />
         </Button>
       </div>
-      <p aria-live="polite" className="font-medium tabular-nums">
-        {label}
-      </p>
+      <p aria-live="polite" className="font-medium tabular-nums">{label}</p>
     </div>
   )
 }
