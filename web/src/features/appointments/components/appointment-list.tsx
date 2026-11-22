@@ -1,8 +1,9 @@
 'use client'
 
 import { format, isToday, isTomorrow, parseISO } from 'date-fns'
-import { Mail, Phone, Video } from 'lucide-react'
+import { ChevronRight, Mail, Phone, Video } from 'lucide-react'
 import { useState } from 'react'
+import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { formatCLP, formatLongDate } from '@/utils/format'
 import type { Appointment } from '../types/appointment'
@@ -76,19 +77,17 @@ function AppointmentRow({ appointment, showProfessional, onSelect }: Appointment
   const cancelled = appointment.status === 'cancelled'
   const { patient_name: name, patient_phone: phone, patient_email: email } = appointment
   return (
-    <li className="relative grid gap-x-6 gap-y-2 px-4 py-3 sm:grid-cols-[8rem_1fr_1fr_auto] sm:items-center">
+    <li
+      className={cn(
+        'relative grid gap-x-6 gap-y-2 px-4 py-3 hover:bg-muted/40 sm:items-center',
+        showProfessional ? 'sm:grid-cols-[8rem_1fr_1fr_auto_auto]' : 'sm:grid-cols-[8rem_1fr_1fr_auto]',
+      )}
+    >
       <p className="text-sm font-medium tabular-nums">
         {format(parseISO(appointment.start), 'HH:mm')} – {format(parseISO(appointment.end), 'HH:mm')}
       </p>
       <div className="min-w-0 space-y-1">
-        <button
-          type="button"
-          onClick={() => onSelect(appointment)}
-          className={cn('block max-w-full truncate text-left font-medium outline-none after:absolute after:inset-0 focus-visible:after:ring-3 focus-visible:after:ring-ring/50', cancelled && 'line-through')}
-        >
-          {name}
-          <span className="sr-only">: ver detalle</span>
-        </button>
+        <p className={cn('truncate font-medium', cancelled && 'line-through')}>{name}</p>
         {cancelled && (
           <span className="inline-block rounded-md bg-muted px-1.5 py-0.5 text-xs font-medium text-muted-foreground">
             Cancelada
@@ -129,6 +128,16 @@ function AppointmentRow({ appointment, showProfessional, onSelect }: Appointment
           {appointment.professional.full_name}
         </p>
       )}
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => onSelect(appointment)}
+        aria-label={`Ver detalles de la cita de ${name}`}
+        className="justify-self-start after:absolute after:inset-0 active:not-aria-[haspopup]:translate-none sm:justify-self-end"
+      >
+        Ver detalles
+        <ChevronRight data-icon="inline-end" aria-hidden="true" />
+      </Button>
     </li>
   )
 }
