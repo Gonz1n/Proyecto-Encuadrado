@@ -2,8 +2,8 @@ from datetime import date, datetime, time, timedelta
 
 import pytest
 
-from app import clock
 from app.centers.models import Membership, Role
+from app.core import clock
 from app.scheduling.models import Appointment
 
 

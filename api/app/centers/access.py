@@ -6,8 +6,8 @@ from fastapi import Depends
 from app.accounts.deps import CurrentUser
 from app.centers import repository
 from app.centers.models import Center, Membership, Role
+from app.core.errors.exceptions import DomainError
 from app.db import SessionDep
-from app.errors import DomainError
 
 NOT_FOUND = "No encontrado."
 FORBIDDEN = "No tienes permiso para realizar esta acción."

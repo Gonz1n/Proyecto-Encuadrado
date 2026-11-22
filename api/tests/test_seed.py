@@ -2,10 +2,11 @@ from datetime import timedelta
 
 from sqlalchemy import func, select, update
 
-from app import clock, seed
+from app import seed
 from app.accounts.repository import get_user_by_email
 from app.accounts.security import verify_password
 from app.centers.models import Center, Membership, Service
+from app.core import clock
 from app.scheduling.models import Appointment
 
 

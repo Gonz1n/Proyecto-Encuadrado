@@ -3,7 +3,7 @@ from datetime import date, datetime, time, timedelta
 import pytest
 from fastapi.exceptions import RequestValidationError
 
-from app import clock
+from app.core import clock
 from app.scheduling import repository
 from app.scheduling.availability import (
     booking_window,

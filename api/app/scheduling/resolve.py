@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 
 from app.centers import repository as centers
 from app.centers.models import Center, Membership, Service
-from app.errors import field_error
+from app.core.errors.exceptions import field_error
 
 BIGINT_MAX = 2**63 - 1
 

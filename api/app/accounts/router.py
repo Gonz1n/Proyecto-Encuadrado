@@ -8,8 +8,8 @@ from app.accounts.deps import CurrentToken, CurrentUser
 from app.accounts.models import User
 from app.accounts.schemas import LoginIn, LoginOut, ProfileUpdate, UserOut
 from app.accounts.security import verify_password
+from app.core.errors.exceptions import DomainError
 from app.db import SessionDep
-from app.errors import DomainError
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 

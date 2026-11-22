@@ -4,8 +4,8 @@ from datetime import datetime, time, timedelta
 import pytest
 from sqlalchemy import select
 
-from app import clock
 from app.centers.models import Role
+from app.core import clock
 from app.scheduling.models import Appointment, AppointmentChange, ChangeKind
 
 FORMAT = "%Y-%m-%dT%H:%M"

@@ -4,9 +4,9 @@ from enum import StrEnum
 from sqlalchemy import BigInteger, Date, DateTime, ForeignKey, Index, String, desc
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app import clock
 from app.accounts.models import User
 from app.centers.models import Center, Membership, Service
+from app.core import clock
 from app.db import Base
 
 

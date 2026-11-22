@@ -3,13 +3,13 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query
 
-from app import clock
 from app.centers import repository as centers
 from app.centers.access import NOT_FOUND
 from app.centers.models import Center
 from app.centers.schemas import CenterListItemOut, CenterOut
+from app.core import clock
+from app.core.errors.exceptions import DomainError
 from app.db import SessionDep
-from app.errors import DomainError
 from app.scheduling import availability, services
 from app.scheduling.models import Appointment
 from app.scheduling.resolve import resolve_professional, resolve_service

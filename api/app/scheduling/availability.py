@@ -3,10 +3,10 @@ from datetime import date, datetime, time, timedelta
 
 from sqlalchemy.orm import Session
 
-from app import clock
 from app.centers import repository as centers_repository
 from app.centers.models import Center, Membership, Service
-from app.errors import field_error
+from app.core import clock
+from app.core.errors.exceptions import field_error
 from app.scheduling import repository
 
 SLOT_STEP_MINUTES = 30

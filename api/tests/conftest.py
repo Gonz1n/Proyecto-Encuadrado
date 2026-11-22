@@ -6,9 +6,9 @@ from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session
 
 from app.accounts import repository
+from app.core.config import settings
 from app.db import Base, get_session
 from app.main import app
-from app.settings import settings
 
 pytest_plugins = ["tests.factories"]
 

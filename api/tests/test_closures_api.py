@@ -3,8 +3,8 @@ from datetime import datetime, timedelta
 import pytest
 from sqlalchemy import select
 
-from app import clock
 from app.centers.models import CenterClosure, Role
+from app.core import clock
 from app.scheduling.models import AppointmentChange, AppointmentStatus
 
 

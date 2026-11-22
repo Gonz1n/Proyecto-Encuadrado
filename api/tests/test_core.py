@@ -5,8 +5,8 @@ import pytest
 from fastapi import APIRouter
 from pydantic import BaseModel, ValidationError
 
-from app import clock
-from app.errors import DomainError
+from app.core import clock
+from app.core.errors.exceptions import DomainError
 from app.formats import HourMinute, Minute
 from app.main import app
 

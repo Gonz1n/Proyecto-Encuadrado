@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 import pytest
 from sqlalchemy.exc import IntegrityError
 
-from app import clock
+from app.core import clock
 from app.scheduling.models import AppointmentChange, ChangeKind
 
 

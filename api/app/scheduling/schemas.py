@@ -3,9 +3,9 @@ from typing import Annotated, Any, Literal
 
 from pydantic import AfterValidator, BaseModel, ConfigDict, EmailStr, Field, ValidationError, field_validator
 
-from app import clock
 from app.centers.phone import valid_phone
 from app.centers.schemas import CenterOut, ServiceOut
+from app.core import clock
 from app.formats import Minute
 from app.scheduling.rut import normalize_rut
 

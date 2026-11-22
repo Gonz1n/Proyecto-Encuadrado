@@ -3,12 +3,12 @@ from datetime import datetime, timedelta
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app import clock
 from app.accounts.models import User
 from app.centers import repository as centers_repository
 from app.centers.access import NOT_FOUND
 from app.centers.models import Center, Membership, Service
-from app.errors import DomainError
+from app.core import clock
+from app.core.errors.exceptions import DomainError
 from app.scheduling.availability import slots_for_day
 from app.scheduling.models import Appointment, AppointmentChange, AppointmentStatus, ChangeKind
 from app.scheduling.schemas import PatientIn
