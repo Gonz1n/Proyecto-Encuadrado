@@ -41,10 +41,7 @@ export function ClosuresCard({ slug, canEdit }: { slug: string; canEdit: boolean
     if (!reason.trim()) return setError('Ingresa el motivo')
     setError(undefined)
     try {
-      const created = await create.mutateAsync({
-        date: format(date, DATE_FORMAT),
-        reason: reason.trim(),
-      })
+      const created = await create.mutateAsync({ date: format(date, DATE_FORMAT), reason: reason.trim() })
       toast.success(cancelledMessage('Día marcado como cerrado.', created.cancelled_appointments))
       setDate(undefined)
       setReason('')

@@ -2,25 +2,18 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { format, subYears } from 'date-fns'
-import { Loader2 } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
+import { PendingLabel } from '@/components/form-field'
 import type { Membership } from '@/features/auth/api'
-import { buildPatientShape, PATIENT_FIELD_NAMES } from '@/features/patient/patient-fields'
+import { buildPatientShape, EMPTY_PATIENT, PATIENT_FIELD_NAMES } from '@/features/patient/patient-fields'
 import { PatientInputs } from '@/features/patient/patient-inputs'
 import { useAvailability, useAvailableDays, usePublicCenter } from '@/features/public-booking/hooks'
 import { ApiError } from '@/lib/api-client'
@@ -66,14 +59,6 @@ function FieldSelect({ label, placeholder, items, value, disabled, onValueChange
   )
 }
 
-const emptyPatient = {
-  patient_name: '',
-  patient_email: '',
-  patient_phone: '',
-  patient_rut: '',
-  patient_birth_date: '',
-}
-
 export function CreateAppointmentDialog({ slug, membership, open, onOpenChange }: CreateAppointmentDialogProps) {
   const center = usePublicCenter(slug)
   const [serviceId, setServiceId] = useState<number>()
@@ -86,12 +71,10 @@ export function CreateAppointmentDialog({ slug, membership, open, onOpenChange }
   const today = format(new Date(), 'yyyy-MM-dd')
   const oldest = format(subYears(new Date(), 120), 'yyyy-MM-dd')
   const schema = useMemo(() => z.object(buildPatientShape(today, oldest)), [today, oldest])
-  const {
-    register,
-    handleSubmit,
-    setError,
-    formState: { errors },
-  } = useForm<typeof emptyPatient>({ resolver: zodResolver(schema), defaultValues: emptyPatient })
+  const { register, handleSubmit, setError, formState: { errors } } = useForm<typeof EMPTY_PATIENT>({
+    resolver: zodResolver(schema),
+    defaultValues: EMPTY_PATIENT,
+  })
 
   const professionals = selectableProfessionals(membership, center.data?.professionals ?? [])
   const professionalId = chosenProfessionalId ?? (professionals.length === 1 ? professionals[0].id : undefined)
@@ -136,14 +119,8 @@ export function CreateAppointmentDialog({ slug, membership, open, onOpenChange }
   })
 
   const serviceItems = services.map((service) => ({ value: String(service.id), label: service.name }))
-  const professionalItems = professionals.map((professional) => ({
-    value: String(professional.id),
-    label: professional.full_name,
-  }))
-  const modalityItems = (Object.keys(MODALITY_LABELS) as Modality[]).map((value) => ({
-    value,
-    label: MODALITY_LABELS[value],
-  }))
+  const professionalItems = professionals.map((professional) => ({ value: String(professional.id), label: professional.full_name }))
+  const modalityItems = (Object.keys(MODALITY_LABELS) as Modality[]).map((value) => ({ value, label: MODALITY_LABELS[value] }))
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -217,14 +194,7 @@ export function CreateAppointmentDialog({ slug, membership, open, onOpenChange }
                 Volver
               </Button>
               <Button type="submit" disabled={!ready || !date || !time || create.isPending}>
-                {create.isPending ? (
-                  <>
-                    <Loader2 className="motion-safe:animate-spin" aria-hidden="true" />
-                    Agendando...
-                  </>
-                ) : (
-                  'Agendar hora'
-                )}
+                {create.isPending ? <PendingLabel>Agendando...</PendingLabel> : 'Agendar hora'}
               </Button>
             </DialogFooter>
           </form>

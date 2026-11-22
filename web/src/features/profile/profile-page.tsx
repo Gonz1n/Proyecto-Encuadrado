@@ -2,16 +2,14 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { Loader2 } from 'lucide-react'
 import { useForm, useWatch } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { CharCount, FieldError } from '@/components/form-field'
+import { CharCount, Field, PendingLabel } from '@/components/form-field'
 import { authApi, type CurrentUser, type ProfileUpdate } from '@/features/auth/api'
 import { useAuth } from '@/features/auth/auth-context'
 import { handleMutationError } from '@/features/center-settings/hooks'
@@ -33,16 +31,9 @@ const profileSchema = z.object({
 
 type ProfileValues = z.infer<typeof profileSchema>
 
-const FIELDS = [
-  'first_name',
-  'last_name',
-  'title',
-  'university',
-  'bio',
-  'health_registry',
-] as const
+const FIELDS = Object.keys(profileSchema.shape) as (keyof ProfileValues)[]
 
-const TEXT_FIELDS: { name: (typeof FIELDS)[number]; label: string; placeholder?: string; inputMode?: 'numeric' }[] = [
+const TEXT_FIELDS: { name: keyof ProfileValues; label: string; placeholder?: string; inputMode?: 'numeric' }[] = [
   { name: 'first_name', label: 'Nombre' },
   { name: 'last_name', label: 'Apellido' },
   { name: 'title', label: 'Profesión', placeholder: 'Psicóloga clínica' },
@@ -82,10 +73,7 @@ function ProfileForm({ user }: { user: CurrentUser }) {
     control,
     formState: { errors, isDirty, isSubmitting },
   } = useForm<ProfileValues>({ resolver: zodResolver(profileSchema), defaultValues: toValues(user) })
-  const [bio, firstName, lastName] = useWatch({
-    control,
-    name: ['bio', 'first_name', 'last_name'],
-  })
+  const [bio, firstName, lastName] = useWatch({ control, name: ['bio', 'first_name', 'last_name'] })
 
   const onSubmit = handleSubmit(async (values) => {
     try {
@@ -117,47 +105,34 @@ function ProfileForm({ user }: { user: CurrentUser }) {
         </div>
         <div className="grid gap-5 sm:grid-cols-2">
           {TEXT_FIELDS.map(({ name, label, placeholder, inputMode }) => (
-            <div
+            <Field
               key={name}
+              id={`profile-${name}`}
+              label={label}
+              error={errors[name]?.message}
               className={name === 'health_registry' ? 'space-y-2 sm:col-span-2' : 'space-y-2'}
             >
-              <Label htmlFor={`profile-${name}`}>{label}</Label>
-              <Input
-                id={`profile-${name}`}
-                placeholder={placeholder}
-                inputMode={inputMode}
-                aria-invalid={errors[name] ? true : undefined}
-                aria-describedby={errors[name] ? `profile-${name}-error` : undefined}
-                {...register(name)}
-              />
-              <FieldError id={`profile-${name}-error`} message={errors[name]?.message} />
-            </div>
+              {(props) => <Input {...props} placeholder={placeholder} inputMode={inputMode} {...register(name)} />}
+            </Field>
           ))}
         </div>
-        <div className="space-y-2">
-          <div className="flex items-baseline justify-between gap-2">
-            <Label htmlFor="profile-bio">Descripción</Label>
-            <CharCount count={bio.length} max={BIO_MAX} />
-          </div>
-          <Textarea
-            id="profile-bio"
-            rows={5}
-            placeholder="Cuéntale a tus pacientes cómo trabajas y en qué te especializas."
-            aria-invalid={errors.bio ? true : undefined}
-            aria-describedby={errors.bio ? 'profile-bio-error' : undefined}
-            {...register('bio')}
-          />
-          <FieldError id="profile-bio-error" message={errors.bio?.message} />
-        </div>
-        <Button type="submit" size="lg" disabled={!isDirty || isSubmitting}>
-          {isSubmitting ? (
-            <>
-              <Loader2 className="motion-safe:animate-spin" aria-hidden="true" />
-              Guardando…
-            </>
-          ) : (
-            'Guardar perfil'
+        <Field
+          id="profile-bio"
+          label="Descripción"
+          hint={<CharCount count={bio.length} max={BIO_MAX} />}
+          error={errors.bio?.message}
+        >
+          {(props) => (
+            <Textarea
+              {...props}
+              rows={5}
+              placeholder="Cuéntale a tus pacientes cómo trabajas y en qué te especializas."
+              {...register('bio')}
+            />
           )}
+        </Field>
+        <Button type="submit" size="lg" disabled={!isDirty || isSubmitting}>
+          {isSubmitting ? <PendingLabel>Guardando…</PendingLabel> : 'Guardar perfil'}
         </Button>
       </form>
     </div>

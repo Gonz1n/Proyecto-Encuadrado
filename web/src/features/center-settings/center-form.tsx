@@ -1,7 +1,8 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Loader2, Lock } from 'lucide-react'
+import { Lock } from 'lucide-react'
+import type { ReactNode } from 'react'
 import { Controller, useForm, useWatch } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
@@ -9,7 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { CharCount, FieldError } from '@/components/form-field'
+import { CharCount, Field, FieldError, PendingLabel } from '@/components/form-field'
 import { WEEKDAY_SHORT } from '@/lib/format'
 import { CONTACT_EMAIL_ERROR, CONTACT_PHONE_ERROR, CONTACT_PHONE_PATTERN } from '@/lib/phone'
 import { SOCIAL_NETWORKS, phoneError, socialLinkError } from '@/lib/social-links'
@@ -20,21 +21,21 @@ import { handleMutationError, useUpdateCenter } from './hooks'
 const DESCRIPTION_MAX = 400
 const TERMS_MAX = 5000
 
-const socialLink = (domain?: string, label?: string) =>
+const refined = (check: (value: string) => string | null) =>
   z
     .string()
     .trim()
     .superRefine((value, ctx) => {
-      const message = socialLinkError(value, domain, label)
+      const message = check(value)
       if (message) ctx.addIssue({ code: 'custom', message })
     })
+
+const socialLink = (domain?: string, label?: string) => refined((value) => socialLinkError(value, domain, label))
 
 const centerSchema = z
   .object({
     name: z.string().trim().min(1, 'Ingresa el nombre del centro'),
-    description: z
-      .string()
-      .max(DESCRIPTION_MAX, `La descripción admite hasta ${DESCRIPTION_MAX} caracteres`),
+    description: z.string().max(DESCRIPTION_MAX, `La descripción admite hasta ${DESCRIPTION_MAX} caracteres`),
     terms: z.string().max(TERMS_MAX, `Los términos admiten hasta ${TERMS_MAX} caracteres`),
     opening_time: z.string().min(1, 'Ingresa el horario de inicio'),
     closing_time: z.string().min(1, 'Ingresa el horario de término'),
@@ -45,22 +46,14 @@ const centerSchema = z
     instagram_url: socialLink('instagram.com', 'Instagram'),
     facebook_url: socialLink('facebook.com', 'Facebook'),
     linkedin_url: socialLink('linkedin.com', 'LinkedIn'),
-    whatsapp_number: z
-      .string()
-      .trim()
-      .superRefine((value, ctx) => {
-        const message = phoneError(value)
-        if (message) ctx.addIssue({ code: 'custom', message })
-      }),
+    whatsapp_number: refined(phoneError),
     address: z.string().trim().max(200, 'La dirección admite hasta 200 caracteres'),
     commune: z.string().trim().max(80, 'La comuna admite hasta 80 caracteres'),
     phone: z
       .string()
       .trim()
       .refine(
-        (value) =>
-          !value ||
-          (CONTACT_PHONE_PATTERN.test(value) && value.replace(/\D/g, '').length >= 8),
+        (value) => !value || (CONTACT_PHONE_PATTERN.test(value) && value.replace(/\D/g, '').length >= 8),
         CONTACT_PHONE_ERROR,
       ),
     email: z
@@ -83,25 +76,7 @@ const centerSchema = z
 
 type CenterValues = z.infer<typeof centerSchema>
 
-const FIELDS = [
-  'name',
-  'description',
-  'terms',
-  'opening_time',
-  'closing_time',
-  'open_days',
-  'lunch_start',
-  'lunch_end',
-  'website_url',
-  'instagram_url',
-  'facebook_url',
-  'linkedin_url',
-  'whatsapp_number',
-  'address',
-  'commune',
-  'phone',
-  'email',
-] as const
+const FIELDS = Object.keys(centerSchema.shape) as (keyof CenterValues)[]
 
 const CONTACT_FIELDS = [
   { field: 'address', label: 'Dirección', placeholder: 'Av. Providencia 1234, oficina 5', type: 'text', autoComplete: 'street-address' },
@@ -110,37 +85,32 @@ const CONTACT_FIELDS = [
   { field: 'email', label: 'Correo', placeholder: 'contacto@tucentro.cl', type: 'email', autoComplete: 'email' },
 ] as const
 
+const time = (value: string | null) => value?.slice(0, 5) ?? ''
+
 function toValues(center: Center): CenterValues {
   return {
-    name: center.name,
-    description: center.description,
-    terms: center.terms,
-    opening_time: center.opening_time.slice(0, 5),
-    closing_time: center.closing_time.slice(0, 5),
-    open_days: center.open_days,
-    lunch_start: center.lunch_start?.slice(0, 5) ?? '',
-    lunch_end: center.lunch_end?.slice(0, 5) ?? '',
-    website_url: center.website_url,
-    instagram_url: center.instagram_url,
-    facebook_url: center.facebook_url,
-    linkedin_url: center.linkedin_url,
-    whatsapp_number: center.whatsapp_number,
-    address: center.address,
-    commune: center.commune,
-    phone: center.phone,
-    email: center.email,
+    ...(Object.fromEntries(FIELDS.map((field) => [field, center[field]])) as CenterValues),
+    opening_time: time(center.opening_time),
+    closing_time: time(center.closing_time),
+    lunch_start: time(center.lunch_start),
+    lunch_end: time(center.lunch_end),
   }
 }
 
-export function CenterForm({
-  slug,
-  center,
-  canEdit,
-}: {
-  slug: string
-  center: Center
-  canEdit: boolean
-}) {
+function Section({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <fieldset className="space-y-4 border-t pt-5">
+      <legend className="sr-only">{title}</legend>
+      <div aria-hidden="true">
+        <h3 className="text-sm font-bold text-primary">{title}</h3>
+        <p className="text-sm text-muted-foreground">Opcionales. Se muestran en el perfil público del centro.</p>
+      </div>
+      <div className="grid gap-5 sm:grid-cols-2">{children}</div>
+    </fieldset>
+  )
+}
+
+export function CenterForm({ slug, center, canEdit }: { slug: string; center: Center; canEdit: boolean }) {
   const update = useUpdateCenter(slug)
   const {
     register,
@@ -149,12 +119,12 @@ export function CenterForm({
     reset,
     control,
     formState: { errors, dirtyFields, isDirty, isSubmitting },
-  } = useForm<CenterValues>({
-    resolver: zodResolver(centerSchema),
-    defaultValues: toValues(center),
-  })
-  const descriptionLength = useWatch({ control, name: 'description' }).length
-  const termsLength = useWatch({ control, name: 'terms' }).length
+  } = useForm<CenterValues>({ resolver: zodResolver(centerSchema), defaultValues: toValues(center) })
+  const [description, terms] = useWatch({ control, name: ['description', 'terms'] })
+  const lunchAria = {
+    'aria-invalid': errors.lunch_end ? true : undefined,
+    'aria-describedby': errors.lunch_end ? 'center-lunch-error' : undefined,
+  } as const
 
   const onSubmit = handleSubmit(async (values) => {
     const body = Object.fromEntries(
@@ -169,9 +139,7 @@ export function CenterForm({
       const saved = await update.mutateAsync(body)
       reset(toValues(saved))
       toast.success(
-        lunchChanged
-          ? cancelledMessage('Colación guardada.', saved.cancelled_appointments)
-          : 'Cambios guardados',
+        lunchChanged ? cancelledMessage('Colación guardada.', saved.cancelled_appointments) : 'Cambios guardados',
       )
     } catch (error) {
       handleMutationError(error, setError, FIELDS)
@@ -187,75 +155,33 @@ export function CenterForm({
         </p>
       )}
       <fieldset disabled={!canEdit} className="space-y-5">
-        <div className="space-y-2">
-          <Label htmlFor="center-name">Nombre</Label>
-          <Input
-            id="center-name"
-            autoComplete="off"
-            aria-invalid={errors.name ? true : undefined}
-            aria-describedby={errors.name ? 'center-name-error' : undefined}
-            {...register('name')}
-          />
-          <FieldError id="center-name-error" message={errors.name?.message} />
-        </div>
-        <div className="space-y-2">
-          <div className="flex items-baseline justify-between gap-2">
-            <Label htmlFor="center-description">Descripción</Label>
-            <CharCount count={descriptionLength} max={DESCRIPTION_MAX} />
-          </div>
-          <Textarea
-            id="center-description"
-            rows={4}
-            aria-invalid={errors.description ? true : undefined}
-            aria-describedby={errors.description ? 'center-description-error' : undefined}
-            {...register('description')}
-          />
-          <FieldError id="center-description-error" message={errors.description?.message} />
-        </div>
+        <Field id="center-name" label="Nombre" error={errors.name?.message}>
+          {(props) => <Input {...props} autoComplete="off" {...register('name')} />}
+        </Field>
+        <Field
+          id="center-description"
+          label="Descripción"
+          hint={<CharCount count={description.length} max={DESCRIPTION_MAX} />}
+          error={errors.description?.message}
+        >
+          {(props) => <Textarea {...props} rows={4} {...register('description')} />}
+        </Field>
         <div className="grid gap-5 sm:grid-cols-2">
-          <div className="space-y-2">
-            <Label htmlFor="center-opening">Horario de inicio</Label>
-            <Input
-              id="center-opening"
-              type="time"
-              aria-invalid={errors.opening_time ? true : undefined}
-              aria-describedby={errors.opening_time ? 'center-opening-error' : undefined}
-              {...register('opening_time')}
-            />
-            <FieldError id="center-opening-error" message={errors.opening_time?.message} />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="center-closing">Horario de término</Label>
-            <Input
-              id="center-closing"
-              type="time"
-              aria-invalid={errors.closing_time ? true : undefined}
-              aria-describedby={errors.closing_time ? 'center-closing-error' : undefined}
-              {...register('closing_time')}
-            />
-            <FieldError id="center-closing-error" message={errors.closing_time?.message} />
-          </div>
+          <Field id="center-opening" label="Horario de inicio" error={errors.opening_time?.message}>
+            {(props) => <Input {...props} type="time" {...register('opening_time')} />}
+          </Field>
+          <Field id="center-closing" label="Horario de término" error={errors.closing_time?.message}>
+            {(props) => <Input {...props} type="time" {...register('closing_time')} />}
+          </Field>
         </div>
         <div className="grid gap-5 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="center-lunch-start">Inicio de colación</Label>
-            <Input
-              id="center-lunch-start"
-              type="time"
-              aria-invalid={errors.lunch_end ? true : undefined}
-              aria-describedby={errors.lunch_end ? 'center-lunch-error' : undefined}
-              {...register('lunch_start')}
-            />
+            <Input id="center-lunch-start" type="time" {...lunchAria} {...register('lunch_start')} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="center-lunch-end">Término de colación</Label>
-            <Input
-              id="center-lunch-end"
-              type="time"
-              aria-invalid={errors.lunch_end ? true : undefined}
-              aria-describedby={errors.lunch_end ? 'center-lunch-error' : undefined}
-              {...register('lunch_end')}
-            />
+            <Input id="center-lunch-end" type="time" {...lunchAria} {...register('lunch_end')} />
           </div>
           <div className="sm:col-span-2 -mt-3 space-y-1">
             <p className="text-sm text-muted-foreground">
@@ -305,88 +231,55 @@ export function CenterForm({
             </div>
           )}
         />
-        <div className="space-y-2">
-          <div className="flex items-baseline justify-between gap-2">
-            <Label htmlFor="center-terms">Términos y condiciones</Label>
-            <CharCount count={termsLength} max={TERMS_MAX} />
-          </div>
-          <Textarea
-            id="center-terms"
-            rows={8}
-            aria-invalid={errors.terms ? true : undefined}
-            aria-describedby={errors.terms ? 'center-terms-error' : undefined}
-            {...register('terms')}
-          />
-          <FieldError id="center-terms-error" message={errors.terms?.message} />
-        </div>
-        <fieldset className="space-y-4 border-t pt-5">
-          <legend className="sr-only">Redes sociales</legend>
-          <div aria-hidden="true">
-            <h3 className="text-sm font-bold text-primary">Redes sociales</h3>
-            <p className="text-sm text-muted-foreground">
-              Opcionales. Se muestran en el perfil público del centro.
-            </p>
-          </div>
-          <div className="grid gap-5 sm:grid-cols-2">
-            {SOCIAL_NETWORKS.map(({ field, label, placeholder, phone, icon: Icon }) => (
-              <div key={field} className="space-y-2">
-                <Label htmlFor={`center-${field}`} className="flex items-center gap-2">
-                  <Icon className="size-4 text-muted-foreground" />
-                  {label}
-                </Label>
+        <Field
+          id="center-terms"
+          label="Términos y condiciones"
+          hint={<CharCount count={terms.length} max={TERMS_MAX} />}
+          error={errors.terms?.message}
+        >
+          {(props) => <Textarea {...props} rows={8} {...register('terms')} />}
+        </Field>
+        <Section title="Redes sociales">
+          {SOCIAL_NETWORKS.map(({ field, label, placeholder, phone, icon: Icon }) => (
+            <Field
+              key={field}
+              id={`center-${field}`}
+              label={<><Icon className="size-4 text-muted-foreground" />{label}</>}
+              error={errors[field]?.message}
+            >
+              {(props) => (
                 <Input
-                  id={`center-${field}`}
+                  {...props}
                   type={phone ? 'tel' : 'url'}
                   inputMode={phone ? 'tel' : 'url'}
                   autoComplete={phone ? 'tel' : 'url'}
                   placeholder={placeholder}
-                  aria-invalid={errors[field] ? true : undefined}
-                  aria-describedby={errors[field] ? `center-${field}-error` : undefined}
                   {...register(field)}
                 />
-                <FieldError id={`center-${field}-error`} message={errors[field]?.message} />
-              </div>
-            ))}
-          </div>
-        </fieldset>
-        <fieldset className="space-y-4 border-t pt-5">
-          <legend className="sr-only">Contacto y ubicación</legend>
-          <div aria-hidden="true">
-            <h3 className="text-sm font-bold text-primary">Contacto y ubicación</h3>
-            <p className="text-sm text-muted-foreground">
-              Opcionales. Se muestran en el perfil público del centro.
-            </p>
-          </div>
-          <div className="grid gap-5 sm:grid-cols-2">
-            {CONTACT_FIELDS.map(({ field, label, placeholder, type, autoComplete }) => (
-              <div key={field} className="space-y-2">
-                <Label htmlFor={`center-${field}`}>{label}</Label>
+              )}
+            </Field>
+          ))}
+        </Section>
+        <Section title="Contacto y ubicación">
+          {CONTACT_FIELDS.map(({ field, label, placeholder, type, autoComplete }) => (
+            <Field key={field} id={`center-${field}`} label={label} error={errors[field]?.message}>
+              {(props) => (
                 <Input
-                  id={`center-${field}`}
+                  {...props}
                   type={type}
                   inputMode={type === 'text' ? undefined : type}
                   autoComplete={autoComplete}
                   placeholder={placeholder}
-                  aria-invalid={errors[field] ? true : undefined}
-                  aria-describedby={errors[field] ? `center-${field}-error` : undefined}
                   {...register(field)}
                 />
-                <FieldError id={`center-${field}-error`} message={errors[field]?.message} />
-              </div>
-            ))}
-          </div>
-        </fieldset>
+              )}
+            </Field>
+          ))}
+        </Section>
       </fieldset>
       {canEdit ? (
         <Button type="submit" size="lg" disabled={!isDirty || isSubmitting}>
-          {isSubmitting ? (
-            <>
-              <Loader2 className="motion-safe:animate-spin" aria-hidden="true" />
-              Guardando…
-            </>
-          ) : (
-            'Guardar cambios'
-          )}
+          {isSubmitting ? <PendingLabel>Guardando…</PendingLabel> : 'Guardar cambios'}
         </Button>
       ) : null}
     </form>

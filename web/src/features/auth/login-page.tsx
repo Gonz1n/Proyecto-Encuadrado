@@ -1,15 +1,14 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { CircleAlert, Eye, EyeOff, Loader2 } from 'lucide-react'
+import { CircleAlert, Eye, EyeOff } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { FieldError } from '@/components/form-field'
+import { Field, PendingLabel } from '@/components/form-field'
 import { ApiError } from '@/lib/api-client'
 import { useAuth } from './auth-context'
 import { safeNextPath } from '@/lib/safe-next-path'
@@ -22,6 +21,9 @@ const loginSchema = z.object({
 })
 
 type LoginValues = z.infer<typeof loginSchema>
+
+const LABEL = 'text-base font-semibold text-(--cp-granate)'
+const INPUT = 'h-11 rounded-xl border-(--cp-granate) px-3 placeholder:text-neutral-600'
 
 function loginErrorMessage(error: unknown): string {
   if (error instanceof ApiError && error.status === 400) {
@@ -79,38 +81,29 @@ export function LoginPage() {
         <h1 className="border-b-2 border-(--cp-granate) pb-3 text-center text-2xl font-bold tracking-tight">
           Ingresa a tu cuenta
         </h1>
-        <div className="mt-8">
-          <form onSubmit={onSubmit} noValidate className="space-y-5">
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-base font-semibold text-(--cp-granate)">
-                Correo electrónico
-              </Label>
+        <form onSubmit={onSubmit} noValidate className="mt-8 space-y-5">
+          <Field id="email" label="Correo electrónico" labelClassName={LABEL} error={errors.email?.message}>
+            {(props) => (
               <Input
-                id="email"
+                {...props}
                 type="email"
                 autoComplete="email"
                 inputMode="email"
                 spellCheck={false}
-                className="h-11 rounded-xl border-(--cp-granate) px-3 placeholder:text-neutral-600"
+                className={INPUT}
                 placeholder="nombre@centro.cl"
-                aria-invalid={errors.email ? true : undefined}
-                aria-describedby={errors.email ? 'email-error' : undefined}
                 {...register('email')}
               />
-              <FieldError id="email-error" message={errors.email?.message} />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-base font-semibold text-(--cp-granate)">
-                Contraseña
-              </Label>
+            )}
+          </Field>
+          <Field id="password" label="Contraseña" labelClassName={LABEL} error={errors.password?.message}>
+            {(props) => (
               <div className="relative">
                 <Input
-                  id="password"
+                  {...props}
                   type={showPassword ? 'text' : 'password'}
                   autoComplete="current-password"
-                  className="h-11 rounded-xl border-(--cp-granate) px-3 placeholder:text-neutral-600 pr-12"
-                  aria-invalid={errors.password ? true : undefined}
-                  aria-describedby={errors.password ? 'password-error' : undefined}
+                  className={`${INPUT} pr-12`}
                   {...register('password')}
                 />
                 <button
@@ -121,36 +114,24 @@ export function LoginPage() {
                   onClick={() => setShowPassword((visible) => !visible)}
                   className="absolute inset-y-0 right-0 my-auto flex size-11 items-center justify-center rounded-lg border border-transparent text-neutral-600 outline-none hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:scale-[0.97] motion-reduce:transform-none motion-reduce:active:scale-100"
                 >
-                  {showPassword ? (
-                    <EyeOff className="size-4" aria-hidden="true" />
-                  ) : (
-                    <Eye className="size-4" aria-hidden="true" />
-                  )}
+                  {showPassword ? <EyeOff className="size-4" aria-hidden="true" /> : <Eye className="size-4" aria-hidden="true" />}
                 </button>
               </div>
-              <FieldError id="password-error" message={errors.password?.message} />
-            </div>
-            {errors.root ? (
-              <p
-                role="alert"
-                className="flex items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2.5 text-sm text-destructive"
-              >
-                <CircleAlert className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-                {errors.root.message}
-              </p>
-            ) : null}
-            <Button type="submit" size="lg" className="h-11 w-full rounded-xl text-base active:scale-[0.97] motion-reduce:active:scale-100" disabled={isSubmitting}>
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="motion-safe:animate-spin" aria-hidden="true" />
-                  Ingresando…
-                </>
-              ) : (
-                'Ingresar'
-              )}
-            </Button>
-          </form>
-        </div>
+            )}
+          </Field>
+          {errors.root ? (
+            <p
+              role="alert"
+              className="flex items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2.5 text-sm text-destructive"
+            >
+              <CircleAlert className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+              {errors.root.message}
+            </p>
+          ) : null}
+          <Button type="submit" size="lg" className="h-11 w-full rounded-xl text-base active:scale-[0.97] motion-reduce:active:scale-100" disabled={isSubmitting}>
+            {isSubmitting ? <PendingLabel>Ingresando…</PendingLabel> : 'Ingresar'}
+          </Button>
+        </form>
       </main>
     </div>
   )

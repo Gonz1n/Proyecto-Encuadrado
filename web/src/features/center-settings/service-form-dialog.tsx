@@ -1,23 +1,14 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Loader2 } from 'lucide-react'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { FieldError } from '@/components/form-field'
+import { Field, PendingLabel } from '@/components/form-field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { formatDuration } from '@/lib/format'
 import type { Service } from './api'
@@ -40,15 +31,7 @@ const serviceSchema = z.object({
 
 type ServiceValues = z.infer<typeof serviceSchema>
 
-function ServiceForm({
-  slug,
-  service,
-  onDone,
-}: {
-  slug: string
-  service?: Service
-  onDone: () => void
-}) {
+function ServiceForm({ slug, service, onDone }: { slug: string; service?: Service; onDone: () => void }) {
   const create = useCreateService(slug)
   const update = useUpdateService(slug)
   const {
@@ -68,12 +51,7 @@ function ServiceForm({
   })
 
   const onSubmit = handleSubmit(async (values) => {
-    const body = {
-      name: values.name,
-      price_clp: Number(values.price_clp),
-      duration_minutes: Number(values.duration_minutes),
-      description: values.description,
-    }
+    const body = { ...values, price_clp: Number(values.price_clp), duration_minutes: Number(values.duration_minutes) }
     try {
       if (service) {
         await update.mutateAsync({ id: service.id, body })
@@ -90,85 +68,45 @@ function ServiceForm({
 
   return (
     <form onSubmit={onSubmit} noValidate className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="service-name">Nombre</Label>
-        <Input
-          id="service-name"
-          autoComplete="off"
-          aria-invalid={errors.name ? true : undefined}
-          aria-describedby={errors.name ? 'service-name-error' : undefined}
-          {...register('name')}
-        />
-        <FieldError id="service-name-error" message={errors.name?.message} />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="service-price">Precio (CLP)</Label>
-        <Input
-          id="service-price"
-          inputMode="numeric"
-          autoComplete="off"
-          placeholder="25000"
-          aria-invalid={errors.price_clp ? true : undefined}
-          aria-describedby={errors.price_clp ? 'service-price-error' : undefined}
-          {...register('price_clp')}
-        />
-        <FieldError id="service-price-error" message={errors.price_clp?.message} />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="service-duration">Duración</Label>
-        <Controller
-          control={control}
-          name="duration_minutes"
-          render={({ field }) => (
-            <Select
-              items={DURATION_OPTIONS}
-              value={field.value}
-              onValueChange={(value) => field.onChange(value ?? '')}
-            >
-              <SelectTrigger
-                id="service-duration"
-                className="w-full"
-                aria-invalid={errors.duration_minutes ? true : undefined}
-                aria-describedby={errors.duration_minutes ? 'service-duration-error' : undefined}
-              >
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {DURATION_OPTIONS.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-        />
-        <FieldError id="service-duration-error" message={errors.duration_minutes?.message} />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="service-description">Descripción (opcional)</Label>
-        <Textarea
-          id="service-description"
-          rows={3}
-          aria-invalid={errors.description ? true : undefined}
-          aria-describedby={errors.description ? 'service-description-error' : undefined}
-          {...register('description')}
-        />
-        <FieldError id="service-description-error" message={errors.description?.message} />
-      </div>
+      <Field id="service-name" label="Nombre" error={errors.name?.message}>
+        {(props) => <Input {...props} autoComplete="off" {...register('name')} />}
+      </Field>
+      <Field id="service-price" label="Precio (CLP)" error={errors.price_clp?.message}>
+        {(props) => (
+          <Input {...props} inputMode="numeric" autoComplete="off" placeholder="25000" {...register('price_clp')} />
+        )}
+      </Field>
+      <Field id="service-duration" label="Duración" error={errors.duration_minutes?.message}>
+        {(props) => (
+          <Controller
+            control={control}
+            name="duration_minutes"
+            render={({ field }) => (
+              <Select items={DURATION_OPTIONS} value={field.value} onValueChange={(value) => field.onChange(value ?? '')}>
+                <SelectTrigger {...props} className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {DURATION_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          />
+        )}
+      </Field>
+      <Field id="service-description" label="Descripción (opcional)" error={errors.description?.message}>
+        {(props) => <Textarea {...props} rows={3} {...register('description')} />}
+      </Field>
       <DialogFooter>
         <Button type="button" variant="outline" onClick={onDone}>
           Cancelar
         </Button>
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? (
-            <>
-              <Loader2 className="motion-safe:animate-spin" aria-hidden="true" />
-              Guardando…
-            </>
-          ) : (
-            'Guardar'
-          )}
+          {isSubmitting ? <PendingLabel>Guardando…</PendingLabel> : 'Guardar'}
         </Button>
       </DialogFooter>
     </form>

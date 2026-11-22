@@ -15,14 +15,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { formatCLP, formatDuration } from '@/lib/format'
 import type { Service } from './api'
 import { notifyDeleteError, useDeleteService, useServices } from './hooks'
@@ -90,27 +83,15 @@ export function ServicesTable({ slug, canEdit }: { slug: string; canEdit: boolea
               {services.map((service) => (
                 <TableRow key={service.id}>
                   <TableCell className="font-medium">{service.name}</TableCell>
-                  <TableCell className="text-right tabular-nums">
-                    {formatCLP(service.price_clp)}
-                  </TableCell>
+                  <TableCell className="text-right tabular-nums">{formatCLP(service.price_clp)}</TableCell>
                   <TableCell>{formatDuration(service.duration_minutes)}</TableCell>
                   {canEdit ? (
                     <TableCell>
                       <div className="flex justify-end gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          aria-label={`Editar ${service.name}`}
-                          onClick={() => openDialog('form', service)}
-                        >
+                        <Button variant="ghost" size="icon-sm" aria-label={`Editar ${service.name}`} onClick={() => openDialog('form', service)}>
                           <Pencil aria-hidden="true" />
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          aria-label={`Eliminar ${service.name}`}
-                          onClick={() => openDialog('delete', service)}
-                        >
+                        <Button variant="ghost" size="icon-sm" aria-label={`Eliminar ${service.name}`} onClick={() => openDialog('delete', service)}>
                           <Trash2 aria-hidden="true" />
                         </Button>
                       </div>
@@ -122,21 +103,11 @@ export function ServicesTable({ slug, canEdit }: { slug: string; canEdit: boolea
           </Table>
         </div>
       )}
-      <ServiceFormDialog
-        slug={slug}
-        service={selected}
-        open={open === 'form'}
-        onOpenChange={(open) => (open ? undefined : close())}
-      />
-      <AlertDialog
-        open={open === 'delete'}
-        onOpenChange={(open) => (open ? undefined : close())}
-      >
+      <ServiceFormDialog slug={slug} service={selected} open={open === 'form'} onOpenChange={(open) => (open ? undefined : close())} />
+      <AlertDialog open={open === 'delete'} onOpenChange={(open) => (open ? undefined : close())}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>
-              {selected ? `Eliminar ${selected.name}` : 'Eliminar servicio'}
-            </AlertDialogTitle>
+            <AlertDialogTitle>{selected ? `Eliminar ${selected.name}` : 'Eliminar servicio'}</AlertDialogTitle>
             <AlertDialogDescription>
               El servicio dejará de estar disponible para nuevos agendamientos. Los agendamientos
               existentes se mantienen.
@@ -144,11 +115,7 @@ export function ServicesTable({ slug, canEdit }: { slug: string; canEdit: boolea
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              disabled={remove.isPending}
-              onClick={() => selected && confirmDelete(selected)}
-            >
+            <AlertDialogAction variant="destructive" disabled={remove.isPending} onClick={() => selected && confirmDelete(selected)}>
               Eliminar
             </AlertDialogAction>
           </AlertDialogFooter>

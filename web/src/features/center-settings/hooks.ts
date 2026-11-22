@@ -4,11 +4,7 @@ import type { FieldValues, Path, UseFormSetError } from 'react-hook-form'
 import { ApiError } from '@/lib/api-client'
 import { setFieldErrors } from '@/lib/form-errors'
 import { queryKeys } from '@/lib/query-keys'
-import {
-  centerApi,
-  type CenterUpdate,
-  type ServiceInput,
-} from './api'
+import { centerApi, type CenterUpdate, type ServiceInput } from './api'
 
 export function useCenter(slug: string) {
   return useQuery({ queryKey: queryKeys.center(slug), queryFn: () => centerApi.get(slug) })
@@ -66,10 +62,7 @@ export function useDeleteClosure(slug: string) {
   })
 }
 
-function useServiceMutation<TVariables>(
-  slug: string,
-  mutationFn: (variables: TVariables) => Promise<unknown>,
-) {
+function useServiceMutation<TVariables>(slug: string, mutationFn: (variables: TVariables) => Promise<unknown>) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn,
@@ -104,14 +97,8 @@ export function handleMutationError<T extends FieldValues>(
     toast.error('No tienes permisos para esta acción')
     return
   }
-  if (
-    error instanceof ApiError &&
-    error.status === 400 &&
-    error.data &&
-    setFieldErrors(error.data as Record<string, unknown>, fields, setError)
-  ) {
-    return
-  }
+  const data = error instanceof ApiError && error.status === 400 ? error.data : null
+  if (data && setFieldErrors(data as Record<string, unknown>, fields, setError)) return
   toast.error('No pudimos guardar los cambios. Intenta de nuevo.')
 }
 

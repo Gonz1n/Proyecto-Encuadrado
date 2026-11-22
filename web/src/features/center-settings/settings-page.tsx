@@ -2,12 +2,29 @@
 
 import { ExternalLink } from 'lucide-react'
 import { useParams } from 'next/navigation'
+import type { ReactNode } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useCan } from '@/features/permissions/use-can'
 import { CenterForm } from './center-form'
 import { ClosuresCard } from './closures-card'
 import { useCenter } from './hooks'
 import { ServicesTable } from './services-table'
+
+type SectionProps = { id: string; title: string; description: string; className?: string; children: ReactNode }
+
+function Section({ id, title, description, className = 'max-w-3xl', children }: SectionProps) {
+  return (
+    <section aria-labelledby={`${id}-heading`} className={`${className} space-y-5`}>
+      <div className="space-y-1">
+        <h2 id={`${id}-heading`} className="text-lg font-bold tracking-tight text-primary">
+          {title}
+        </h2>
+        <p className="text-sm text-muted-foreground">{description}</p>
+      </div>
+      {children}
+    </section>
+  )
+}
 
 export function SettingsPage() {
   const { slug } = useParams<{ slug: string }>()
@@ -29,15 +46,7 @@ export function SettingsPage() {
           <ExternalLink className="size-4" aria-hidden="true" />
         </a>
       </div>
-      <section aria-labelledby="center-heading" className="max-w-2xl space-y-5">
-        <div className="space-y-1">
-          <h2 id="center-heading" className="text-lg font-bold tracking-tight text-primary">
-            Datos del centro
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            Lo que ven tus pacientes en la página pública de agendamiento.
-          </p>
-        </div>
+      <Section id="center" title="Datos del centro" description="Lo que ven tus pacientes en la página pública de agendamiento." className="max-w-2xl">
         {isPending ? (
           <Skeleton className="h-72 w-full" />
         ) : isError ? (
@@ -47,29 +56,13 @@ export function SettingsPage() {
         ) : (
           <CenterForm key={slug} slug={slug} center={center} canEdit={canEdit} />
         )}
-      </section>
-      <section aria-labelledby="services-heading" className="max-w-3xl space-y-5">
-        <div className="space-y-1">
-          <h2 id="services-heading" className="text-lg font-bold tracking-tight text-primary">
-            Servicios
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            Precio y duración de lo que se puede agendar.
-          </p>
-        </div>
+      </Section>
+      <Section id="services" title="Servicios" description="Precio y duración de lo que se puede agendar.">
         <ServicesTable slug={slug} canEdit={canEdit} />
-      </section>
-      <section aria-labelledby="closures-heading" className="max-w-3xl space-y-5">
-        <div className="space-y-1">
-          <h2 id="closures-heading" className="text-lg font-bold tracking-tight text-primary">
-            Días sin atención
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            Feriados o cierres puntuales. Las citas de ese día se cancelan.
-          </p>
-        </div>
+      </Section>
+      <Section id="closures" title="Días sin atención" description="Feriados o cierres puntuales. Las citas de ese día se cancelan.">
         <ClosuresCard slug={slug} canEdit={canEdit} />
-      </section>
+      </Section>
     </div>
   )
 }

@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQueryClient } from '@tanstack/react-query'
-import { Building2, Loader2, Video } from 'lucide-react'
+import { Building2, Video } from 'lucide-react'
 import { useEffect, useMemo } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { useRouter } from 'next/navigation'
@@ -8,15 +8,8 @@ import { toast } from 'sonner'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
-import { FieldError } from '@/components/form-field'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog'
+import { FieldError, PendingLabel } from '@/components/form-field'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { format, subYears } from 'date-fns'
 import { ApiError } from '@/lib/api-client'
 import { buildPatientShape, PATIENT_FIELD_NAMES } from '@/features/patient/patient-fields'
@@ -41,19 +34,15 @@ const buildPatientSchema = (today: string, oldest: string) =>
 
 const PATIENT_FIELDS = [...PATIENT_FIELD_NAMES, 'accept_terms', 'data_consent'] as const
 
-function ConsentCheckbox({
-  id,
-  checked,
-  onCheckedChange,
-  error,
-  children,
-}: {
+type ConsentCheckboxProps = {
   id: string
   checked: boolean
   onCheckedChange: (checked: boolean) => void
   error?: string
   children: React.ReactNode
-}) {
+}
+
+function ConsentCheckbox({ id, checked, onCheckedChange, error, children }: ConsentCheckboxProps) {
   return (
     <div className="space-y-1">
       <label htmlFor={id} className="flex min-h-11 cursor-pointer items-start gap-3 py-2 text-sm leading-snug">
@@ -76,13 +65,7 @@ function TermsDialog({ centerName, terms }: { centerName: string; terms: string 
   return (
     <Dialog>
       <DialogTrigger
-        render={
-          <Button
-            type="button"
-            variant="link"
-            className="-mt-1 h-11 px-0 text-[var(--cp-granate)] underline underline-offset-4"
-          />
-        }
+        render={<Button type="button" variant="link" className="-mt-1 h-11 px-0 text-[var(--cp-granate)] underline underline-offset-4" />}
       >
         Ver términos
       </DialogTrigger>
@@ -233,14 +216,7 @@ export function PatientStep() {
         )}
       />
       <Button type="submit" size="lg" className="h-11 w-full rounded-full active:scale-[0.97] motion-reduce:active:scale-100" disabled={isSubmitting}>
-        {isSubmitting ? (
-          <>
-            <Loader2 className="motion-safe:animate-spin" aria-hidden="true" />
-            Agendando…
-          </>
-        ) : (
-          'Confirmar hora'
-        )}
+        {isSubmitting ? <PendingLabel>Agendando…</PendingLabel> : 'Confirmar hora'}
       </Button>
     </form>
   )
