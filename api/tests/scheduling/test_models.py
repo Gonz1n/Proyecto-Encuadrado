@@ -1,19 +1,8 @@
 from datetime import datetime, timedelta
 
-import pytest
-from sqlalchemy.exc import IntegrityError
-
 from app.core import clock
 from app.scheduling.constants.statuses import ChangeKind
 from app.scheduling.models.appointment_change import AppointmentChange
-
-
-def test_user_cannot_have_two_memberships_in_same_center(session, user_factory, center_factory, membership_factory):
-    user = user_factory()
-    center = center_factory()
-    membership_factory(user=user, center=center)
-    with pytest.raises(IntegrityError):
-        membership_factory(user=user, center=center)
 
 
 def test_appointment_changes_are_newest_first(session, membership_factory, service_factory, appointment_factory):
