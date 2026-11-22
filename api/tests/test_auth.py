@@ -1,5 +1,5 @@
 from app.accounts.repositories import users
-from app.centers.models import Role
+from app.centers.constants.roles import Role
 
 
 def login(client, email, password="clave-segura-123"):

@@ -1,24 +1,16 @@
-import re
-from datetime import date
 from typing import Annotated
 from urllib.parse import urlparse
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, HttpUrl, TypeAdapter, field_validator
 
+from app.centers.constants.messages import CONTACT_EMAIL_ERROR, CONTACT_PHONE_ERROR
+from app.centers.constants.patterns import CONTACT_PHONE
+from app.centers.constants.social_networks import SOCIAL_NETWORKS
 from app.shared.schemas.fields import HourMinute, NotBlank
 from app.shared.validators.phone import valid_phone
 
 _url = TypeAdapter(HttpUrl)
 _email = TypeAdapter(EmailStr)
-CONTACT_PHONE = re.compile(r"^\+?[0-9][0-9 -]{6,18}$")
-CONTACT_PHONE_ERROR = "Ingresa un teléfono válido, por ejemplo +56 2 2345 6789"
-CONTACT_EMAIL_ERROR = "Ingresa un correo válido"
-
-SOCIAL_NETWORKS = {
-    "instagram_url": ("instagram.com", "Instagram"),
-    "facebook_url": ("facebook.com", "Facebook"),
-    "linkedin_url": ("linkedin.com", "LinkedIn"),
-}
 
 
 class CenterOut(BaseModel):
@@ -117,66 +109,3 @@ class CenterUpdate(BaseModel):
         if not value:
             raise ValueError("Selecciona al menos un día de atención")
         return sorted(set(value))
-
-
-class ServiceIn(BaseModel):
-    model_config = ConfigDict(extra="ignore", str_strip_whitespace=True)
-
-    name: Annotated[str, Field(max_length=120), NotBlank]
-    price_clp: Annotated[int, Field(ge=1, le=10_000_000)]
-    duration_minutes: Annotated[int, Field(ge=15, le=240)]
-    description: Annotated[str, Field(max_length=300)] = ""
-
-    @field_validator("duration_minutes")
-    @classmethod
-    def multiple_of_15(cls, value: int) -> int:
-        if value % 15:
-            raise ValueError("La duración debe ser múltiplo de 15 minutos")
-        return value
-
-
-class ServiceUpdate(ServiceIn):
-    name: Annotated[str, Field(max_length=120), NotBlank] = Field(default=None)
-    price_clp: Annotated[int, Field(ge=1, le=10_000_000)] = Field(default=None)
-    duration_minutes: Annotated[int, Field(ge=15, le=240)] = Field(default=None)
-    description: Annotated[str, Field(max_length=300)] = Field(default=None)
-
-
-class ServiceOut(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
-    id: int
-    name: str
-    price_clp: int
-    duration_minutes: int
-    description: str
-
-
-class MemberUserOut(BaseModel):
-    full_name: str
-    email: str
-    title: str
-
-
-class MemberOut(BaseModel):
-    id: int
-    role: str
-    role_label: str
-    user: MemberUserOut
-
-
-class ClosureIn(BaseModel):
-    model_config = ConfigDict(extra="ignore", str_strip_whitespace=True)
-
-    date: date
-    reason: Annotated[str, Field(min_length=1, max_length=120)]
-
-
-class ClosureOut(BaseModel):
-    id: int
-    date: date
-    reason: str
-
-
-class ClosureCreatedOut(ClosureOut):
-    cancelled_appointments: int

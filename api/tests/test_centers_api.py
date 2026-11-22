@@ -1,7 +1,8 @@
 import pytest
 
-from app.centers import repository
-from app.centers.models import Role, Service
+from app.centers.constants.roles import Role
+from app.centers.models.service import Service
+from app.centers.repositories import memberships
 from app.shared.validators.phone import normalize_phone
 
 ADMIN = Role.ADMIN
@@ -19,7 +20,7 @@ def test_bookable_queryset_excludes_viewers(session, membership_factory, center_
     admin = membership_factory(role=Role.ADMIN, center=center)
     member = membership_factory(role=Role.MEMBER, center=center)
     membership_factory(role=Role.VIEWER, center=center)
-    assert set(repository.bookable_memberships(session, center.id)) == {admin, member}
+    assert set(memberships.bookable_memberships(session, center.id)) == {admin, member}
 
 
 @pytest.mark.parametrize(

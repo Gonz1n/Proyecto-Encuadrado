@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from app.accounts.models.user import User
 from app.accounts.schemas.profile import ProfileUpdate
 from app.accounts.schemas.user import UserOut
-from app.centers.repository import user_memberships
+from app.centers.repositories.memberships import user_memberships
 
 
 def build_user_out(session: Session, user: User) -> UserOut:

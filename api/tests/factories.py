@@ -6,7 +6,11 @@ import pytest
 
 from app.accounts.models.user import User
 from app.accounts.security.passwords import hash_password
-from app.centers.models import Center, CenterClosure, Membership, Role, Service
+from app.centers.constants.roles import Role
+from app.centers.models.center import Center
+from app.centers.models.closure import CenterClosure
+from app.centers.models.membership import Membership
+from app.centers.models.service import Service
 from app.scheduling.models import Appointment
 
 _hash = cache(hash_password)

@@ -4,7 +4,9 @@ from sqlalchemy import func, select, update
 
 from app.accounts.repositories.users import get_user_by_email
 from app.accounts.security.passwords import verify_password
-from app.centers.models import Center, Membership, Service
+from app.centers.models.center import Center
+from app.centers.models.membership import Membership
+from app.centers.models.service import Service
 from app.core import clock
 from app.db.seed.loaders import run as run_seed
 from app.scheduling.models import Appointment

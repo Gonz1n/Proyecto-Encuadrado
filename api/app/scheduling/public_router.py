@@ -3,9 +3,10 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query
 
-from app.centers import repository as centers
-from app.centers.models import Center
-from app.centers.schemas import CenterListItemOut, CenterOut
+from app.centers.models.center import Center
+from app.centers.repositories import centers, memberships
+from app.centers.repositories import services as center_services
+from app.centers.schemas.center import CenterListItemOut, CenterOut
 from app.core import clock
 from app.core.errors.exceptions import DomainError
 from app.db.session import SessionDep
@@ -44,13 +45,13 @@ def list_centers(session: SessionDep) -> list[Center]:
 @router.get("/", response_model=PublicCenterOut)
 def read_center(session: SessionDep, center: PublicCenter) -> PublicCenterOut:
     professionals = sorted(
-        centers.bookable_memberships(session, center.id),
+        memberships.bookable_memberships(session, center.id),
         key=lambda m: (m.user.last_name, m.user.first_name),
     )
     return PublicCenterOut(
         **CenterOut.model_validate(center).model_dump(),
         professionals=[PublicProfessionalOut.from_membership(m) for m in professionals],
-        services=centers.active_services(session, center.id),
+        services=center_services.active_services(session, center.id),
     )
 
 

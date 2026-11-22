@@ -3,8 +3,10 @@ from datetime import date, datetime, time, timedelta
 
 from sqlalchemy.orm import Session
 
-from app.centers import repository as centers_repository
-from app.centers.models import Center, Membership, Service
+from app.centers.models.center import Center
+from app.centers.models.membership import Membership
+from app.centers.models.service import Service
+from app.centers.repositories import closures
 from app.core import clock
 from app.core.errors.exceptions import field_error
 from app.scheduling import repository
@@ -65,7 +67,7 @@ def slots_for_day(
     center = professional.center
     if day.weekday() not in center.open_days:
         return []
-    if centers_repository.closure_dates(session, center.id, day, day):
+    if closures.closure_dates(session, center.id, day, day):
         return []
     return _center_slots(center, service, day, repository.busy_ranges(session, professional, day, day, exclude_id), now)
 
@@ -85,7 +87,7 @@ def days_with_slots(
         busy_by_day[b_start.date()].append((b_start, b_end))
         if b_end.date() != b_start.date():
             busy_by_day[b_end.date()].append((b_start, b_end))
-    closed = centers_repository.closure_dates(session, center.id, start, end)
+    closed = closures.closure_dates(session, center.id, start, end)
     days = (start + timedelta(days=n) for n in range((end - start).days + 1))
     return [
         day

@@ -3,7 +3,8 @@ from typing import Annotated, Any, Literal
 
 from pydantic import AfterValidator, BaseModel, ConfigDict, EmailStr, Field, ValidationError, field_validator
 
-from app.centers.schemas import CenterOut, ServiceOut
+from app.centers.schemas.center import CenterOut
+from app.centers.schemas.service import ServiceOut
 from app.core import clock
 from app.shared.schemas.fields import Minute
 from app.shared.validators.phone import valid_phone

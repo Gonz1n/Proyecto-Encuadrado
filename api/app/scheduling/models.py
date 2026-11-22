@@ -5,7 +5,9 @@ from sqlalchemy import BigInteger, Date, DateTime, ForeignKey, Index, String, de
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.accounts.models.user import User
-from app.centers.models import Center, Membership, Service
+from app.centers.models.center import Center
+from app.centers.models.membership import Membership
+from app.centers.models.service import Service
 from app.core import clock
 from app.db.base import Base
 

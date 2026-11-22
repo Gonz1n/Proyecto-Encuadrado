@@ -4,8 +4,10 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.accounts.models.user import User
-from app.centers import repository as centers_repository
-from app.centers.models import Center, Membership, Service
+from app.centers.models.center import Center
+from app.centers.models.membership import Membership
+from app.centers.models.service import Service
+from app.centers.repositories import memberships
 from app.core import clock
 from app.core.errors.exceptions import DomainError
 from app.scheduling.availability import slots_for_day
@@ -34,7 +36,7 @@ def lock_professional(session: Session, professional: Membership) -> None:
 
 
 def lock_center_professionals(session: Session, center: Center) -> None:
-    user_ids = [m.user_id for m in centers_repository.bookable_memberships(session, center.id)]
+    user_ids = [m.user_id for m in memberships.bookable_memberships(session, center.id)]
     session.execute(select(User.id).where(User.id.in_(user_ids)).order_by(User.id).with_for_update())
 
 

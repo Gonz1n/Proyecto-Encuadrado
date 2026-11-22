@@ -3,8 +3,9 @@ from datetime import date, datetime, time, timedelta
 from sqlalchemy import Time, func, literal, select
 from sqlalchemy.orm import Session, joinedload, selectinload
 
-from app.centers.access import CenterAccess
-from app.centers.models import Membership, Role
+from app.centers.api.dependencies import CenterAccess
+from app.centers.constants.roles import Role
+from app.centers.models.membership import Membership
 from app.scheduling.models import Appointment, AppointmentChange, AppointmentStatus
 
 

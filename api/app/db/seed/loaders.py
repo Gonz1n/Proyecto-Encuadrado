@@ -8,8 +8,11 @@ from sqlalchemy.orm import Session
 from app.accounts.models.user import User
 from app.accounts.repositories.users import create_user, get_user_by_email
 from app.accounts.security.passwords import hash_password
-from app.centers import repository as centers
-from app.centers.models import Center, Membership, Role, Service
+from app.centers.constants.roles import Role
+from app.centers.models.center import Center
+from app.centers.models.membership import Membership
+from app.centers.models.service import Service
+from app.centers.repositories import centers, memberships, services
 from app.core import clock
 from app.db.seed.data import CENTERS, PASSWORD, PATIENTS, USERS
 from app.scheduling.availability import slots_for_day
@@ -41,7 +44,7 @@ def get_or_create_center(session: Session, spec: dict) -> Center:
 
 
 def ensure_membership(session: Session, user: User, center: Center, role: Role) -> None:
-    if centers.get_membership(session, user.id, center.id) is None:
+    if memberships.get_membership(session, user.id, center.id) is None:
         session.add(Membership(user_id=user.id, center_id=center.id, role=role))
 
 
@@ -65,15 +68,15 @@ def has_future_appointments(session: Session, center: Center, now: datetime.date
 
 def create_appointments(session: Session, center: Center, now: datetime.datetime) -> int:
     rng = random.Random(2026)
-    professionals = centers.bookable_memberships(session, center.id)
-    services = centers.active_services(session, center.id)
+    professionals = memberships.bookable_memberships(session, center.id)
+    center_services = services.active_services(session, center.id)
     target = rng.randint(8, 12)
     created = 0
     for _ in range(target * 5):
         if created == target:
             break
         professional = rng.choice(professionals)
-        service = rng.choice(services)
+        service = rng.choice(center_services)
         day = (now + datetime.timedelta(days=rng.randint(1, 14))).date()
         slots = slots_for_day(session, professional, service, day, now)
         if not slots:

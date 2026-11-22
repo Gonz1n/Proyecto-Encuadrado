@@ -1,7 +1,8 @@
 import pytest
 from sqlalchemy import select
 
-from app.centers.models import Center, Role
+from app.centers.constants.roles import Role
+from app.centers.models.center import Center
 from app.db.seed.loaders import run as run_seed
 
 PHONE_ERROR = "Ingresa un teléfono válido, por ejemplo +56 2 2345 6789"

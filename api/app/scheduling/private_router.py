@@ -4,8 +4,8 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Query
 
 from app.accounts.api.dependencies import CurrentUser
-from app.centers.access import CenterDep, ManagerDep
-from app.centers.models import Role
+from app.centers.api.dependencies import CenterDep, ManagerDep
+from app.centers.constants.roles import Role
 from app.core import clock
 from app.core.errors.exceptions import DomainError, field_error
 from app.db.session import SessionDep

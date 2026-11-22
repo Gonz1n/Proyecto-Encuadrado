@@ -1,6 +1,6 @@
 import datetime
 
-from app.centers.models import Role
+from app.centers.constants.roles import Role
 
 PASSWORD = "encuadrado2026"
 ADMIN, MEMBER, VIEWER = Role.ADMIN, Role.MEMBER, Role.VIEWER

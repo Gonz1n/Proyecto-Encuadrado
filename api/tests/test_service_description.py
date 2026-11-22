@@ -1,7 +1,7 @@
 import pytest
 from sqlalchemy import select
 
-from app.centers.models import Service
+from app.centers.models.service import Service
 from app.db.seed.loaders import run as run_seed
 
 PAYLOAD = {"name": "Consulta", "price_clp": 1000, "duration_minutes": 30}

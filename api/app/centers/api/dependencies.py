@@ -4,8 +4,10 @@ from typing import Annotated
 from fastapi import Depends
 
 from app.accounts.api.dependencies import CurrentUser
-from app.centers import repository
-from app.centers.models import Center, Membership, Role
+from app.centers.constants.roles import Role
+from app.centers.models.center import Center
+from app.centers.models.membership import Membership
+from app.centers.repositories import centers, memberships
 from app.core.errors.exceptions import DomainError
 from app.db.session import SessionDep
 from app.shared.constants.messages import FORBIDDEN, NOT_FOUND
@@ -18,10 +20,10 @@ class CenterAccess:
 
 
 def center_access(slug: str, user: CurrentUser, session: SessionDep) -> CenterAccess:
-    center = repository.get_center_by_slug(session, slug)
+    center = centers.get_center_by_slug(session, slug)
     if center is None:
         raise DomainError(404, NOT_FOUND)
-    membership = repository.get_membership(session, user.id, center.id)
+    membership = memberships.get_membership(session, user.id, center.id)
     if membership is None:
         raise DomainError(404, NOT_FOUND)
     return CenterAccess(center, membership)

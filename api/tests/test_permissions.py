@@ -1,8 +1,8 @@
 import pytest
 from fastapi import APIRouter
 
-from app.centers.access import AdminDep, CenterDep
-from app.centers.models import Role
+from app.centers.api.dependencies import AdminDep, CenterDep
+from app.centers.constants.roles import Role
 from app.main import app
 
 probe = APIRouter(prefix="/api/centers/{slug}/_probe")
