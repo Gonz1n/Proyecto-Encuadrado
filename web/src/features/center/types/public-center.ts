@@ -1,35 +1,11 @@
-import type { SocialLinks } from '@/types/social-links'
-import type { Service } from './center'
+import type { components } from '@/types/api'
 
-export type PublicProfessional = {
-  id: number
-  full_name: string
-  title: string
-  university: string
-  bio: string
-  health_registry: string
-}
+type Schemas = components['schemas']
 
-export type PublicService = Service
+export type PublicProfessional = Schemas['PublicProfessionalOut']
 
-export type PublicCenterSummary = {
-  slug: string
-  name: string
-  description: string
-}
+export type PublicService = Schemas['ServiceOut']
 
-export type PublicCenter = {
-  name: string
-  slug: string
-  description: string
-  opening_time: string
-  closing_time: string
-  terms: string
-  open_days: number[]
-  professionals: PublicProfessional[]
-  services: PublicService[]
-  address: string
-  commune: string
-  phone: string
-  email: string
-} & SocialLinks
+export type PublicCenterSummary = Schemas['CenterListItemOut']
+
+export type PublicCenter = Schemas['PublicCenterOut']

@@ -6,7 +6,7 @@ const booking: Booking = {
   id: 1,
   center: { name: 'Centro Aurora', slug: 'centro-aurora' },
   professional: { full_name: 'Ana Perez' },
-  service: { name: 'Consulta', price_clp: 20000 },
+  service: { id: 1, name: 'Consulta', price_clp: 20000 },
   start: '2026-11-25T10:00:00',
   end: '2026-11-25T10:30:00',
   modality: 'in_person',

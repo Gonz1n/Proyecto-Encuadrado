@@ -1,17 +1,12 @@
 import type { SlotQuery } from '@/features/availability/types/availability'
 import type { PatientValues } from '@/features/patient/types/patient'
+import type { components } from '@/types/api'
 import type { Modality } from '@/types/modality'
+
+type Schemas = components['schemas']
 
 export type PatientDraft = PatientValues & { modality: Modality; accept_terms: boolean; data_consent: boolean }
 
-export type BookingInput = SlotQuery & PatientDraft & { start: string }
+export type BookingInput = Omit<Schemas['PublicBookingIn'], 'service' | 'professional'> & SlotQuery
 
-export type Booking = {
-  id: number
-  center: { name: string; slug: string }
-  professional: { full_name: string }
-  service: { name: string; price_clp: number }
-  start: string
-  end: string
-  modality: Modality
-}
+export type Booking = Omit<Schemas['BookingOut'], 'modality'> & { modality: Modality }

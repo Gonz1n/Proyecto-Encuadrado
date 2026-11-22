@@ -1,4 +1,5 @@
 import { apiFetch } from '@/lib/api-client'
+import type { AvailableDays, AvailableSlots } from '@/features/availability/types/availability'
 import type { Appointment, AppointmentFilters, CreateAppointmentInput, RescheduleInput } from '../types/appointment'
 
 const detailPath = (slug: string, id: number) => `/api/centers/${slug}/appointments/${id}/`
@@ -17,7 +18,7 @@ export const appointmentsApi = {
   cancel: (slug: string, id: number, note: string) =>
     apiFetch<Appointment>(`${detailPath(slug, id)}cancel/`, { method: 'POST', body: { note } }),
   availabilityDays: (slug: string, id: number) =>
-    apiFetch<{ days: string[] }>(`${detailPath(slug, id)}availability/days/`),
+    apiFetch<AvailableDays>(`${detailPath(slug, id)}availability/days/`),
   availability: (slug: string, id: number, date: string) =>
-    apiFetch<{ date: string; slots: string[] }>(`${detailPath(slug, id)}availability/?date=${date}`),
+    apiFetch<AvailableSlots>(`${detailPath(slug, id)}availability/?date=${date}`),
 }

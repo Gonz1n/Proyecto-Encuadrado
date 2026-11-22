@@ -1,45 +1,24 @@
 import type { Role } from '@/features/permissions/types/permissions'
-import type { SocialLinks } from '@/types/social-links'
+import type { components } from '@/types/api'
 
-export type Center = {
-  name: string
-  slug: string
-  description: string
-  opening_time: string
-  closing_time: string
-  terms: string
-  open_days: number[]
-  lunch_start: string | null
-  lunch_end: string | null
-  address: string
-  commune: string
-  phone: string
-  email: string
-} & SocialLinks
+type Schemas = components['schemas']
 
-export type CenterUpdate = Partial<Omit<Center, 'slug'>>
+export type Center = Schemas['CenterOut']
 
-export type Closure = {
-  id: number
-  date: string
-  reason: string
-}
+export type CenterUpdate = Schemas['CenterUpdate']
 
-export type ClosureCreated = Closure & { cancelled_appointments: number }
+export type CenterUpdated = Schemas['CenterUpdatedOut']
 
-export type Service = {
-  id: number
-  name: string
-  price_clp: number
-  duration_minutes: number
-  description: string
-}
+export type Closure = Schemas['ClosureOut']
 
-export type ServiceInput = Omit<Service, 'id'>
+export type ClosureInput = Schemas['ClosureIn']
 
-export type Member = {
-  id: number
-  role: Role
-  role_label: string
-  user: { full_name: string; email: string; title: string }
-}
+export type ClosureCreated = Schemas['ClosureCreatedOut']
+
+export type Service = Schemas['ServiceOut']
+
+export type ServiceInput = Schemas['ServiceIn']
+
+export type ServiceUpdate = Schemas['ServiceUpdate']
+
+export type Member = Omit<Schemas['MemberOut'], 'role'> & { role: Role }

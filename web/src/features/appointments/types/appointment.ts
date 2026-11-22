@@ -1,27 +1,11 @@
-import type { PatientFieldName } from '@/features/patient/types/patient'
+import type { components } from '@/types/api'
 import type { Modality } from '@/types/modality'
 
-export type AppointmentChange = {
-  kind: 'rescheduled' | 'cancelled'
-  previous_start: string
-  new_start: string | null
-  note: string
-  changed_by: { full_name: string } | null
-  created_at: string
-}
+type Schemas = components['schemas']
 
-export type Appointment = {
-  id: number
-  start: string
-  end: string
-  status: string
-  service: { id: number; name: string; price_clp: number }
-  professional: { id: number; full_name: string }
-  patient_name: string
-  patient_email: string
-  patient_phone: string
-  patient_rut: string
-  patient_birth_date: string | null
+export type AppointmentChange = Omit<Schemas['ChangeOut'], 'kind'> & { kind: 'rescheduled' | 'cancelled' }
+
+export type Appointment = Omit<Schemas['AppointmentOut'], 'modality' | 'changes'> & {
   modality: Modality
   changes: AppointmentChange[]
 }
@@ -33,11 +17,9 @@ export type AppointmentFilters = {
   include_cancelled?: boolean
 }
 
-export type CreateAppointmentInput = Record<PatientFieldName, string> & {
+export type CreateAppointmentInput = Omit<Schemas['StaffBookingIn'], 'service' | 'professional'> & {
   service: number
   professional: number
-  start: string
-  modality: Modality
 }
 
-export type RescheduleInput = { start: string; note?: string }
+export type RescheduleInput = Schemas['RescheduleIn']

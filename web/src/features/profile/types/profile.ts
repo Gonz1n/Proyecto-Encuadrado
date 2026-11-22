@@ -1,3 +1,3 @@
-import type { CurrentUser } from '@/features/auth/types/auth'
+import type { components } from '@/types/api'
 
-export type ProfileUpdate = Pick<CurrentUser, 'first_name' | 'last_name' | 'title' | 'university' | 'bio' | 'health_registry'>
+export type ProfileUpdate = components['schemas']['ProfileUpdate']
