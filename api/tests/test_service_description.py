@@ -1,8 +1,8 @@
 import pytest
 from sqlalchemy import select
 
-from app import seed
 from app.centers.models import Service
+from app.db.seed.loaders import run as run_seed
 
 PAYLOAD = {"name": "Consulta", "price_clp": 1000, "duration_minutes": 30}
 
@@ -47,12 +47,12 @@ def test_public_profile_services_include_description(client, center_factory, ser
 
 
 def test_seed_sets_descriptions_only_for_services_it_creates(session):
-    seed.run(session)
+    run_seed(session)
     service = session.scalar(select(Service).where(Service.name == "Sesión psicológica"))
     assert service.description.startswith("Atención individual")
     service.description = "Editada"
     session.flush()
-    seed.run(session)
+    run_seed(session)
     assert service.description == "Editada"
 
 

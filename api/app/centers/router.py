@@ -18,7 +18,7 @@ from app.centers.schemas import (
 )
 from app.core import clock
 from app.core.errors.exceptions import DomainError, field_error
-from app.db import SessionDep
+from app.db.session import SessionDep
 from app.scheduling import repository as scheduling_repository
 from app.scheduling.services import cancel_for_center, lock_center_professionals
 

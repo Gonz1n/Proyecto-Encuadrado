@@ -23,7 +23,7 @@ uv sync                          # instalar dependencias
 uv run alembic upgrade head      # aplicar migraciones
 uv run fastapi dev app/main.py   # servidor de desarrollo
 uv run pytest -q                 # pruebas
-uv run python -m app.seed        # cargar datos de ejemplo
+uv run python -m app.db.seed     # cargar datos de ejemplo
 ```
 
 La salud del servicio se verifica en `GET /api/health/`.

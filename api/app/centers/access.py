@@ -7,7 +7,7 @@ from app.accounts.deps import CurrentUser
 from app.centers import repository
 from app.centers.models import Center, Membership, Role
 from app.core.errors.exceptions import DomainError
-from app.db import SessionDep
+from app.db.session import SessionDep
 
 NOT_FOUND = "No encontrado."
 FORBIDDEN = "No tienes permiso para realizar esta acción."

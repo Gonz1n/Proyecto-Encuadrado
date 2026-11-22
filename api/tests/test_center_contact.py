@@ -1,8 +1,8 @@
 import pytest
 from sqlalchemy import select
 
-from app import seed
 from app.centers.models import Center, Role
+from app.db.seed.loaders import run as run_seed
 
 PHONE_ERROR = "Ingresa un teléfono válido, por ejemplo +56 2 2345 6789"
 EMAIL_ERROR = "Ingresa un correo válido"
@@ -73,13 +73,13 @@ def test_public_profile_exposes_contact(client, center_factory):
 
 
 def test_seed_creates_demo_contact_for_new_center_only(session):
-    seed.run(session)
+    run_seed(session)
     aurora = session.scalar(select(Center).where(Center.slug == "centro-aurora"))
     assert aurora.address == "Av. Providencia 1234, oficina 502"
     assert aurora.email == "contacto@centroaurora.cl"
     aurora.phone = ""
     session.flush()
-    seed.run(session)
+    run_seed(session)
     assert aurora.phone == ""
     nutrir = session.scalar(select(Center).where(Center.slug == "clinica-nutrir"))
     assert (nutrir.commune, nutrir.phone) == ("Las Condes", "+56 2 2987 6543")

@@ -8,7 +8,7 @@ from app.centers.access import NOT_FOUND, CenterDep, ManagerDep
 from app.centers.models import Role
 from app.core import clock
 from app.core.errors.exceptions import DomainError, field_error
-from app.db import SessionDep
+from app.db.session import SessionDep
 from app.scheduling import availability, repository, services
 from app.scheduling.models import Appointment
 from app.scheduling.resolve import resolve_professional, resolve_service

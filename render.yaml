@@ -5,7 +5,7 @@ services:
     rootDir: api
     plan: free
     buildCommand: pip install uv && uv sync --frozen --no-dev
-    startCommand: uv run alembic upgrade head && uv run python -m app.seed && uv run fastapi run app/main.py --host 0.0.0.0 --port $PORT
+    startCommand: uv run alembic upgrade head && uv run python -m app.db.seed && uv run fastapi run app/main.py --host 0.0.0.0 --port $PORT
     healthCheckPath: /api/health/
     envVars:
       - key: DATABASE_URL

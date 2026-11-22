@@ -9,7 +9,7 @@ from app.centers.models import Center
 from app.centers.schemas import CenterListItemOut, CenterOut
 from app.core import clock
 from app.core.errors.exceptions import DomainError
-from app.db import SessionDep
+from app.db.session import SessionDep
 from app.scheduling import availability, services
 from app.scheduling.models import Appointment
 from app.scheduling.resolve import resolve_professional, resolve_service

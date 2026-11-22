@@ -7,7 +7,8 @@ from sqlalchemy.orm import Session
 
 from app.accounts import repository
 from app.core.config import settings
-from app.db import Base, get_session
+from app.db.base import Base
+from app.db.session import get_session
 from app.main import app
 
 pytest_plugins = ["tests.factories"]

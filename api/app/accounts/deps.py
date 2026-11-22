@@ -4,7 +4,7 @@ from fastapi import Depends, Header, HTTPException
 
 from app.accounts import repository
 from app.accounts.models import User
-from app.db import SessionDep
+from app.db.session import SessionDep
 
 _HEADERS = {"WWW-Authenticate": "Bearer"}
 

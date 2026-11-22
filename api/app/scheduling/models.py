@@ -7,7 +7,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.accounts.models import User
 from app.centers.models import Center, Membership, Service
 from app.core import clock
-from app.db import Base
+from app.db.base import Base
 
 
 class AppointmentStatus(StrEnum):

@@ -3,8 +3,8 @@ from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import create_engine
 
-import app.models
-from app.db import Base
+import app.db.registry
+from app.db.base import Base
 from app.core.config import settings
 
 config = context.config

@@ -4,7 +4,7 @@ from sqlalchemy import BigInteger, Boolean, DateTime, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core import clock
-from app.db import Base
+from app.db.base import Base
 
 
 class User(Base):
