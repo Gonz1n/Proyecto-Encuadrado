@@ -3,7 +3,7 @@ from typing import Annotated
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
-from app.formats import NotBlank
+from app.shared.schemas.fields import NotBlank
 
 
 class CenterSummary(BaseModel):

@@ -1,6 +1,6 @@
 import pytest
 
-from app.scheduling.rut import check_digit, format_rut, normalize_rut
+from app.shared.validators.rut import check_digit, format_rut, normalize_rut
 
 
 @pytest.mark.parametrize(

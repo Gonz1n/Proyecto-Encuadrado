@@ -5,8 +5,8 @@ from urllib.parse import urlparse
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, HttpUrl, TypeAdapter, field_validator
 
-from app.centers.phone import valid_phone
-from app.formats import HourMinute, NotBlank
+from app.shared.schemas.fields import HourMinute, NotBlank
+from app.shared.validators.phone import valid_phone
 
 _url = TypeAdapter(HttpUrl)
 _email = TypeAdapter(EmailStr)

@@ -14,7 +14,7 @@ from app.core import clock
 from app.db.seed.data import CENTERS, PASSWORD, PATIENTS, USERS
 from app.scheduling.availability import slots_for_day
 from app.scheduling.models import Appointment, AppointmentStatus, Modality
-from app.scheduling.rut import format_rut
+from app.shared.validators.rut import format_rut
 
 
 @cache

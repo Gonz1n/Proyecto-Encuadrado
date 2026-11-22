@@ -3,11 +3,11 @@ from typing import Annotated, Any, Literal
 
 from pydantic import AfterValidator, BaseModel, ConfigDict, EmailStr, Field, ValidationError, field_validator
 
-from app.centers.phone import valid_phone
 from app.centers.schemas import CenterOut, ServiceOut
 from app.core import clock
-from app.formats import Minute
-from app.scheduling.rut import normalize_rut
+from app.shared.schemas.fields import Minute
+from app.shared.validators.phone import valid_phone
+from app.shared.validators.rut import normalize_rut
 
 
 class PublicProfessionalOut(BaseModel):

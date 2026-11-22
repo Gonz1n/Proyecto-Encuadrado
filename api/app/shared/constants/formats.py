@@ -1,0 +1,2 @@
+MINUTE_FORMAT = "%Y-%m-%dT%H:%M"
+HOUR_MINUTE_FORMAT = "%H:%M"

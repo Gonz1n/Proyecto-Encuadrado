@@ -7,8 +7,8 @@ from pydantic import BaseModel, ValidationError
 
 from app.core import clock
 from app.core.errors.exceptions import DomainError
-from app.formats import HourMinute, Minute
 from app.main import app
+from app.shared.schemas.fields import HourMinute, Minute
 
 
 class Probe(BaseModel):

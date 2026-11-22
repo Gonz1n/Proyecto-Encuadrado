@@ -3,8 +3,7 @@ from typing import Annotated, Any
 
 from pydantic import AfterValidator, BeforeValidator, PlainSerializer
 
-MINUTE_FORMAT = "%Y-%m-%dT%H:%M"
-HOUR_MINUTE_FORMAT = "%H:%M"
+from app.shared.constants.formats import HOUR_MINUTE_FORMAT, MINUTE_FORMAT
 
 
 def _parser(fmt: str, kind: type, message: str):

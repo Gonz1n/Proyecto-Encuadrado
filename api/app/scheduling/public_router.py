@@ -4,7 +4,6 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Query
 
 from app.centers import repository as centers
-from app.centers.access import NOT_FOUND
 from app.centers.models import Center
 from app.centers.schemas import CenterListItemOut, CenterOut
 from app.core import clock
@@ -21,6 +20,7 @@ from app.scheduling.schemas import (
     PublicProfessionalOut,
     SlotsOut,
 )
+from app.shared.constants.messages import NOT_FOUND
 
 list_router = APIRouter(prefix="/api/public/centers", tags=["public"])
 router = APIRouter(prefix="/api/public/centers/{slug}", tags=["public"])

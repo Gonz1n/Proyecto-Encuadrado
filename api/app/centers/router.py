@@ -2,7 +2,7 @@ from fastapi import APIRouter, Response
 
 from app.accounts.deps import CurrentUser
 from app.centers import repository
-from app.centers.access import NOT_FOUND, AdminDep, CenterDep
+from app.centers.access import AdminDep, CenterDep
 from app.centers.models import CenterClosure, Membership, Service
 from app.centers.schemas import (
     CenterOut,
@@ -21,6 +21,7 @@ from app.core.errors.exceptions import DomainError, field_error
 from app.db.session import SessionDep
 from app.scheduling import repository as scheduling_repository
 from app.scheduling.services import cancel_for_center, lock_center_professionals
+from app.shared.constants.messages import NOT_FOUND
 
 router = APIRouter(prefix="/api/centers/{slug}", tags=["centers"])
 

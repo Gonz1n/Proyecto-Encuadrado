@@ -4,7 +4,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Query
 
 from app.accounts.deps import CurrentUser
-from app.centers.access import NOT_FOUND, CenterDep, ManagerDep
+from app.centers.access import CenterDep, ManagerDep
 from app.centers.models import Role
 from app.core import clock
 from app.core.errors.exceptions import DomainError, field_error
@@ -13,6 +13,7 @@ from app.scheduling import availability, repository, services
 from app.scheduling.models import Appointment
 from app.scheduling.resolve import resolve_professional, resolve_service
 from app.scheduling.schemas import AppointmentOut, CancelIn, DaysOut, RescheduleIn, SlotsOut, StaffBookingIn
+from app.shared.constants.messages import NOT_FOUND
 
 router = APIRouter(prefix="/api/centers/{slug}/appointments", tags=["appointments"])
 

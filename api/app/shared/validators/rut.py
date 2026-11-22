@@ -1,6 +1,4 @@
-import re
-
-RUT_PATTERN = re.compile(r"^([0-9]{7,8})-?([0-9K])$")
+from app.shared.constants.patterns import RUT_PATTERN
 
 
 def check_digit(number: int) -> str:

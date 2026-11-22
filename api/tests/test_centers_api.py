@@ -2,7 +2,7 @@ import pytest
 
 from app.centers import repository
 from app.centers.models import Role, Service
-from app.centers.phone import normalize_phone
+from app.shared.validators.phone import normalize_phone
 
 ADMIN = Role.ADMIN
 MEMBER = Role.MEMBER

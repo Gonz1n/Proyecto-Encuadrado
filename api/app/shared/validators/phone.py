@@ -1,7 +1,5 @@
-import re
-
-PHONE_PATTERN = re.compile(r"^(?:\+?56)?\s?9\s?([0-9]{4})\s?([0-9]{4})$")
-PHONE_ERROR = "Ingresa un celular chileno válido"
+from app.shared.constants.messages import PHONE_ERROR
+from app.shared.constants.patterns import PHONE_PATTERN
 
 
 def normalize_phone(value: str) -> str | None:
