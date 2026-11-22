@@ -1,30 +1,20 @@
 'use client'
 
-import { CalendarDays, LogOut, Settings, UserRound, type LucideIcon } from 'lucide-react'
+import { LogOut } from 'lucide-react'
 import Link from 'next/link'
 import { useParams, usePathname } from 'next/navigation'
 import type { ReactNode } from 'react'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import { useAuth } from '@/features/auth/auth-context'
-import type { CurrentUser } from '@/features/auth/api'
-import { RoleBadge } from '@/features/permissions/role-badge'
-import { useCurrentMembership } from '@/features/permissions/use-can'
+import { useAuth } from '@/features/auth/contexts/auth-context'
+import { RoleBadge } from '@/features/permissions/components/role-badge'
+import { useCurrentMembership } from '@/features/auth/hooks/use-current-membership'
 import { cn } from '@/lib/utils'
+import { initials } from '@/utils/initials'
+import { NAV_ITEMS } from '../constants/navigation'
+import { FOCUS_RING } from '../constants/styles'
 import { CenterSwitcher } from './center-switcher'
-import { NotFoundPage } from './not-found-page'
-
-const NAV_ITEMS: { section: string; label: string; icon: LucideIcon }[] = [
-  { section: 'agenda', label: 'Agenda', icon: CalendarDays },
-  { section: 'configuracion', label: 'Configuración', icon: Settings },
-  { section: 'perfil', label: 'Mi perfil', icon: UserRound },
-]
-
-const focusRing = 'outline-none focus-visible:ring-3 focus-visible:ring-ring/50'
-
-function initials(user: CurrentUser): string {
-  return `${user.first_name.charAt(0)}${user.last_name.charAt(0)}`.toUpperCase()
-}
+import { NotFoundPage } from '@/components/layout/not-found-page'
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { user, logout } = useAuth()
@@ -52,7 +42,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <title>{`${membership.center.name} | CentradaMente`}</title>
       <header className="sticky top-0 z-40 border-b border-border bg-gradient-to-r from-accent to-white">
         <div className="mx-auto flex h-14 max-w-6xl items-center gap-2 px-4 sm:gap-3 sm:px-6">
-          <Link href="/" aria-label="CentradaMente, ir al inicio" className={cn('flex shrink-0 items-center rounded-lg', focusRing)}>
+          <Link href="/" aria-label="CentradaMente, ir al inicio" className={cn('flex shrink-0 items-center rounded-lg', FOCUS_RING)}>
             <img src="/logo-centradamente.svg" alt="" aria-hidden="true" className="h-8 w-auto" />
           </Link>
           <div className="flex min-w-0 flex-1 items-center">
@@ -65,7 +55,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <RoleBadge role={membership.role} />
           <div className="hidden items-center gap-2.5 border-l pl-3 md:flex">
             <Avatar size="sm">
-              <AvatarFallback>{initials(user)}</AvatarFallback>
+              <AvatarFallback>{initials(user.first_name, user.last_name)}</AvatarFallback>
             </Avatar>
             <div className="flex flex-col leading-tight">
               <span className="text-sm font-medium">{user.full_name}</span>
@@ -89,7 +79,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                     aria-current={isActive ? 'page' : undefined}
                     className={cn(
                       'inline-flex h-10 items-center gap-2 border-b-2 text-sm font-medium transition-colors',
-                      focusRing,
+                      FOCUS_RING,
                       isActive
                         ? 'border-primary font-semibold text-primary'
                         : 'border-transparent text-muted-foreground hover:border-secondary hover:text-primary',

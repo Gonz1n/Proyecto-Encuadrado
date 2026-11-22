@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest'
-import type { Membership } from '@/features/auth/api'
+import type { Membership } from '@/features/auth/types/auth'
 import { selectableProfessionals } from './booking-professionals'
 
 const membership = (role: Membership['role'], id: number): Membership => ({ id, role, role_label: role, center: { slug: 'centro', name: 'Centro' } })

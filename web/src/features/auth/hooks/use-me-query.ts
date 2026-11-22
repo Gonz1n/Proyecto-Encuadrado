@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query-keys'
-import { authApi } from './api'
+import { authApi } from '../api/auth-api'
 
 export function useMeQuery(enabled = true) {
   return useQuery({

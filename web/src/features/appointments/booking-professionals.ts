@@ -1,4 +1,4 @@
-import type { Membership } from '@/features/auth/api'
+import type { Membership } from '@/features/auth/types/auth'
 
 export function selectableProfessionals<T extends { id: number }>(membership: Membership, professionals: T[]): T[] {
   if (membership.role === 'admin') return professionals

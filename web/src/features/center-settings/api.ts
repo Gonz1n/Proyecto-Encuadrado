@@ -1,5 +1,5 @@
 import { apiFetch } from '@/lib/api-client'
-import type { Role } from '@/features/permissions/roles'
+import type { Role } from '@/features/permissions/types/permissions'
 import type { SocialLinks } from '@/types/social-links'
 
 export type Center = {

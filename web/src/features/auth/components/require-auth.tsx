@@ -6,9 +6,9 @@ import { useRouter } from 'next/navigation'
 import type { ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
 import { NotFoundPage } from '@/components/layout/not-found-page'
-import { useAuth } from './auth-context'
+import { useAuth } from '../contexts/auth-context'
 import { isUnauthorized } from '@/utils/api-errors'
-import { useMeQuery } from './hooks'
+import { useMeQuery } from '../hooks/use-me-query'
 
 function SessionLoading() {
   return (

@@ -1,7 +1,4 @@
-const CENTER_PHOTOS: Record<string, string> = {
-  'centro-aurora': '/centros/centro-aurora.svg',
-  'clinica-nutrir': '/centros/clinica-nutrir.svg',
-}
+import { CENTER_PHOTOS } from '@/constants/center-photos'
 
 export function photoFor(photos: Record<string, string>, slug: string): string | null {
   return Object.hasOwn(photos, slug) ? photos[slug] : null

@@ -12,10 +12,13 @@ import { Textarea } from '@/components/ui/textarea'
 import { CharCount } from '@/components/form/char-count'
 import { Field } from '@/components/form/field'
 import { PendingLabel } from '@/components/form/pending-label'
-import { authApi, type CurrentUser, type ProfileUpdate } from '@/features/auth/api'
-import { useAuth } from '@/features/auth/auth-context'
+import { type CurrentUser } from '@/features/auth/types/auth'
+import { type ProfileUpdate } from './types/profile'
+import { useAuth } from '@/features/auth/contexts/auth-context'
 import { handleMutationError } from '@/utils/mutation-errors'
 import { queryKeys } from '@/lib/query-keys'
+import { initials } from '@/utils/initials'
+import { profileApi } from './api/profile-api'
 
 const BIO_MAX = 500
 
@@ -61,7 +64,7 @@ export function ProfilePage() {
 function ProfileForm({ user }: { user: CurrentUser }) {
   const queryClient = useQueryClient()
   const update = useMutation({
-    mutationFn: (body: ProfileUpdate) => authApi.updateProfile(body),
+    mutationFn: (body: ProfileUpdate) => profileApi.update(body),
     onSuccess: (saved) => {
       queryClient.setQueryData(queryKeys.me, saved)
       queryClient.invalidateQueries({ queryKey: queryKeys.allPublicCenters })
@@ -100,7 +103,7 @@ function ProfileForm({ user }: { user: CurrentUser }) {
         <div className="flex items-center gap-4">
           <Avatar className="size-16">
             <AvatarFallback className="bg-primary/10 text-lg font-medium text-primary">
-              {`${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase()}
+              {initials(firstName, lastName)}
             </AvatarFallback>
           </Avatar>
           <p className="text-sm text-muted-foreground">{user.email}</p>

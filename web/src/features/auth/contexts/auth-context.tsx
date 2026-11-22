@@ -3,9 +3,10 @@
 import { createContext, use, useEffect, useMemo, type ReactNode } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query-keys'
-import { authApi, type CurrentUser } from './api'
+import { authApi } from '../api/auth-api'
+import { type CurrentUser } from '../types/auth'
 import { isUnauthorized } from '@/utils/api-errors'
-import { useMeQuery } from './hooks'
+import { useMeQuery } from '../hooks/use-me-query'
 
 type AuthContextValue = {
   user: CurrentUser | undefined

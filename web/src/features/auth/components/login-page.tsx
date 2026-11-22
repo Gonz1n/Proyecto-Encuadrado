@@ -5,26 +5,17 @@ import { CircleAlert, Eye, EyeOff } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Field } from '@/components/form/field'
 import { PendingLabel } from '@/components/form/pending-label'
-import { useAuth } from './auth-context'
+import { useAuth } from '../contexts/auth-context'
 import { safeNextPath } from '@/utils/safe-next-path'
-import { centerPhoto } from '@/features/public-booking/center-photos'
-import { centerSlugFromNext } from './center-slug'
+import { centerPhoto } from '@/utils/center-photos'
+import { centerSlugFromNext } from '../utils/center-slug'
+import { LOGIN_INPUT_CLASS, LOGIN_LABEL_CLASS } from '../constants/styles'
+import { loginSchema, type LoginValues } from '../schemas/login-schema'
 import { isApiError } from '@/utils/api-errors'
-
-const loginSchema = z.object({
-  email: z.email('Ingresa un correo válido'),
-  password: z.string().min(1, 'Ingresa tu contraseña'),
-})
-
-type LoginValues = z.infer<typeof loginSchema>
-
-const LABEL = 'text-base font-semibold text-(--cp-granate)'
-const INPUT = 'h-11 rounded-xl border-(--cp-granate) px-3 placeholder:text-neutral-600'
 
 function loginErrorMessage(error: unknown): string {
   if (isApiError(error, 400)) {
@@ -83,7 +74,7 @@ export function LoginPage() {
           Ingresa a tu cuenta
         </h1>
         <form onSubmit={onSubmit} noValidate className="mt-8 space-y-5">
-          <Field id="email" label="Correo electrónico" labelClassName={LABEL} error={errors.email?.message}>
+          <Field id="email" label="Correo electrónico" labelClassName={LOGIN_LABEL_CLASS} error={errors.email?.message}>
             {(props) => (
               <Input
                 {...props}
@@ -91,20 +82,20 @@ export function LoginPage() {
                 autoComplete="email"
                 inputMode="email"
                 spellCheck={false}
-                className={INPUT}
+                className={LOGIN_INPUT_CLASS}
                 placeholder="nombre@centro.cl"
                 {...register('email')}
               />
             )}
           </Field>
-          <Field id="password" label="Contraseña" labelClassName={LABEL} error={errors.password?.message}>
+          <Field id="password" label="Contraseña" labelClassName={LOGIN_LABEL_CLASS} error={errors.password?.message}>
             {(props) => (
               <div className="relative">
                 <Input
                   {...props}
                   type={showPassword ? 'text' : 'password'}
                   autoComplete="current-password"
-                  className={`${INPUT} pr-12`}
+                  className={`${LOGIN_INPUT_CLASS} pr-12`}
                   {...register('password')}
                 />
                 <button

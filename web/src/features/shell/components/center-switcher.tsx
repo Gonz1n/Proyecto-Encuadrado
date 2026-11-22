@@ -12,7 +12,7 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import type { Membership } from '@/features/auth/api'
+import type { Membership } from '@/features/auth/types/auth'
 
 type CenterSwitcherProps = {
   memberships: Membership[]

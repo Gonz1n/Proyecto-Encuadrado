@@ -7,7 +7,8 @@ import { useSetSearchParams } from '@/hooks/use-set-search-params'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Button } from '@/components/ui/button'
 import { CalendarPlus } from 'lucide-react'
-import { useCan, useCurrentMembership } from '@/features/permissions/use-can'
+import { useCan } from '@/features/permissions/hooks/use-can'
+import { useCurrentMembership } from '@/features/auth/hooks/use-current-membership'
 import { CalendarNavigation } from './calendar-navigation'
 import { formatLongDate } from '@/utils/format'
 import { DATE_FORMAT, parseDateParam, resolveView, weekDays, weekRangeLabel } from './calendar-layout'
@@ -31,7 +32,7 @@ export function AppointmentsPage() {
   const [today] = useState(() => new Date())
   const membership = useCurrentMembership()
   const [creating, setCreating] = useState(false)
-  const canCreate = membership !== undefined && membership.role !== 'viewer'
+  const canCreate = useCan('agenda:create')
 
   const view = resolveView(searchParams.get('vista'), viewAll)
   const reference = parseDateParam(searchParams.get('fecha'), today)
@@ -128,7 +129,7 @@ export function AppointmentsPage() {
       ) : (
         <WeekView slug={slug} reference={reference} professional={professional} viewAll={viewAll} includeCancelled={includeCancelled} />
       )}
-      {canCreate && <CreateAppointmentDialog slug={slug} membership={membership} open={creating} onOpenChange={setCreating} />}
+      {canCreate && membership && <CreateAppointmentDialog slug={slug} membership={membership} open={creating} onOpenChange={setCreating} />}
     </div>
   )
 }
