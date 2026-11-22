@@ -21,27 +21,65 @@ Contraseña de todos los usuarios: `encuadrado2026`
 
 Perfiles públicos: `/c/centro-aurora` y `/c/clinica-nutrir`.
 
-## Setup
+## Correr en local
 
 Stack: Next.js 16 + TypeScript + shadcn/ui (web), FastAPI + SQLAlchemy + Alembic (API), Postgres en Neon.
 
-Requisitos: Python 3.15 con [uv](https://docs.astral.sh/uv/), Node 20 con pnpm, y dos bases Postgres (desarrollo y pruebas).
+### 1. Instalar herramientas (una sola vez)
+
+- [Git](https://git-scm.com/downloads)
+- [uv](https://docs.astral.sh/uv/getting-started/installation/), el gestor de Python. Descarga Python 3.15 por su cuenta al instalar la API, no hace falta instalarlo aparte.
+  - macOS / Linux: `curl -LsSf https://astral.sh/uv/install.sh | sh`
+  - Windows (PowerShell): `powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"`
+- [Node.js](https://nodejs.org) 20.9 o superior (versión LTS).
+- pnpm: `npm install -g pnpm`
+
+No se necesita instalar Postgres: la base de datos está en Neon (en la nube) y ya tiene las tablas y los datos de prueba.
+
+### 2. Clonar el repositorio
+
+```bash
+git clone https://github.com/Gonz1n/Proyecto-Encuadrado.git
+cd Proyecto-Encuadrado
+```
+
+### 3. Levantar la API (terminal 1)
 
 ```bash
 cd api
-cp .env.example .env              # DATABASE_URL y TEST_DATABASE_URL
-uv sync
-uv run alembic upgrade head       # crea las tablas
-uv run python -m app.db.seed      # carga centros, usuarios, servicios y citas
-uv run fastapi dev app/main.py    # http://localhost:8000
+cp .env.example .env
+```
 
+Abrir `api/.env` y reemplazar `DATABASE_URL` por la URL enviada en el correo de entrega. `TEST_DATABASE_URL` solo se usa para correr las pruebas.
+
+```bash
+uv sync                           # instala Python 3.15 y las dependencias
+uv run alembic upgrade head       # crea las tablas si faltan
+uv run python -m app.db.seed      # carga los datos de prueba si faltan
+uv run fastapi dev app/main.py    # http://localhost:8000
+```
+
+Dejar esta terminal abierta. Para comprobar que funciona, abrir http://localhost:8000/api/health/ (debe responder `{"status":"ok"}`).
+
+### 4. Levantar la web (terminal 2)
+
+Desde la raíz del repositorio:
+
+```bash
 cd web
-cp .env.example .env.local        # API_URL=http://localhost:8000
+cp .env.example .env.local        # API_URL=http://localhost:8000, no hay que cambiarlo
 pnpm install
 pnpm dev                          # http://localhost:3000
 ```
 
-Pruebas: `uv run pytest -q` en `api/` y `pnpm check` en `web/` (lint, tipos y pruebas).
+### 5. Usar la aplicación
+
+Abrir http://localhost:3000 e ingresar con cualquier usuario de la tabla de [Accesos](#accesos). El perfil público de los centros está en http://localhost:3000/c/centro-aurora.
+
+### Pruebas
+
+- API: `uv run pytest -q` en `api/`. Requiere `TEST_DATABASE_URL` apuntando a una base distinta de `DATABASE_URL`, porque las pruebas borran y recrean las tablas.
+- Web: `pnpm check` en `web/` (lint, tipos y pruebas).
 
 Deploy: Render usa `render.yaml` y en cada arranque aplica migraciones y seed. Vercel despliega `web/` con la variable `API_URL`.
 
