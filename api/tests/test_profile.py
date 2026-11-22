@@ -7,7 +7,6 @@ PROFILE = {
     "university": "Universidad de Chile",
     "bio": "Atiendo adultos con enfoque cognitivo-conductual.",
     "health_registry": "123456",
-    "avatar_url": "https://example.com/camila.jpg",
 }
 
 
@@ -27,12 +26,12 @@ def test_profile_requires_name(user_factory, auth_client):
     assert "first_name" in response.json()
 
 
-def test_profile_rejects_long_bio_bad_registry_and_bad_avatar(user_factory, auth_client):
+def test_profile_rejects_long_bio_and_bad_registry(user_factory, auth_client):
     client = auth_client(user_factory())
-    body = {"bio": "a" * 501, "health_registry": "12A45", "avatar_url": "no es un enlace"}
+    body = {"bio": "a" * 501, "health_registry": "12A45"}
     response = client.patch("/api/auth/me/", json=body)
     assert response.status_code == 400
-    assert {"bio", "health_registry", "avatar_url"} <= set(response.json())
+    assert {"bio", "health_registry"} <= set(response.json())
 
 
 def test_profile_cannot_change_email(session, user_factory, auth_client):
@@ -48,7 +47,8 @@ def test_profile_update_requires_token(client):
     assert client.patch("/api/auth/me/", json=PROFILE).status_code == 401
 
 
-def test_profile_allows_blank_avatar_and_partial(user_factory, auth_client):
-    response = auth_client(user_factory()).patch("/api/auth/me/", json={"avatar_url": ""})
+def test_profile_allows_partial_update(user_factory, auth_client):
+    response = auth_client(user_factory()).patch("/api/auth/me/", json={"title": "Psicóloga"})
     assert response.status_code == 200
-    assert response.json()["avatar_url"] == ""
+    assert response.json()["title"] == "Psicóloga"
+    assert "avatar_url" not in response.json()

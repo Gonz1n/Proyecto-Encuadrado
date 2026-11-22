@@ -17,7 +17,6 @@ class User(Base):
     last_name: Mapped[str] = mapped_column(String(150), default="")
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     title: Mapped[str] = mapped_column(String(120), default="")
-    avatar_url: Mapped[str] = mapped_column(String(200), default="")
     university: Mapped[str] = mapped_column(String(150), default="")
     bio: Mapped[str] = mapped_column(String(500), default="")
     health_registry: Mapped[str] = mapped_column(String(10), default="")

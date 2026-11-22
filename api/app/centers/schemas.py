@@ -180,7 +180,6 @@ class MemberUserOut(BaseModel):
     full_name: str
     email: str
     title: str
-    avatar_url: str
 
 
 class MemberOut(BaseModel):

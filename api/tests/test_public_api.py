@@ -72,7 +72,6 @@ def test_public_profile_hides_viewer_and_inactive_services(client, setup, servic
         "id",
         "full_name",
         "title",
-        "avatar_url",
         "university",
         "bio",
         "health_registry",

@@ -1,9 +1,7 @@
 import re
 from typing import Annotated
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field, HttpUrl, TypeAdapter, field_validator
-
-_url = TypeAdapter(HttpUrl)
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
 
 class CenterSummary(BaseModel):
@@ -29,7 +27,6 @@ class UserOut(BaseModel):
     last_name: str
     full_name: str
     title: str
-    avatar_url: str
     university: str
     bio: str
     health_registry: str
@@ -55,7 +52,6 @@ class ProfileUpdate(BaseModel):
     university: Annotated[str, Field(max_length=150)] | None = None
     bio: Annotated[str, Field(max_length=500)] | None = None
     health_registry: Annotated[str, Field(max_length=10)] | None = None
-    avatar_url: Annotated[str, Field(max_length=200)] | None = None
 
     @field_validator("first_name", "last_name")
     @classmethod
@@ -69,14 +65,4 @@ class ProfileUpdate(BaseModel):
     def digits_only(cls, value: str | None) -> str | None:
         if value and not re.fullmatch(r"\d+", value):
             raise ValueError("El registro solo admite números")
-        return value
-
-    @field_validator("avatar_url")
-    @classmethod
-    def valid_url(cls, value: str | None) -> str | None:
-        if value:
-            try:
-                _url.validate_python(value)
-            except ValueError:
-                raise ValueError("Ingresa una URL válida.") from None
         return value

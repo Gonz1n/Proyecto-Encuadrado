@@ -14,7 +14,6 @@ class PublicProfessionalOut(BaseModel):
     id: int
     full_name: str
     title: str
-    avatar_url: str
     university: str
     bio: str
     health_registry: str
@@ -26,7 +25,6 @@ class PublicProfessionalOut(BaseModel):
             id=membership.id,
             full_name=user.full_name,
             title=user.title,
-            avatar_url=user.avatar_url,
             university=user.university,
             bio=user.bio,
             health_registry=user.health_registry,

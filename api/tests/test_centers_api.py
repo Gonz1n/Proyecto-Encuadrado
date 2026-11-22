@@ -273,7 +273,7 @@ def test_members_lists_all_roles(setup, membership_factory):
     first = data[0]
     assert first["role_label"] == "Administrador"
     assert set(first) == {"id", "role", "role_label", "user"}
-    assert set(first["user"]) == {"full_name", "email", "title", "avatar_url"}
+    assert set(first["user"]) == {"full_name", "email", "title"}
 
 
 def test_terms_are_trimmed_and_limited_to_5000(setup):
