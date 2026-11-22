@@ -100,7 +100,14 @@ Deploy: Render usa `render.yaml` y en cada arranque aplica migraciones y seed. V
 
 ## Decisiones que destaco
 
-- Destaco el diseño web que tiene la plataforma completa, es facil de usar e incita al usuario a mirar todas las opciones que tiene la plataforma. Se adjuntan algunas imagenes de como se planeo usando la Ilustrator.
+- Destaco el diseño web que tiene la plataforma completa, es fácil de usar e incita al usuario a mirar todas las opciones que tiene la plataforma. Se adjuntan algunas imágenes de cómo se planeó usando Illustrator.
 
 - Se destaca el manejo de roles para una persona que trabaja en dos centros a la vez.
 
+**Perfil público del centro**
+
+![Boceto del perfil público del centro](assets/diseno/boceto-perfil-publico.png)
+
+**Inicio de sesión**
+
+![Boceto del inicio de sesión](assets/diseno/boceto-login.png)
