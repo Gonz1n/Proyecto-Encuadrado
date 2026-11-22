@@ -1,4 +1,4 @@
-import type { PatientFieldName } from '@/features/patient/patient-fields'
+import type { PatientFieldName } from '@/features/patient/types/patient'
 import type { Modality } from '@/types/modality'
 
 export type AppointmentChange = {

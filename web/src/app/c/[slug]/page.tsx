@@ -1,4 +1,4 @@
-import { CenterProfilePage } from '@/features/public-booking/center-profile-page'
+import { CenterProfilePage } from '@/features/public-booking/components/center-profile/center-profile-page'
 import { generateCenterMetadata } from '@/features/center/api/public-center-server'
 
 export const generateMetadata = generateCenterMetadata
