@@ -4,7 +4,7 @@ import { useState, type ReactNode } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
-import { isUnauthorized } from '@/features/auth/hooks'
+import { isUnauthorized } from '@/utils/api-errors'
 
 export function Providers({ children }: { children: ReactNode }) {
   const [queryClient] = useState(

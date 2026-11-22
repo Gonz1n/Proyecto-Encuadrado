@@ -7,7 +7,8 @@ import type { ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
 import { NotFoundPage } from '@/components/layout/not-found-page'
 import { useAuth } from './auth-context'
-import { isUnauthorized, useMeQuery } from './hooks'
+import { isUnauthorized } from '@/utils/api-errors'
+import { useMeQuery } from './hooks'
 
 function SessionLoading() {
   return (

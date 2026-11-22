@@ -1,8 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { ApiError } from '@/lib/api-client'
 import { queryKeys } from '@/lib/query-keys'
 import { appointmentsApi, type AppointmentFilters, type CreateAppointmentInput, type RescheduleInput } from './api'
+import { isApiError } from '@/utils/api-errors'
+import { FORBIDDEN_MESSAGE, SLOT_TAKEN_MESSAGE } from '@/constants/messages'
 
 export function useAppointments(slug: string, filters: AppointmentFilters) {
   return useQuery({ queryKey: queryKeys.appointments(slug, filters), queryFn: () => appointmentsApi.list(slug, filters) })
@@ -31,18 +32,18 @@ function useManageMutation<TVariables>(
       await invalidate()
     },
     onError: (error) => {
-      if (error instanceof ApiError && error.status === 409) {
-        toast.error('Esa hora acaba de ser tomada, elige otra')
+      if (isApiError(error, 409)) {
+        toast.error(SLOT_TAKEN_MESSAGE)
         onConflict?.()
         return
       }
-      if (error instanceof ApiError && error.status === 404) {
+      if (isApiError(error, 404)) {
         toast.error('La cita ya fue modificada o cancelada')
         onDone()
         void invalidate()
         return
       }
-      if (error instanceof ApiError && error.status === 400) {
+      if (isApiError(error, 400)) {
         const data = (error.data ?? {}) as Record<string, unknown>
         const message = [data.detail, data.start, data.note].flat().find((value) => typeof value === 'string')
         if (message) {
@@ -50,8 +51,8 @@ function useManageMutation<TVariables>(
           return
         }
       }
-      if (error instanceof ApiError && error.status === 403) {
-        toast.error('No tienes permisos para esta acción')
+      if (isApiError(error, 403)) {
+        toast.error(FORBIDDEN_MESSAGE)
         return
       }
       toast.error('No pudimos completar la acción. Intenta de nuevo.')

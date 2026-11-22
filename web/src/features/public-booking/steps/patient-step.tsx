@@ -12,7 +12,6 @@ import { FieldError } from '@/components/form/field-error'
 import { PendingLabel } from '@/components/form/pending-label'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { format, subYears } from 'date-fns'
-import { ApiError } from '@/lib/api-client'
 import { buildPatientShape, PATIENT_FIELD_NAMES } from '@/features/patient/patient-fields'
 import { firstMessage, setFieldErrors } from '@/utils/form-errors'
 import { PatientInputs } from '@/features/patient/patient-inputs'
@@ -23,6 +22,8 @@ import { saveBooking } from '../booking-storage'
 import { useCreateBooking } from '../hooks'
 import { MODALITY_LABELS } from '@/constants/modality'
 import { type Modality } from '@/types/modality'
+import { isApiError, validationErrors } from '@/utils/api-errors'
+import { SLOT_TAKEN_MESSAGE } from '@/constants/messages'
 
 const TERMS_ERROR = 'Debes aceptar los términos y condiciones'
 const CONSENT_ERROR = 'Debes autorizar el tratamiento de tus datos personales'
@@ -105,13 +106,13 @@ export function PatientStep() {
   useEffect(() => () => savePatientDraft(getValues()), [getValues, savePatientDraft])
 
   const handleError = (error: unknown) => {
-    if (error instanceof ApiError && error.status === 409) {
-      toast.error('Esa hora acaba de ser tomada, elige otra')
+    if (isApiError(error, 409)) {
+      toast.error(SLOT_TAKEN_MESSAGE)
       state.update({ time: null }, { replace: true })
       return
     }
-    if (error instanceof ApiError && error.status === 400 && error.data) {
-      const data = error.data as Record<string, unknown>
+    const data = validationErrors(error)
+    if (data) {
       if (firstMessage(data, 'service')) {
         toast.error('Este servicio ya no está disponible')
         queryClient.invalidateQueries({ queryKey: queryKeys.publicCenter(slug) })

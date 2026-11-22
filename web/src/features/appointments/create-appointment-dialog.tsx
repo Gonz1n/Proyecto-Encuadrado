@@ -16,13 +16,14 @@ import type { Membership } from '@/features/auth/api'
 import { buildPatientShape, EMPTY_PATIENT, PATIENT_FIELD_NAMES } from '@/features/patient/patient-fields'
 import { PatientInputs } from '@/features/patient/patient-inputs'
 import { useAvailability, useAvailableDays, usePublicCenter } from '@/features/public-booking/hooks'
-import { ApiError } from '@/lib/api-client'
 import { firstMessage, setFieldErrors } from '@/utils/form-errors'
 import { MODALITY_LABELS } from '@/constants/modality'
 import { type Modality } from '@/types/modality'
 import { selectableProfessionals } from './booking-professionals'
 import { DayTimePicker } from './day-time-picker'
 import { useCreateAppointment } from './hooks'
+import { isApiError, validationErrors } from '@/utils/api-errors'
+import { SLOT_TAKEN_MESSAGE } from '@/constants/messages'
 
 type CreateAppointmentDialogProps = {
   slug: string
@@ -97,13 +98,13 @@ export function CreateAppointmentDialog({ slug, membership, open, onOpenChange }
       {
         onSuccess: () => onOpenChange(false),
         onError: (error) => {
-          if (error instanceof ApiError && error.status === 409) {
-            toast.error('Esa hora acaba de ser tomada, elige otra')
+          if (isApiError(error, 409)) {
+            toast.error(SLOT_TAKEN_MESSAGE)
             setTime(undefined)
             return
           }
-          if (error instanceof ApiError && error.status === 400 && error.data) {
-            const data = error.data as Record<string, unknown>
+          const data = validationErrors(error)
+          if (data) {
             const general = ['service', 'professional', 'start']
               .map((key) => firstMessage(data, key))
               .find((message) => message)

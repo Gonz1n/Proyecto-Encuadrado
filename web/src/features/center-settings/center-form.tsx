@@ -20,7 +20,8 @@ import { SOCIAL_NETWORKS } from '@/constants/social-networks'
 import { phoneError, socialLinkError } from '@/utils/social-links'
 import type { Center, CenterUpdate } from './api'
 import { cancelledMessage } from './cancelled-message'
-import { handleMutationError, useUpdateCenter } from './hooks'
+import { handleMutationError } from '@/utils/mutation-errors'
+import { useUpdateCenter } from './hooks'
 
 const DESCRIPTION_MAX = 400
 const TERMS_MAX = 5000

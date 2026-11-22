@@ -11,18 +11,20 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import { FieldError } from '@/components/form/field-error'
-import { ApiError } from '@/lib/api-client'
 import { firstMessage } from '@/utils/form-errors'
 import { formatLongDate } from '@/utils/format'
 import { cancelledMessage } from './cancelled-message'
-import { notifyDeleteError, useClosures, useCreateClosure, useDeleteClosure } from './hooks'
+import { notifyDeleteError } from '@/utils/mutation-errors'
+import { useClosures, useCreateClosure, useDeleteClosure } from './hooks'
+import { isApiError, validationErrors } from '@/utils/api-errors'
+import { FORBIDDEN_MESSAGE, SAVE_ERROR_MESSAGE } from '@/constants/messages'
 
 const REASON_MAX = 120
 const DATE_FORMAT = 'yyyy-MM-dd'
 
 function firstError(error: unknown): string | undefined {
-  if (!(error instanceof ApiError) || error.status !== 400 || !error.data) return undefined
-  const data = error.data as Record<string, unknown>
+  const data = validationErrors(error)
+  if (!data) return undefined
   return firstMessage(data, 'date') ?? firstMessage(data, 'reason') ?? undefined
 }
 
@@ -48,8 +50,8 @@ export function ClosuresCard({ slug, canEdit }: { slug: string; canEdit: boolean
     } catch (e) {
       const message = firstError(e)
       if (message) setError(message)
-      else if (e instanceof ApiError && e.status === 403) toast.error('No tienes permisos para esta acción')
-      else toast.error('No pudimos guardar los cambios. Intenta de nuevo.')
+      else if (isApiError(e, 403)) toast.error(FORBIDDEN_MESSAGE)
+      else toast.error(SAVE_ERROR_MESSAGE)
     }
   }
 

@@ -10,11 +10,11 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Field } from '@/components/form/field'
 import { PendingLabel } from '@/components/form/pending-label'
-import { ApiError } from '@/lib/api-client'
 import { useAuth } from './auth-context'
 import { safeNextPath } from '@/utils/safe-next-path'
 import { centerPhoto } from '@/features/public-booking/center-photos'
 import { centerSlugFromNext } from './center-slug'
+import { isApiError } from '@/utils/api-errors'
 
 const loginSchema = z.object({
   email: z.email('Ingresa un correo válido'),
@@ -27,7 +27,7 @@ const LABEL = 'text-base font-semibold text-(--cp-granate)'
 const INPUT = 'h-11 rounded-xl border-(--cp-granate) px-3 placeholder:text-neutral-600'
 
 function loginErrorMessage(error: unknown): string {
-  if (error instanceof ApiError && error.status === 400) {
+  if (isApiError(error, 400)) {
     const detail = (error.data as { detail?: unknown } | null)?.detail
     return typeof detail === 'string' ? detail : 'Correo o contraseña incorrectos'
   }

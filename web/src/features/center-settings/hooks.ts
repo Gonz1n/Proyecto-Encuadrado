@@ -1,8 +1,4 @@
 import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query'
-import { toast } from 'sonner'
-import type { FieldValues, Path, UseFormSetError } from 'react-hook-form'
-import { ApiError } from '@/lib/api-client'
-import { setFieldErrors } from '@/utils/form-errors'
 import { queryKeys } from '@/lib/query-keys'
 import { centerApi, type CenterUpdate, type ServiceInput } from './api'
 
@@ -86,22 +82,4 @@ export function useUpdateService(slug: string) {
 
 export function useDeleteService(slug: string) {
   return useServiceMutation(slug, (id: number) => centerApi.deleteService(slug, id))
-}
-
-export function handleMutationError<T extends FieldValues>(
-  error: unknown,
-  setError: UseFormSetError<T>,
-  fields: readonly Path<T>[],
-) {
-  if (error instanceof ApiError && error.status === 403) {
-    toast.error('No tienes permisos para esta acción')
-    return
-  }
-  const data = error instanceof ApiError && error.status === 400 ? error.data : null
-  if (data && setFieldErrors(data as Record<string, unknown>, fields, setError)) return
-  toast.error('No pudimos guardar los cambios. Intenta de nuevo.')
-}
-
-export function notifyDeleteError(error: unknown, fallback: string) {
-  toast.error(error instanceof ApiError && error.status === 403 ? 'No tienes permisos para esta acción' : fallback)
 }

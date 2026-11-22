@@ -13,7 +13,8 @@ import { PendingLabel } from '@/components/form/pending-label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { formatDuration } from '@/utils/format'
 import type { Service } from './api'
-import { handleMutationError, useCreateService, useUpdateService } from './hooks'
+import { handleMutationError } from '@/utils/mutation-errors'
+import { useCreateService, useUpdateService } from './hooks'
 
 const DURATION_OPTIONS = Array.from({ length: 16 }, (_, i) => {
   const minutes = (i + 1) * 15

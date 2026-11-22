@@ -14,7 +14,7 @@ import { Field } from '@/components/form/field'
 import { PendingLabel } from '@/components/form/pending-label'
 import { authApi, type CurrentUser, type ProfileUpdate } from '@/features/auth/api'
 import { useAuth } from '@/features/auth/auth-context'
-import { handleMutationError } from '@/features/center-settings/hooks'
+import { handleMutationError } from '@/utils/mutation-errors'
 import { queryKeys } from '@/lib/query-keys'
 
 const BIO_MAX = 500

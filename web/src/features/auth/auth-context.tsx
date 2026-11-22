@@ -4,7 +4,8 @@ import { createContext, use, useEffect, useMemo, type ReactNode } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query-keys'
 import { authApi, type CurrentUser } from './api'
-import { isUnauthorized, useMeQuery } from './hooks'
+import { isUnauthorized } from '@/utils/api-errors'
+import { useMeQuery } from './hooks'
 
 type AuthContextValue = {
   user: CurrentUser | undefined
