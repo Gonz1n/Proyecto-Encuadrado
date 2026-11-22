@@ -1,0 +1,53 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "unicorn", "oxc", "import"],
+  "ignorePatterns": ["src/types/api.ts"],
+  "rules": {
+    "import/no-cycle": "error",
+    "no-restricted-imports": [
+      "error",
+      {
+        "patterns": [
+          {
+            "group": [
+              "@/features/appointments/**",
+              "@/features/center-settings/**",
+              "@/features/profile/**",
+              "@/features/public-booking/**",
+              "@/features/shell/**"
+            ],
+            "message": "Las features de pantalla solo se importan desde app/. Lo compartido va en una feature de dominio o en la capa global."
+          },
+          {
+            "group": ["../../../**"],
+            "message": "No salgas de la feature con imports relativos. Usa el alias @/."
+          }
+        ]
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": ["src/components/**", "src/lib/**", "src/utils/**", "src/constants/**", "src/types/**", "src/hooks/**"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": ["@/features/**"],
+                "message": "La capa global no puede depender de features."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["src/app/**"],
+      "rules": {
+        "no-restricted-imports": "off"
+      }
+    }
+  ]
+}
