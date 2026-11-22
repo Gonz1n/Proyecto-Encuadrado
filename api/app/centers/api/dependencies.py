@@ -46,3 +46,13 @@ def manager_access(access: CenterDep) -> CenterAccess:
 
 AdminDep = Annotated[CenterAccess, Depends(admin_access)]
 ManagerDep = Annotated[CenterAccess, Depends(manager_access)]
+
+
+def public_center(session: SessionDep, slug: str) -> Center:
+    center = centers.get_center_by_slug(session, slug)
+    if center is None:
+        raise DomainError(404, NOT_FOUND)
+    return center
+
+
+PublicCenter = Annotated[Center, Depends(public_center)]

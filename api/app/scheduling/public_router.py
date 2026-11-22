@@ -1,14 +1,10 @@
 from datetime import date
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Query
 
-from app.centers.models.center import Center
-from app.centers.repositories import centers, memberships
-from app.centers.repositories import services as center_services
-from app.centers.schemas.center import CenterListItemOut, CenterOut
+from app.centers.api.dependencies import PublicCenter
 from app.core import clock
-from app.core.errors.exceptions import DomainError
 from app.db.session import SessionDep
 from app.scheduling import availability, services
 from app.scheduling.models import Appointment
@@ -17,42 +13,10 @@ from app.scheduling.schemas import (
     BookingOut,
     DaysOut,
     PublicBookingIn,
-    PublicCenterOut,
-    PublicProfessionalOut,
     SlotsOut,
 )
-from app.shared.constants.messages import NOT_FOUND
 
-list_router = APIRouter(prefix="/api/public/centers", tags=["public"])
 router = APIRouter(prefix="/api/public/centers/{slug}", tags=["public"])
-
-
-def _center(session: SessionDep, slug: str) -> Center:
-    center = centers.get_center_by_slug(session, slug)
-    if center is None:
-        raise DomainError(404, NOT_FOUND)
-    return center
-
-
-PublicCenter = Annotated[Center, Depends(_center)]
-
-
-@list_router.get("/", response_model=list[CenterListItemOut])
-def list_centers(session: SessionDep) -> list[Center]:
-    return centers.all_centers(session)
-
-
-@router.get("/", response_model=PublicCenterOut)
-def read_center(session: SessionDep, center: PublicCenter) -> PublicCenterOut:
-    professionals = sorted(
-        memberships.bookable_memberships(session, center.id),
-        key=lambda m: (m.user.last_name, m.user.first_name),
-    )
-    return PublicCenterOut(
-        **CenterOut.model_validate(center).model_dump(),
-        professionals=[PublicProfessionalOut.from_membership(m) for m in professionals],
-        services=center_services.active_services(session, center.id),
-    )
 
 
 @router.get("/availability/", response_model=SlotsOut)

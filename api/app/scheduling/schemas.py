@@ -3,38 +3,10 @@ from typing import Annotated, Any, Literal
 
 from pydantic import AfterValidator, BaseModel, ConfigDict, EmailStr, Field, ValidationError, field_validator
 
-from app.centers.schemas.center import CenterOut
-from app.centers.schemas.service import ServiceOut
 from app.core import clock
 from app.shared.schemas.fields import Minute
 from app.shared.validators.phone import valid_phone
 from app.shared.validators.rut import normalize_rut
-
-
-class PublicProfessionalOut(BaseModel):
-    id: int
-    full_name: str
-    title: str
-    university: str
-    bio: str
-    health_registry: str
-
-    @classmethod
-    def from_membership(cls, membership) -> "PublicProfessionalOut":
-        user = membership.user
-        return cls(
-            id=membership.id,
-            full_name=user.full_name,
-            title=user.title,
-            university=user.university,
-            bio=user.bio,
-            health_registry=user.health_registry,
-        )
-
-
-class PublicCenterOut(CenterOut):
-    professionals: list[PublicProfessionalOut]
-    services: list[ServiceOut]
 
 
 class SlotsOut(BaseModel):
