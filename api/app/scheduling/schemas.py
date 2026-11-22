@@ -160,7 +160,7 @@ class AppointmentOut(BaseModel):
     professional: AppointmentProfessionalOut
     patient_name: str
     patient_email: str
-    patient_phone: Annotated[str, AfterValidator(valid_phone)]
+    patient_phone: str
     patient_rut: str
     patient_birth_date: date | None
     modality: str

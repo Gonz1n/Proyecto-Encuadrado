@@ -57,6 +57,14 @@ def test_viewer_sees_all_appointments(setup, auth_client):
     assert len(auth_client(viewer.user).get(url(center)).json()) == 2
 
 
+def test_list_returns_stored_phone_unchanged(setup, auth_client, appointment_factory, service_factory):
+    center, admin, member_a, _, _ = setup
+    appointment_factory(member_a, service_factory(center), at(2, 10), patient_phone="+56 9 1234 5678")
+    response = auth_client(admin.user).get(url(center), params={"from": at(2, 0).date().isoformat()})
+    assert response.status_code == 200
+    assert [a["patient_phone"] for a in response.json()] == ["+56 9 1234 5678"]
+
+
 def test_invalid_query_params_return_400(setup, auth_client):
     center, admin, *_ = setup
     assert auth_client(admin.user).get(url(center), params={"from": "nope"}).status_code == 400
