@@ -2,9 +2,7 @@ import { expect, test } from 'vitest'
 import { navLinks, professionalSubtitle } from './center-page'
 
 test('joins title and university and omits empty parts', () => {
-  expect(professionalSubtitle({ title: 'Psicóloga', university: 'Universidad de Chile' })).toBe(
-    'Psicóloga · Universidad de Chile',
-  )
+  expect(professionalSubtitle({ title: 'Psicóloga', university: 'Universidad de Chile' })).toBe('Psicóloga · Universidad de Chile')
   expect(professionalSubtitle({ title: 'Psicóloga', university: '' })).toBe('Psicóloga')
   expect(professionalSubtitle({ title: '', university: '' })).toBe('')
 })

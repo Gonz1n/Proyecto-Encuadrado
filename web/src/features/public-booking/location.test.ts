@@ -9,12 +9,8 @@ test('builds the query with commune and country', () => {
 
 test('encodes the map urls', () => {
   const query = encodeURIComponent('Av. Ñuñoa 10 & 20, Ñuñoa, Chile')
-  expect(mapsEmbedUrl('Av. Ñuñoa 10 & 20', 'Ñuñoa')).toBe(
-    `https://www.google.com/maps?q=${query}&output=embed`,
-  )
-  expect(mapsDirectionsUrl('Av. Ñuñoa 10 & 20', 'Ñuñoa')).toBe(
-    `https://www.google.com/maps/search/?api=1&query=${query}`,
-  )
+  expect(mapsEmbedUrl('Av. Ñuñoa 10 & 20', 'Ñuñoa')).toBe(`https://www.google.com/maps?q=${query}&output=embed`)
+  expect(mapsDirectionsUrl('Av. Ñuñoa 10 & 20', 'Ñuñoa')).toBe(`https://www.google.com/maps/search/?api=1&query=${query}`)
 })
 
 test('returns empty urls without address', () => {

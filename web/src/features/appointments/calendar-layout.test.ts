@@ -11,6 +11,9 @@ import {
   weekRangeLabel,
 } from './calendar-layout'
 
+const at = (time: string) => `2026-11-20T${time}`
+const span = (id: number, start: string, end: string) => ({ id, start: at(start), end: at(end) })
+
 test('parseDateParam acepta fecha real y rechaza invalidas', () => {
   const today = new Date(2026, 10, 20)
   expect(parseDateParam('2026-11-25', today)).toEqual(new Date(2026, 10, 25))
@@ -31,51 +34,32 @@ test('visibleHourRange usa el horario del centro', () => {
 })
 
 test('visibleHourRange se extiende para citas fuera del horario', () => {
-  const appts = [
-    { start: '2026-11-20T08:15', end: '2026-11-20T09:00' },
-    { start: '2026-11-20T19:00', end: '2026-11-20T19:45' },
-  ]
+  const appts = [span(1, '08:15', '09:00'), span(2, '19:00', '19:45')]
   expect(visibleHourRange('09:00', '19:00', appts)).toEqual({ startMinutes: 480, endMinutes: 1200 })
 })
 
 test('blockPosition en porcentaje del rango', () => {
-  expect(
-    blockPosition('2026-11-20T10:00', '2026-11-20T11:00', { startMinutes: 540, endMinutes: 1140 }),
-  ).toEqual({ top: 10, height: 10 })
+  expect(blockPosition(at('10:00'), at('11:00'), { startMinutes: 540, endMinutes: 1140 })).toEqual({ top: 10, height: 10 })
 })
 
-test('assignLanes separa solapes y deja solos los que no chocan', () => {
-  const r = assignLanes([
-    { id: 1, start: '2026-11-20T09:00', end: '2026-11-20T10:00' },
-    { id: 2, start: '2026-11-20T09:30', end: '2026-11-20T10:30' },
-    { id: 3, start: '2026-11-20T11:00', end: '2026-11-20T12:00' },
-  ])
-  expect(r.map((x) => [x.item.id, x.lane, x.lanes])).toEqual([
-    [1, 0, 2],
-    [2, 1, 2],
-    [3, 0, 1],
-  ])
-})
-
-test('assignLanes: solape transitivo forma un solo grupo', () => {
-  const r = assignLanes([
-    { id: 1, start: '2026-11-20T09:00', end: '2026-11-20T11:00' },
-    { id: 2, start: '2026-11-20T09:30', end: '2026-11-20T10:00' },
-    { id: 3, start: '2026-11-20T10:30', end: '2026-11-20T12:00' },
-  ])
-  expect(r.map((x) => [x.item.id, x.lane, x.lanes])).toEqual([
-    [1, 0, 2],
-    [2, 1, 2],
-    [3, 1, 2],
-  ])
-})
-
-test('assignLanes: cita que termina justo cuando empieza otra no se solapa', () => {
-  const r = assignLanes([
-    { id: 1, start: '2026-11-20T09:00', end: '2026-11-20T10:00' },
-    { id: 2, start: '2026-11-20T10:00', end: '2026-11-20T11:00' },
-  ])
-  expect(r.map((x) => x.lanes)).toEqual([1, 1])
+test.each([
+  [
+    'separa solapes y deja solos los que no chocan',
+    [span(1, '09:00', '10:00'), span(2, '09:30', '10:30'), span(3, '11:00', '12:00')],
+    [[1, 0, 2], [2, 1, 2], [3, 0, 1]],
+  ],
+  [
+    'solape transitivo forma un solo grupo',
+    [span(1, '09:00', '11:00'), span(2, '09:30', '10:00'), span(3, '10:30', '12:00')],
+    [[1, 0, 2], [2, 1, 2], [3, 1, 2]],
+  ],
+  [
+    'cita que termina justo cuando empieza otra no se solapa',
+    [span(1, '09:00', '10:00'), span(2, '10:00', '11:00')],
+    [[1, 0, 1], [2, 0, 1]],
+  ],
+])('assignLanes: %s', (_, items, expected) => {
+  expect(assignLanes(items).map((x) => [x.item.id, x.lane, x.lanes])).toEqual(expected)
 })
 
 test('professionalColor es estable por id', () => {
@@ -98,10 +82,7 @@ test('resolveView cae a semana sin permiso y a lista con valores invalidos', () 
 })
 
 test('dayColumns pone primero a los miembros y agrega profesionales desconocidos sin duplicar', () => {
-  const members = [
-    { id: 2, full_name: 'Camila' },
-    { id: 1, full_name: 'Matías' },
-  ]
+  const members = [{ id: 2, full_name: 'Camila' }, { id: 1, full_name: 'Matías' }]
   const appointments = [
     { professional: { id: 1, full_name: 'Matías' } },
     { professional: { id: 9, full_name: 'Ex Miembro' } },

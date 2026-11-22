@@ -10,12 +10,8 @@ describe('socialLinkError', () => {
 
   test('rechaza texto que no es enlace y dominios equivocados', () => {
     expect(socialLinkError('centro')).toBe('Ingresa un enlace válido, por ejemplo https://...')
-    expect(socialLinkError('https://facebook.com/centro', 'instagram.com', 'Instagram')).toBe(
-      'El enlace debe ser de Instagram',
-    )
-    expect(socialLinkError('https://evil.com/linkedin.com', 'linkedin.com', 'LinkedIn')).toBe(
-      'El enlace debe ser de LinkedIn',
-    )
+    expect(socialLinkError('https://facebook.com/centro', 'instagram.com', 'Instagram')).toBe('El enlace debe ser de Instagram')
+    expect(socialLinkError('https://evil.com/linkedin.com', 'linkedin.com', 'LinkedIn')).toBe('El enlace debe ser de LinkedIn')
   })
 })
 

@@ -24,9 +24,7 @@ test('useSetSearchParams keeps other params and replaces', () => {
     },
     { replace: true },
   )
-  expect(router.replace).toHaveBeenCalledWith('/app/centro/agenda?view=day&professional=3', {
-    scroll: false,
-  })
+  expect(router.replace).toHaveBeenCalledWith('/app/centro/agenda?view=day&professional=3', { scroll: false })
   expect(router.push).not.toHaveBeenCalled()
 })
 
