@@ -19,6 +19,7 @@ class CenterAccess:
     membership: Membership
 
 
+# Valida que el usuario pertenezca al centro
 def center_access(slug: str, user: CurrentUser, session: SessionDep) -> CenterAccess:
     center = centers.get_center_by_slug(session, slug)
     if center is None:
@@ -32,12 +33,14 @@ def center_access(slug: str, user: CurrentUser, session: SessionDep) -> CenterAc
 CenterDep = Annotated[CenterAccess, Depends(center_access)]
 
 
+# Exige rol administrador
 def admin_access(access: CenterDep) -> CenterAccess:
     if access.membership.role != Role.ADMIN:
         raise DomainError(403, FORBIDDEN)
     return access
 
 
+# Exige un rol que pueda gestionar citas
 def manager_access(access: CenterDep) -> CenterAccess:
     if access.membership.role == Role.VIEWER:
         raise DomainError(403, FORBIDDEN)
@@ -48,6 +51,7 @@ AdminDep = Annotated[CenterAccess, Depends(admin_access)]
 ManagerDep = Annotated[CenterAccess, Depends(manager_access)]
 
 
+# Busca el centro por slug sin pedir sesion
 def public_center(session: SessionDep, slug: str) -> Center:
     center = centers.get_center_by_slug(session, slug)
     if center is None:

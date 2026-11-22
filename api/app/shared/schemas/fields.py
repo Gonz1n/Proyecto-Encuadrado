@@ -6,7 +6,9 @@ from pydantic import AfterValidator, BeforeValidator, PlainSerializer
 from app.shared.constants.formats import HOUR_MINUTE_FORMAT, MINUTE_FORMAT
 
 
+# Crea un parser de fecha u hora con su mensaje de error
 def _parser(fmt: str, kind: type, message: str):
+    # Convierte el texto al formato esperado
     def parse(value: Any) -> Any:
         if isinstance(value, str):
             try:
@@ -32,6 +34,7 @@ HourMinute = Annotated[
 ]
 
 
+# Rechaza textos vacios
 def _not_blank(value: str) -> str:
     if not value:
         raise ValueError("Este campo no puede estar en blanco.")

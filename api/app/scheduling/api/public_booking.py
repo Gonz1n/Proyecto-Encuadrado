@@ -17,6 +17,7 @@ from app.shared.constants.formats import HOUR_MINUTE_FORMAT
 router = APIRouter(prefix="/api/public/centers/{slug}", tags=["public"])
 
 
+# Horas libres de un dia
 @router.get("/availability/", response_model=SlotsOut)
 def read_availability(
     session: SessionDep,
@@ -32,6 +33,7 @@ def read_availability(
     return SlotsOut(date=date, slots=[slot.strftime(HOUR_MINUTE_FORMAT) for slot in slots])
 
 
+# Dias con horas libres
 @router.get("/availability/days/", response_model=DaysOut)
 def read_availability_days(
     session: SessionDep,
@@ -46,6 +48,7 @@ def read_availability_days(
     return DaysOut(days=days)
 
 
+# Agenda una cita desde la pagina publica
 @router.post("/appointments/", response_model=BookingOut, status_code=201)
 def create_appointment(session: SessionDep, center: PublicCenter, data: PublicBookingIn) -> Appointment:
     service = resolve_service(session, center, data.service)

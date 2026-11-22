@@ -13,6 +13,7 @@ class ServiceIn(BaseModel):
     duration_minutes: Annotated[int, Field(ge=15, le=240)]
     description: Annotated[str, Field(max_length=300)] = ""
 
+    # Exige una duracion multiplo de 15 minutos
     @field_validator("duration_minutes")
     @classmethod
     def multiple_of_15(cls, value: int) -> int:

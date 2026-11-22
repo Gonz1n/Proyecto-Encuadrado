@@ -8,6 +8,7 @@ from app.core.errors.exceptions import DomainError
 from app.shared.constants.messages import NOT_FOUND
 
 
+# Busca un servicio activo o responde 404
 def _active_service(session: Session, center: Center, service_id: int) -> Service:
     service = services.get_active_service(session, center.id, service_id)
     if service is None:
@@ -15,6 +16,7 @@ def _active_service(session: Session, center: Center, service_id: int) -> Servic
     return service
 
 
+# Crea un servicio en el centro
 def create_service(session: Session, center: Center, data: ServiceIn) -> Service:
     service = Service(center_id=center.id, **data.model_dump())
     session.add(service)
@@ -22,6 +24,7 @@ def create_service(session: Session, center: Center, data: ServiceIn) -> Service
     return service
 
 
+# Aplica los cambios a un servicio
 def update_service(session: Session, center: Center, service_id: int, data: ServiceUpdate) -> Service:
     service = _active_service(session, center, service_id)
     for field, value in data.model_dump(exclude_unset=True).items():
@@ -30,6 +33,7 @@ def update_service(session: Session, center: Center, service_id: int, data: Serv
     return service
 
 
+# Marca un servicio como inactivo
 def deactivate_service(session: Session, center: Center, service_id: int) -> None:
     _active_service(session, center, service_id).is_active = False
     session.commit()

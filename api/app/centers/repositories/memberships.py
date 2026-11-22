@@ -7,12 +7,14 @@ from app.centers.models.center import Center
 from app.centers.models.membership import Membership
 
 
+# Busca la membresia de un usuario en un centro
 def get_membership(session: Session, user_id: int, center_id: int) -> Membership | None:
     return session.scalar(
         select(Membership).where(Membership.user_id == user_id, Membership.center_id == center_id)
     )
 
 
+# Profesionales que pueden recibir citas
 def bookable_memberships(session: Session, center_id: int) -> list[Membership]:
     return session.scalars(
         select(Membership)
@@ -22,6 +24,7 @@ def bookable_memberships(session: Session, center_id: int) -> list[Membership]:
     ).all()
 
 
+# Todos los miembros del centro con su usuario
 def members(session: Session, center_id: int) -> list[Membership]:
     return session.scalars(
         select(Membership)
@@ -32,6 +35,7 @@ def members(session: Session, center_id: int) -> list[Membership]:
     ).all()
 
 
+# Membresias del usuario con su centro
 def user_memberships(session: Session, user: User) -> list[Membership]:
     return session.scalars(
         select(Membership)

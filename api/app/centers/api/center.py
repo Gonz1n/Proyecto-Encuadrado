@@ -9,11 +9,13 @@ from app.db.session import SessionDep
 router = APIRouter(prefix="/api/centers/{slug}", tags=["centers"])
 
 
+# Devuelve los datos del centro
 @router.get("/", response_model=CenterOut)
 def read_center(access: CenterDep) -> CenterOut:
     return CenterOut.model_validate(access.center)
 
 
+# Actualiza la configuracion del centro
 @router.patch("/", response_model=CenterUpdatedOut)
 def update_center(
     session: SessionDep, access: AdminDep, user: CurrentUser, data: CenterUpdate

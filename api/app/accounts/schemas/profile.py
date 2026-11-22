@@ -16,6 +16,7 @@ class ProfileUpdate(BaseModel):
     bio: Annotated[str, Field(max_length=500)] | None = None
     health_registry: Annotated[str, Field(max_length=10)] | None = None
 
+    # Exige que el registro de salud tenga solo numeros
     @field_validator("health_registry")
     @classmethod
     def digits_only(cls, value: str | None) -> str | None:

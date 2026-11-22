@@ -20,6 +20,7 @@ class User(Base):
 
     memberships: Mapped[list["Membership"]] = relationship(back_populates="user")
 
+    # Nombre y apellido juntos
     @property
     def full_name(self) -> str:
         return f"{self.first_name} {self.last_name}".strip()

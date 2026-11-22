@@ -9,6 +9,7 @@ from app.accounts.repositories import tokens
 from app.db.session import SessionDep
 
 
+# Lee el token Bearer del header Authorization
 def current_token(authorization: Annotated[str | None, Header()] = None) -> str:
     scheme, _, key = (authorization or "").partition(" ")
     if scheme != "Bearer" or not key.strip():
@@ -16,6 +17,7 @@ def current_token(authorization: Annotated[str | None, Header()] = None) -> str:
     return key.strip()
 
 
+# Obtiene el usuario activo dueño del token
 def current_user(session: SessionDep, key: Annotated[str, Depends(current_token)]) -> User:
     user = tokens.user_for_token(session, key)
     if user is None:
@@ -23,6 +25,7 @@ def current_user(session: SessionDep, key: Annotated[str, Depends(current_token)
     return user
 
 
+# Lee el cuerpo JSON y devuelve None si no es valido
 async def json_body(request: Request) -> object:
     try:
         return await request.json()

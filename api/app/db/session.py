@@ -11,6 +11,7 @@ engine = create_engine(settings.database_url, pool_pre_ping=True)
 SessionLocal = sessionmaker(engine, autoflush=False, expire_on_commit=False)
 
 
+# Entrega una sesion de base de datos por request
 def get_session() -> Iterator[Session]:
     with SessionLocal() as session:
         yield session

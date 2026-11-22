@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.centers.models.closure import CenterClosure
 
 
+# Fechas cerradas dentro de un rango
 def closure_dates(session: Session, center_id: int, start: date, end: date) -> set[date]:
     return set(
         session.scalars(
@@ -16,6 +17,7 @@ def closure_dates(session: Session, center_id: int, start: date, end: date) -> s
     )
 
 
+# Cierres desde una fecha en adelante
 def upcoming_closures(session: Session, center_id: int, today: date) -> list[CenterClosure]:
     return session.scalars(
         select(CenterClosure)
@@ -24,11 +26,13 @@ def upcoming_closures(session: Session, center_id: int, today: date) -> list[Cen
     ).all()
 
 
+# Busca un cierre del centro
 def get_closure(session: Session, center_id: int, closure_id: int) -> CenterClosure | None:
     return session.scalar(
         select(CenterClosure).where(CenterClosure.id == closure_id, CenterClosure.center_id == center_id)
     )
 
 
+# Indica si el dia ya esta cerrado
 def closure_exists(session: Session, center_id: int, day: date) -> bool:
     return day in closure_dates(session, center_id, day, day)

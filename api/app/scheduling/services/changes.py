@@ -14,6 +14,7 @@ from app.scheduling.services.availability import slots_for_day
 from app.scheduling.services.locks import lock_center_professionals, lock_professional
 
 
+# Marca la cita como cancelada y guarda el cambio
 def _cancel(session: Session, appointment: Appointment, note: str, user: User) -> None:
     session.add(
         AppointmentChange(
@@ -27,6 +28,7 @@ def _cancel(session: Session, appointment: Appointment, note: str, user: User) -
     appointment.status = AppointmentStatus.CANCELLED
 
 
+# Cancela varias citas del centro de una vez
 def cancel_for_center(
     session: Session, center: Center, appointments: list[Appointment], note: str, user: User
 ) -> int:
@@ -48,6 +50,7 @@ def cancel_for_center(
     return len(locked)
 
 
+# Bloquea la cita y revisa que se pueda modificar
 def _lock_editable(session: Session, appointment: Appointment, now: datetime) -> Appointment:
     lock_professional(session, appointment.professional)
     locked = session.scalar(
@@ -63,6 +66,7 @@ def _lock_editable(session: Session, appointment: Appointment, now: datetime) ->
     return locked
 
 
+# Mueve la cita a otra hora libre
 def reschedule_appointment(
     session: Session, appointment: Appointment, start: datetime, note: str, user: User, now: datetime
 ) -> Appointment:
@@ -88,6 +92,7 @@ def reschedule_appointment(
     return appointment
 
 
+# Cancela una cita
 def cancel_appointment(session: Session, appointment: Appointment, note: str, user: User, now: datetime) -> Appointment:
     appointment = _lock_editable(session, appointment, now)
     _cancel(session, appointment, note, user)

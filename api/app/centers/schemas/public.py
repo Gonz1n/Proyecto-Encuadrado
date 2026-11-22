@@ -13,6 +13,7 @@ class PublicProfessionalOut(BaseModel):
     bio: str
     health_registry: str
 
+    # Arma el profesional publico desde su membresia
     @classmethod
     def from_membership(cls, membership: Membership) -> "PublicProfessionalOut":
         user = membership.user

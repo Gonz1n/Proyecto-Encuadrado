@@ -22,6 +22,7 @@ class PatientIn(BaseModel):
     patient_birth_date: date
     modality: Literal["in_person", "remote"] = "in_person"
 
+    # Cambia el mensaje de correo invalido
     @field_validator("patient_email", mode="wrap")
     @classmethod
     def valid_email(cls, value, handler) -> str:
@@ -30,6 +31,7 @@ class PatientIn(BaseModel):
         except ValidationError:
             raise ValueError("Ingresa un correo electrónico válido.") from None
 
+    # Valida y formatea el RUT
     @field_validator("patient_rut")
     @classmethod
     def valid_rut(cls, value: str) -> str:
@@ -38,6 +40,7 @@ class PatientIn(BaseModel):
             raise ValueError("Ingresa un RUT válido")
         return rut
 
+    # Revisa que la fecha de nacimiento sea razonable
     @field_validator("patient_birth_date")
     @classmethod
     def valid_birth_date(cls, value: date) -> date:
@@ -53,6 +56,7 @@ class PublicBookingIn(PatientIn):
     accept_terms: bool = Field(default=False, validate_default=True)
     data_consent: bool = Field(default=False, validate_default=True)
 
+    # Exige aceptar los terminos
     @field_validator("accept_terms")
     @classmethod
     def terms_accepted(cls, value: bool) -> bool:
@@ -60,6 +64,7 @@ class PublicBookingIn(PatientIn):
             raise ValueError("Debes aceptar los términos y condiciones")
         return value
 
+    # Exige autorizar el uso de datos
     @field_validator("data_consent")
     @classmethod
     def consent_given(cls, value: bool) -> bool:

@@ -14,12 +14,14 @@ from app.scheduling.repositories import appointments
 from app.scheduling.services.slots import booking_window, free_slots
 
 
+# Exige que la fecha este dentro del periodo de reserva
 def ensure_in_window(day: date, include_today: bool, field: str) -> None:
     start, end = booking_window(clock.local_today(), include_today)
     if not start <= day <= end:
         raise field_error(field, OUT_OF_WINDOW)
 
 
+# Horas libres del dia descontando la colacion
 def _center_slots(
     center: Center, service: Service, day: date, busy: list[tuple[datetime, datetime]], now: datetime
 ) -> list[datetime]:
@@ -28,6 +30,7 @@ def _center_slots(
     return free_slots(day, center.opening_time, center.closing_time, service.duration_minutes, busy, not_before=now)
 
 
+# Horas libres de un profesional en un dia
 def slots_for_day(
     session: Session,
     professional: Membership,
@@ -45,6 +48,7 @@ def slots_for_day(
     return _center_slots(center, service, day, busy, now)
 
 
+# Dias del rango que tienen al menos una hora libre
 def days_with_slots(
     session: Session,
     professional: Membership,

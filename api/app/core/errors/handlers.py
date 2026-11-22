@@ -5,6 +5,7 @@ from fastapi.responses import JSONResponse
 from app.core.errors.exceptions import DomainError
 
 
+# Traduce un error de Pydantic a un mensaje en espanol
 def _message(error: dict) -> str:
     ctx = error.get("ctx") or {}
     match error["type"]:
@@ -30,6 +31,7 @@ def _message(error: dict) -> str:
             return "Valor inválido."
 
 
+# Obtiene el nombre del campo con error
 def _field(error: dict) -> str:
     names = [part for part in error["loc"] if isinstance(part, str)]
     if names and names[-1] != "body":
@@ -37,6 +39,7 @@ def _field(error: dict) -> str:
     return "non_field_errors"
 
 
+# Responde los errores de validacion agrupados por campo
 async def validation_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
     body: dict[str, list[str]] = {}
     for error in exc.errors():
@@ -44,10 +47,12 @@ async def validation_handler(request: Request, exc: RequestValidationError) -> J
     return JSONResponse(body, status_code=400)
 
 
+# Responde un error de negocio con su codigo
 async def domain_handler(request: Request, exc: DomainError) -> JSONResponse:
     return JSONResponse({"detail": exc.detail}, status_code=exc.status_code)
 
 
+# Registra los manejadores de errores en la app
 def register_error_handlers(app: FastAPI) -> None:
     app.add_exception_handler(RequestValidationError, validation_handler)
     app.add_exception_handler(DomainError, domain_handler)

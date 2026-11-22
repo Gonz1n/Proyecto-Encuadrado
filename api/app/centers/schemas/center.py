@@ -67,6 +67,7 @@ class CenterUpdate(BaseModel):
     email: Annotated[str, Field(max_length=254)] = Field(default=None)
     open_days: list[Annotated[int, Field(ge=0, le=6)]] = Field(default=None)
 
+    # Valida la URL y que sea de la red social correcta
     @field_validator("website_url", "instagram_url", "facebook_url", "linkedin_url")
     @classmethod
     def valid_url(cls, value: str, info) -> str:
@@ -81,11 +82,13 @@ class CenterUpdate(BaseModel):
             raise ValueError(f"El enlace debe ser de {network}")
         return value
 
+    # Valida y normaliza el numero de WhatsApp
     @field_validator("whatsapp_number")
     @classmethod
     def valid_whatsapp(cls, value: str) -> str:
         return valid_phone(value) if value else ""
 
+    # Valida el telefono de contacto
     @field_validator("phone")
     @classmethod
     def valid_contact_phone(cls, value: str) -> str:
@@ -93,6 +96,7 @@ class CenterUpdate(BaseModel):
             raise ValueError(CONTACT_PHONE_ERROR)
         return value
 
+    # Valida el correo de contacto
     @field_validator("email")
     @classmethod
     def valid_email(cls, value: str) -> str:
@@ -103,6 +107,7 @@ class CenterUpdate(BaseModel):
                 raise ValueError(CONTACT_EMAIL_ERROR) from None
         return value
 
+    # Ordena los dias de atencion y exige al menos uno
     @field_validator("open_days")
     @classmethod
     def sorted_days(cls, value: list[int]) -> list[int]:

@@ -10,6 +10,7 @@ from app.scheduling.models.appointment import Appointment
 from app.scheduling.models.appointment_change import AppointmentChange
 
 
+# Rangos ocupados del profesional en todos sus centros
 def busy_ranges(
     session: Session, professional: Membership, start: date, end: date, exclude_id: int | None = None
 ) -> list[tuple[datetime, datetime]]:
@@ -28,6 +29,7 @@ def busy_ranges(
     return [(row.start, row.end) for row in session.execute(query)]
 
 
+# Citas del centro con servicio, profesional e historial
 def list_appointments(
     session: Session,
     center_id: int,
@@ -57,6 +59,7 @@ def list_appointments(
     return session.scalars(query).all()
 
 
+# Cita confirmada que la membresia puede gestionar
 def get_manageable(session: Session, membership: Membership, appointment_id: int) -> Appointment | None:
     query = (
         select(Appointment)
@@ -72,6 +75,7 @@ def get_manageable(session: Session, membership: Membership, appointment_id: int
     return session.scalar(query)
 
 
+# Citas futuras confirmadas de un dia
 def confirmed_future_on_day(session: Session, center_id: int, day: date, now: datetime) -> list[Appointment]:
     return session.scalars(
         select(Appointment).where(
@@ -84,6 +88,7 @@ def confirmed_future_on_day(session: Session, center_id: int, day: date, now: da
     ).all()
 
 
+# Citas futuras que chocan con la colacion
 def confirmed_future_overlapping_lunch(
     session: Session, center_id: int, lunch_start: time, lunch_end: time, now: datetime
 ) -> list[Appointment]:

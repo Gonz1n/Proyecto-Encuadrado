@@ -6,6 +6,7 @@ from app.centers.schemas.center import CenterOut
 from app.centers.schemas.public import PublicCenterOut, PublicProfessionalOut
 
 
+# Arma el perfil publico con profesionales y servicios
 def build_public_center(session: Session, center: Center) -> PublicCenterOut:
     professionals = sorted(
         memberships.bookable_memberships(session, center.id),

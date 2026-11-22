@@ -8,6 +8,7 @@ from app.accounts.services.users import build_user_out
 from app.core.errors.exceptions import DomainError
 
 
+# Valida las credenciales y entrega el token
 def login(session: Session, body: object) -> LoginOut:
     try:
         credentials = LoginIn.model_validate(body)
@@ -21,6 +22,7 @@ def login(session: Session, body: object) -> LoginOut:
     return LoginOut(token=token.key, user=build_user_out(session, user))
 
 
+# Elimina el token de la sesion
 def logout(session: Session, key: str) -> None:
     tokens.delete_token(session, key)
     session.commit()

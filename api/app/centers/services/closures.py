@@ -14,6 +14,7 @@ from app.scheduling.services.locks import lock_center_professionals
 from app.shared.constants.messages import NOT_FOUND
 
 
+# Crea el cierre y cancela las citas de ese dia
 def create_closure(session: Session, center: Center, user: User, data: ClosureIn) -> ClosureCreatedOut:
     if data.date < clock.local_today():
         raise field_error("date", PAST_DATE_ERROR)
@@ -28,6 +29,7 @@ def create_closure(session: Session, center: Center, user: User, data: ClosureIn
     return ClosureCreatedOut(id=closure.id, date=closure.date, reason=closure.reason, cancelled_appointments=cancelled)
 
 
+# Borra un cierre del centro
 def delete_closure(session: Session, center: Center, closure_id: int) -> None:
     closure = closures.get_closure(session, center.id, closure_id)
     if closure is None:

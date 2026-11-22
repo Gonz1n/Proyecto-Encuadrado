@@ -7,10 +7,12 @@ from app.centers.models.membership import Membership
 from app.centers.repositories import memberships
 
 
+# Bloquea al profesional para evitar reservas dobles
 def lock_professional(session: Session, professional: Membership) -> None:
     session.execute(select(User.id).where(User.id == professional.user_id).with_for_update())
 
 
+# Bloquea a todos los profesionales del centro
 def lock_center_professionals(session: Session, center: Center) -> None:
     user_ids = [m.user_id for m in memberships.bookable_memberships(session, center.id)]
     session.execute(select(User.id).where(User.id.in_(user_ids)).order_by(User.id).with_for_update())

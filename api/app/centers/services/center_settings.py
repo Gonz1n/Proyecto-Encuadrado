@@ -19,6 +19,7 @@ from app.scheduling.services.changes import cancel_for_center
 from app.scheduling.services.locks import lock_center_professionals
 
 
+# Revisa que la colacion este completa y dentro del horario
 def _validate_lunch(lunch_start: time | None, lunch_end: time | None, opening: time, closing: time) -> None:
     if lunch_start is None and lunch_end is None:
         return
@@ -30,6 +31,7 @@ def _validate_lunch(lunch_start: time | None, lunch_end: time | None, opening: t
         raise field_error("lunch_end", LUNCH_RANGE_ERROR)
 
 
+# Guarda el centro y cancela citas que choquen con la colacion
 def update_center(session: Session, center: Center, user: User, data: CenterUpdate) -> CenterUpdatedOut:
     changes = data.model_dump(exclude_unset=True)
     opening = changes.get("opening_time", center.opening_time)

@@ -25,6 +25,7 @@ from app.shared.constants.formats import HOUR_MINUTE_FORMAT
 router = APIRouter(prefix="/api/centers/{slug}/appointments", tags=["appointments"])
 
 
+# Lista las citas del centro en un rango de fechas
 @router.get("/", response_model=list[AppointmentOut])
 def list_appointments(
     session: SessionDep,
@@ -47,6 +48,7 @@ def list_appointments(
     )
 
 
+# Agenda una cita desde el panel
 @router.post("/", response_model=AppointmentOut, status_code=201)
 def create_appointment(session: SessionDep, user: CurrentUser, access: ManagerDep, data: StaffBookingIn) -> Appointment:
     service = resolve_service(session, access.center, data.service)
@@ -57,6 +59,7 @@ def create_appointment(session: SessionDep, user: CurrentUser, access: ManagerDe
     return booking.create_appointment(session, access.center, data, professional, service, user)
 
 
+# Cambia la hora de una cita
 @router.patch("/{appointment_id}/", response_model=AppointmentOut)
 def reschedule(
     session: SessionDep, user: CurrentUser, appointment: ManagedAppointment, data: RescheduleIn
@@ -65,11 +68,13 @@ def reschedule(
     return changes.reschedule_appointment(session, appointment, data.start, data.note, user, clock.local_now())
 
 
+# Cancela una cita
 @router.post("/{appointment_id}/cancel/", response_model=AppointmentOut)
 def cancel(session: SessionDep, user: CurrentUser, appointment: ManagedAppointment, data: CancelIn) -> Appointment:
     return changes.cancel_appointment(session, appointment, data.note, user, clock.local_now())
 
 
+# Horas libres de un dia para reagendar
 @router.get("/{appointment_id}/availability/", response_model=SlotsOut)
 def read_availability(session: SessionDep, appointment: ManagedAppointment, date: Annotated[date, Query()]) -> SlotsOut:
     availability.ensure_in_window(date, True, "date")
@@ -79,6 +84,7 @@ def read_availability(session: SessionDep, appointment: ManagedAppointment, date
     return SlotsOut(date=date, slots=[slot.strftime(HOUR_MINUTE_FORMAT) for slot in slots])
 
 
+# Dias con horas libres para reagendar
 @router.get("/{appointment_id}/availability/days/", response_model=DaysOut)
 def read_availability_days(session: SessionDep, appointment: ManagedAppointment) -> DaysOut:
     first, last = booking_window(clock.local_today(), True)

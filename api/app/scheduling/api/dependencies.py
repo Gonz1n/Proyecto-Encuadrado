@@ -10,6 +10,7 @@ from app.scheduling.repositories import appointments
 from app.shared.constants.messages import NOT_FOUND
 
 
+# Busca una cita que el usuario pueda gestionar
 def managed_appointment(session: SessionDep, access: ManagerDep, appointment_id: int) -> Appointment:
     appointment = appointments.get_manageable(session, access.membership, appointment_id)
     if appointment is None:

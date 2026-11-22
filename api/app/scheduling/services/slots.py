@@ -3,6 +3,7 @@ from datetime import date, datetime, time, timedelta
 from app.scheduling.constants.availability import SLOT_STEP_MINUTES, WINDOW_DAYS
 
 
+# Calcula las horas libres de un dia
 def free_slots(
     day: date,
     opening: time,
@@ -24,6 +25,7 @@ def free_slots(
     return slots
 
 
+# Primer y ultimo dia en que se puede reservar
 def booking_window(today: date, include_today: bool = False) -> tuple[date, date]:
     start = today if include_today else today + timedelta(days=1)
     return start, today + timedelta(days=WINDOW_DAYS)

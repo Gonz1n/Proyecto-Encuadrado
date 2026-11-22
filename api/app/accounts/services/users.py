@@ -6,11 +6,13 @@ from app.accounts.schemas.user import UserOut
 from app.centers.repositories.memberships import user_memberships
 
 
+# Arma la respuesta del usuario con sus membresias
 def build_user_out(session: Session, user: User) -> UserOut:
     fields = {name: getattr(user, name) for name in UserOut.model_fields if name != "memberships"}
     return UserOut(**fields, memberships=user_memberships(session, user))
 
 
+# Guarda los cambios del perfil
 def update_profile(session: Session, user: User, data: ProfileUpdate) -> UserOut:
     for field, value in data.model_dump(exclude_unset=True, exclude_none=True).items():
         setattr(user, field, value)

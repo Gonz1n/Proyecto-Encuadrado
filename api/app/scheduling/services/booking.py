@@ -14,6 +14,7 @@ from app.scheduling.services.availability import slots_for_day
 from app.scheduling.services.locks import lock_professional
 
 
+# Crea la cita si la hora sigue libre
 def create_appointment(
     session: Session,
     center: Center,

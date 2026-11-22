@@ -21,11 +21,13 @@ from app.scheduling.services.availability import slots_for_day
 from app.shared.validators.rut import format_rut
 
 
+# Hash de la contrasena de prueba
 @cache
 def demo_password_hash() -> str:
     return hash_password(PASSWORD)
 
 
+# Busca o crea un usuario de prueba
 def get_or_create_user(session: Session, email: str, first_name: str, last_name: str, title: str) -> User:
     user = get_user_by_email(session, email)
     if user is None:
@@ -34,6 +36,7 @@ def get_or_create_user(session: Session, email: str, first_name: str, last_name:
     return user
 
 
+# Busca o crea un centro de prueba
 def get_or_create_center(session: Session, spec: dict) -> Center:
     center = centers.get_center_by_slug(session, spec["slug"])
     if center is None:
@@ -44,17 +47,20 @@ def get_or_create_center(session: Session, spec: dict) -> Center:
     return center
 
 
+# Crea la membresia si no existe
 def ensure_membership(session: Session, user: User, center: Center, role: Role) -> None:
     if memberships.get_membership(session, user.id, center.id) is None:
         session.add(Membership(user_id=user.id, center_id=center.id, role=role))
 
 
+# Crea el servicio si no existe
 def ensure_service(session: Session, center: Center, name: str, price: int, duration: int, description: str) -> None:
     exists = session.scalar(select(Service.id).where(Service.center_id == center.id, Service.name == name))
     if exists is None:
         session.add(Service(center_id=center.id, name=name, price_clp=price, duration_minutes=duration, description=description))
 
 
+# Indica si el centro tiene citas futuras
 def has_future_appointments(session: Session, center: Center, now: datetime.datetime) -> bool:
     return session.scalar(
         select(Appointment.id)
@@ -67,6 +73,7 @@ def has_future_appointments(session: Session, center: Center, now: datetime.date
     ) is not None
 
 
+# Crea citas de ejemplo en horas libres
 def create_appointments(session: Session, center: Center, now: datetime.datetime) -> int:
     rng = random.Random(2026)
     professionals = memberships.bookable_memberships(session, center.id)
@@ -106,6 +113,7 @@ def create_appointments(session: Session, center: Center, now: datetime.datetime
     return created
 
 
+# Carga todos los datos de ejemplo
 def run(session: Session) -> dict[str, int]:
     now = clock.local_now()
     users = {email: get_or_create_user(session, email, *data) for email, data in USERS.items()}

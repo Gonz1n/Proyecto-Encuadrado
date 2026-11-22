@@ -14,6 +14,7 @@ from app.scheduling.constants.messages import (
 )
 
 
+# Convierte el valor recibido en un id
 def _to_id(value, field: str, invalid: str) -> int | None:
     if isinstance(value, bool) or not isinstance(value, (int, str)) or not str(value).strip().isascii():
         raise field_error(field, invalid)
@@ -24,6 +25,7 @@ def _to_id(value, field: str, invalid: str) -> int | None:
     return number if -BIGINT_MAX <= number <= BIGINT_MAX else None
 
 
+# Obtiene el servicio activo o responde error
 def resolve_service(session: Session, center: Center, value) -> Service:
     service_id = _to_id(value, "service", INVALID_SERVICE)
     service = None if service_id is None else services.get_active_service(session, center.id, service_id)
@@ -32,6 +34,7 @@ def resolve_service(session: Session, center: Center, value) -> Service:
     return service
 
 
+# Obtiene el profesional del centro o responde error
 def resolve_professional(session: Session, center: Center, value) -> Membership:
     wanted = _to_id(value, "professional", INVALID_PROFESSIONAL)
     for membership in memberships.bookable_memberships(session, center.id):
