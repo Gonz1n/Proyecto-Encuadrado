@@ -64,7 +64,7 @@ function ProfileForm({ user }: { user: CurrentUser }) {
     mutationFn: (body: ProfileUpdate) => authApi.updateProfile(body),
     onSuccess: (saved) => {
       queryClient.setQueryData(queryKeys.me, saved)
-      queryClient.invalidateQueries({ queryKey: ['public-center'] })
+      queryClient.invalidateQueries({ queryKey: queryKeys.allPublicCenters })
     },
   })
   const {

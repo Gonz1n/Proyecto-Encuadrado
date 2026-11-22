@@ -4,6 +4,7 @@ import { queryKeys } from '@/lib/query-keys'
 import { appointmentsApi, type AppointmentFilters, type CreateAppointmentInput, type RescheduleInput } from './api'
 import { isApiError } from '@/utils/api-errors'
 import { FORBIDDEN_MESSAGE, SLOT_TAKEN_MESSAGE } from '@/constants/messages'
+import { invalidateAgenda, invalidateAvailability } from '@/utils/query-invalidation'
 
 export function useAppointments(slug: string, filters: AppointmentFilters) {
   return useQuery({ queryKey: queryKeys.appointments(slug, filters), queryFn: () => appointmentsApi.list(slug, filters) })
@@ -19,11 +20,7 @@ function useManageMutation<TVariables>(
   onConflict?: () => void,
 ) {
   const queryClient = useQueryClient()
-  const invalidate = () =>
-    Promise.all([
-      queryClient.invalidateQueries({ queryKey: ['appointments', slug] }),
-      queryClient.invalidateQueries({ queryKey: ['appointment-availability', slug] }),
-    ])
+  const invalidate = () => invalidateAgenda(queryClient, slug)
   return useMutation({
     mutationFn,
     onSuccess: async () => {
@@ -69,7 +66,7 @@ export function useRescheduleAppointment(slug: string, id: number, onDone: () =>
     onDone,
     () => {
       onConflict?.()
-      return queryClient.invalidateQueries({ queryKey: ['appointment-availability', slug, id] })
+      return queryClient.invalidateQueries({ queryKey: queryKeys.appointmentAvailability(slug, id) })
     },
   )
 }
@@ -99,9 +96,8 @@ export function useCreateAppointment(slug: string) {
     },
     onSettled: () =>
       Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['appointments', slug] }),
-        queryClient.invalidateQueries({ queryKey: ['available-days', slug] }),
-        queryClient.invalidateQueries({ queryKey: ['availability', slug] }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.allAppointments(slug) }),
+        invalidateAvailability(queryClient, slug),
       ]),
   })
 }

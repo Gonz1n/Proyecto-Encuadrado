@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query-keys'
 import { publicBookingApi, type BookingInput, type SlotQuery } from './api'
 import { isNotFound } from '@/utils/api-errors'
+import { invalidateAvailability } from '@/utils/query-invalidation'
 
 export function usePublicCenter(slug: string) {
   return useQuery({
@@ -42,10 +43,6 @@ export function useCreateBooking(slug: string) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (body: BookingInput) => publicBookingApi.book(slug, body),
-    onSettled: () =>
-      Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['availability', slug] }),
-        queryClient.invalidateQueries({ queryKey: ['available-days', slug] }),
-      ]),
+    onSettled: () => invalidateAvailability(queryClient, slug),
   })
 }

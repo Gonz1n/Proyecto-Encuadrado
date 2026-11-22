@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query-keys'
 import { centerApi, type CenterUpdate, type ServiceInput } from './api'
+import { invalidateAgenda, invalidateAvailability } from '@/utils/query-invalidation'
 
 export function useCenter(slug: string) {
   return useQuery({ queryKey: queryKeys.center(slug), queryFn: () => centerApi.get(slug) })
@@ -22,10 +23,8 @@ function invalidateSchedule(queryClient: QueryClient, slug: string) {
   return Promise.all([
     queryClient.invalidateQueries({ queryKey: queryKeys.center(slug) }),
     queryClient.invalidateQueries({ queryKey: queryKeys.closures(slug) }),
-    queryClient.invalidateQueries({ queryKey: ['appointments', slug] }),
-    queryClient.invalidateQueries({ queryKey: ['availability', slug] }),
-    queryClient.invalidateQueries({ queryKey: ['available-days', slug] }),
-    queryClient.invalidateQueries({ queryKey: ['appointment-availability', slug] }),
+    invalidateAgenda(queryClient, slug),
+    invalidateAvailability(queryClient, slug),
   ])
 }
 
