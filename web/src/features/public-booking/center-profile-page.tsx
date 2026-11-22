@@ -171,12 +171,7 @@ function CenterProfile({ center }: { center: PublicCenter }) {
         </section>
 
         <section id="profesionales" aria-labelledby="professionals-heading" className="space-y-6">
-          <div>
-            <h2 id="professionals-heading" className="text-3xl font-bold tracking-tight sm:text-4xl">
-              Nuestros profesionales
-            </h2>
-            <hr className="mt-3 border-[var(--cp-terracota)]" />
-          </div>
+          <SectionTitle id="professionals-heading">Nuestros profesionales</SectionTitle>
           {center.professionals.length === 0 ? (
             <p className="text-sm">Este centro aún no tiene profesionales con agenda.</p>
           ) : (
