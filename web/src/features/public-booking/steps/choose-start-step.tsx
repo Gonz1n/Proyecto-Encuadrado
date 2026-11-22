@@ -4,18 +4,8 @@ import { OptionButton } from '../option-button'
 import type { BookingStart } from '../use-booking-state'
 
 const OPTIONS: { value: BookingStart; label: string; description: string; icon: typeof UserRound }[] = [
-  {
-    value: 'service',
-    label: 'Por servicio',
-    description: 'Elige primero la atención que necesitas.',
-    icon: ClipboardList,
-  },
-  {
-    value: 'professional',
-    label: 'Por profesional',
-    description: 'Elige primero con quién quieres atenderte.',
-    icon: UserRound,
-  },
+  { value: 'service', label: 'Por servicio', description: 'Elige primero la atención que necesitas.', icon: ClipboardList },
+  { value: 'professional', label: 'Por profesional', description: 'Elige primero con quién quieres atenderte.', icon: UserRound },
 ]
 
 export function ChooseStartStep() {

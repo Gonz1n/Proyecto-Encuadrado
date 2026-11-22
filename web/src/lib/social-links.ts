@@ -19,44 +19,14 @@ export const SOCIAL_NETWORKS: {
   field: SocialField
   label: string
   placeholder: string
-  domain?: string
   phone?: boolean
   icon: ComponentType<IconProps>
 }[] = [
-  {
-    field: 'website_url',
-    label: 'Sitio web',
-    placeholder: 'https://www.tucentro.cl',
-    icon: Globe,
-  },
-  {
-    field: 'instagram_url',
-    label: 'Instagram',
-    placeholder: 'https://www.instagram.com/tucentro',
-    domain: 'instagram.com',
-    icon: InstagramIcon,
-  },
-  {
-    field: 'facebook_url',
-    label: 'Facebook',
-    placeholder: 'https://www.facebook.com/tucentro',
-    domain: 'facebook.com',
-    icon: FacebookIcon,
-  },
-  {
-    field: 'linkedin_url',
-    label: 'LinkedIn',
-    placeholder: 'https://www.linkedin.com/company/tucentro',
-    domain: 'linkedin.com',
-    icon: LinkedInIcon,
-  },
-  {
-    field: 'whatsapp_number',
-    label: 'WhatsApp',
-    placeholder: '+56 9 1234 5678',
-    phone: true,
-    icon: WhatsAppIcon,
-  },
+  { field: 'website_url', label: 'Sitio web', placeholder: 'https://www.tucentro.cl', icon: Globe },
+  { field: 'instagram_url', label: 'Instagram', placeholder: 'https://www.instagram.com/tucentro', icon: InstagramIcon },
+  { field: 'facebook_url', label: 'Facebook', placeholder: 'https://www.facebook.com/tucentro', icon: FacebookIcon },
+  { field: 'linkedin_url', label: 'LinkedIn', placeholder: 'https://www.linkedin.com/company/tucentro', icon: LinkedInIcon },
+  { field: 'whatsapp_number', label: 'WhatsApp', placeholder: '+56 9 1234 5678', phone: true, icon: WhatsAppIcon },
 ]
 
 export function socialHref(field: SocialField, value: string): string {

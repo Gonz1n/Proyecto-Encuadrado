@@ -3,10 +3,11 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useParams } from 'next/navigation'
 import { NotFoundPage } from '@/components/layout/not-found-page'
+import { EMPTY_PATIENT } from '@/features/patient/patient-fields'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
-import type { PublicCenter } from './api'
-import { BookingFlowContext, useBookingFlow, type PatientDraft } from './booking-context'
+import type { PatientDraft, PublicCenter } from './api'
+import { BookingFlowContext, useBookingFlow } from './booking-context'
 import { BookingSummary } from './booking-summary'
 import { isNotFound, usePublicCenter } from './hooks'
 import { PublicHeader } from './public-header'
@@ -17,22 +18,10 @@ import { ServiceStep } from './steps/service-step'
 import { SlotStep } from './steps/slot-step'
 import { useBookingState, type BookingStart, type BookingStep } from './use-booking-state'
 
-const EMPTY_DRAFT: PatientDraft = {
-  patient_name: '',
-  patient_email: '',
-  patient_phone: '',
-  patient_rut: '',
-  patient_birth_date: '',
-  modality: 'in_person',
-  accept_terms: false,
-  data_consent: false,
-}
+const EMPTY_DRAFT: PatientDraft = { ...EMPTY_PATIENT, modality: 'in_person', accept_terms: false, data_consent: false }
 
 const STEP_COPY: Record<BookingStep, { title: string; description: string }> = {
-  start: {
-    title: '¿Cómo quieres agendar?',
-    description: 'Puedes partir por el servicio o por la persona que te atenderá.',
-  },
+  start: { title: '¿Cómo quieres agendar?', description: 'Puedes partir por el servicio o por la persona que te atenderá.' },
   service: { title: 'Elige un servicio', description: 'Cada servicio indica su duración y precio.' },
   professional: { title: 'Elige un profesional', description: 'Después verás sus horas libres.' },
   slot: { title: 'Elige día y hora', description: 'Los días sin horas libres aparecen desactivados.' },
@@ -111,17 +100,12 @@ export function BookingPage() {
     )
   }
   if (center.isError) {
-    return isNotFound(center.error) ? (
+    const missing = isNotFound(center.error)
+    return (
       <NotFoundPage
-        title="No encontramos este centro"
-        description="Revisa la dirección que te compartieron."
-        action={null}
-      />
-    ) : (
-      <NotFoundPage
-        title="No pudimos cargar la agenda"
-        description="Revisa tu conexión e intenta de nuevo."
-        action={<Button onClick={() => center.refetch()}>Reintentar</Button>}
+        title={missing ? 'No encontramos este centro' : 'No pudimos cargar la agenda'}
+        description={missing ? 'Revisa la dirección que te compartieron.' : 'Revisa tu conexión e intenta de nuevo.'}
+        action={missing ? null : <Button onClick={() => center.refetch()}>Reintentar</Button>}
       />
     )
   }

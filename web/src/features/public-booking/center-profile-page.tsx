@@ -33,17 +33,12 @@ export function CenterProfilePage() {
     )
   }
   if (center.isError) {
-    return isNotFound(center.error) ? (
+    const missing = isNotFound(center.error)
+    return (
       <NotFoundPage
-        title="No encontramos este centro"
-        description="Revisa la dirección que te compartieron."
-        action={null}
-      />
-    ) : (
-      <NotFoundPage
-        title="No pudimos cargar el centro"
-        description="Revisa tu conexión e intenta de nuevo."
-        action={<Button onClick={() => center.refetch()}>Reintentar</Button>}
+        title={missing ? 'No encontramos este centro' : 'No pudimos cargar el centro'}
+        description={missing ? 'Revisa la dirección que te compartieron.' : 'Revisa tu conexión e intenta de nuevo.'}
+        action={missing ? null : <Button onClick={() => center.refetch()}>Reintentar</Button>}
       />
     )
   }
@@ -59,13 +54,11 @@ const card = 'rounded-3xl border border-[var(--cp-granate)] bg-[var(--cp-card)]'
 function CenterProfile({ center }: { center: PublicCenter }) {
   const bookingPath = `/c/${center.slug}/agendar`
   const photo = centerPhoto(center.slug)
-  const { address, phone, email, whatsapp_number: whatsapp } = center
-  const hasSocials = SOCIAL_NETWORKS.some(({ field }) => center[field])
-  const hasContact = Boolean(phone || email || whatsapp || hasSocials)
+  const hasContact = Boolean(center.phone || center.email || SOCIAL_NETWORKS.some(({ field }) => center[field]))
   const links = navLinks({
     services: center.services.length > 0,
     professionals: center.professionals.length > 0,
-    location: Boolean(address),
+    location: Boolean(center.address),
     contact: hasContact,
   })
   return (
@@ -84,9 +77,7 @@ function CenterProfile({ center }: { center: PublicCenter }) {
             )}
           </div>
           <div className="min-w-0 flex-1">
-            <h1 className="text-2xl font-bold tracking-tight text-balance [overflow-wrap:break-word] sm:text-3xl">
-              {center.name}
-            </h1>
+            <h1 className="text-2xl font-bold tracking-tight text-balance [overflow-wrap:break-word] sm:text-3xl">{center.name}</h1>
             <hr className="mt-3 border-[var(--cp-terracota)]" />
             {center.description ? (
               <p className="mt-3 max-w-2xl text-sm text-pretty sm:text-base">{center.description}</p>
@@ -95,9 +86,7 @@ function CenterProfile({ center }: { center: PublicCenter }) {
               <p className="flex items-center border-l-4 border-[var(--cp-granate)] pl-3 text-sm font-semibold">
                 <span>
                   Atención {formatOpenDays(center.open_days)}
-                  <span className="block">
-                    {center.opening_time} a {center.closing_time} h
-                  </span>
+                  <span className="block">{center.opening_time} a {center.closing_time} h</span>
                 </span>
               </p>
               <Link href={bookingPath} className={`${pill} gap-2`}>
@@ -111,10 +100,7 @@ function CenterProfile({ center }: { center: PublicCenter }) {
 
       <main className="mx-auto max-w-5xl space-y-14 px-4 pt-6 pb-14 sm:px-6">
         {links.length > 0 ? (
-          <nav
-            aria-label="Secciones del centro"
-            className="rounded-2xl border border-[var(--cp-granate)]/70 px-2"
-          >
+          <nav aria-label="Secciones del centro" className="rounded-2xl border border-[var(--cp-granate)]/70 px-2">
             <ul className="flex flex-wrap justify-around">
               {links.map((link) => (
                 <li key={link.href}>
@@ -132,10 +118,7 @@ function CenterProfile({ center }: { center: PublicCenter }) {
 
         <section id="servicios" aria-labelledby="services-heading">
           <div className={`${card} grid gap-6 p-6 md:grid-cols-[14rem_1fr] md:gap-0 md:p-8`}>
-            <h2
-              id="services-heading"
-              className="self-center text-4xl font-bold tracking-tight md:border-r-4 md:border-[var(--cp-granate)] md:pr-6 md:text-5xl"
-            >
+            <h2 id="services-heading" className="self-center text-4xl font-bold tracking-tight md:border-r-4 md:border-[var(--cp-granate)] md:pr-6 md:text-5xl">
               Nuestros servicios
             </h2>
             {center.services.length === 0 ? (
@@ -145,9 +128,7 @@ function CenterProfile({ center }: { center: PublicCenter }) {
                 {center.services.map((service) => (
                   <li key={service.id} className="flex items-end gap-4">
                     <div className="min-w-0 flex-1">
-                      <p className="border-b border-[var(--cp-granate)] pb-1 font-bold [overflow-wrap:break-word]">
-                        {service.name}
-                      </p>
+                      <p className="border-b border-[var(--cp-granate)] pb-1 font-bold [overflow-wrap:break-word]">{service.name}</p>
                       <p className="mt-1 flex flex-wrap justify-between gap-x-4 text-sm">
                         <span>Duración: {formatDuration(service.duration_minutes)}</span>
                         <span className="tabular-nums">Precio: {formatCLP(service.price_clp)}</span>
@@ -179,10 +160,7 @@ function CenterProfile({ center }: { center: PublicCenter }) {
               {center.professionals.map((professional) => {
                 const subtitle = professionalSubtitle(professional)
                 return (
-                  <li
-                    key={professional.id}
-                    className={`${card} flex flex-col items-center gap-3 p-5 text-center`}
-                  >
+                  <li key={professional.id} className={`${card} flex flex-col items-center gap-3 p-5 text-center`}>
                     <ProfessionalAvatar
                       professional={professional}
                       className="size-20 after:hidden"
@@ -212,20 +190,15 @@ function CenterProfile({ center }: { center: PublicCenter }) {
         </section>
 
         <LocationSection center={center} />
-        <ContactSection center={center} />
+        {hasContact ? <ContactSection center={center} /> : null}
 
         {center.terms ? (
           <details className="group rounded-2xl border border-[var(--cp-granate)]/70">
             <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 rounded-2xl px-4 py-3 font-semibold outline-none focus-visible:ring-3 focus-visible:ring-[var(--cp-granate)]/40 [&::-webkit-details-marker]:hidden">
               Términos y condiciones
-              <ChevronDown
-                className="size-4 transition-transform group-open:rotate-180 motion-reduce:transition-none"
-                aria-hidden="true"
-              />
+              <ChevronDown className="size-4 transition-transform group-open:rotate-180 motion-reduce:transition-none" aria-hidden="true" />
             </summary>
-            <p className="max-w-prose px-4 pb-4 text-sm leading-relaxed whitespace-pre-line">
-              {center.terms}
-            </p>
+            <p className="max-w-prose px-4 pb-4 text-sm leading-relaxed whitespace-pre-line">{center.terms}</p>
           </details>
         ) : null}
       </main>
@@ -311,8 +284,6 @@ function LocationSection({ center }: { center: PublicCenter }) {
 
 function ContactSection({ center }: { center: PublicCenter }) {
   const { phone, email, whatsapp_number: whatsapp } = center
-  const hasSocials = SOCIAL_NETWORKS.some(({ field }) => center[field])
-  if (!phone && !email && !whatsapp && !hasSocials) return null
   return (
     <section id="contacto" aria-labelledby="contact-heading" className="space-y-6">
       <SectionTitle id="contact-heading">Contacto</SectionTitle>
@@ -335,12 +306,7 @@ function ContactSection({ center }: { center: PublicCenter }) {
         ) : null}
         {whatsapp ? (
           <li>
-            <a
-              href={socialHref('whatsapp_number', whatsapp)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={contactLink}
-            >
+            <a href={socialHref('whatsapp_number', whatsapp)} target="_blank" rel="noopener noreferrer" className={contactLink}>
               <WhatsAppIcon className="size-4" />
               WhatsApp
               <span className="sr-only"> (se abre en una pestaña nueva)</span>

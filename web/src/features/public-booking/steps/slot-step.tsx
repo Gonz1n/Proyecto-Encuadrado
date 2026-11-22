@@ -44,9 +44,7 @@ export function SlotStep() {
     return (
       <div className="space-y-3 rounded-3xl border border-dashed border-[var(--cp-granate)] bg-[var(--cp-card)] p-5">
         <p className="font-medium">No quedan horas en los próximos 30 días</p>
-        <p className="text-sm text-[var(--cp-granate)]/80">
-          Prueba con otro profesional o con otro servicio.
-        </p>
+        <p className="text-sm text-[var(--cp-granate)]/80">Prueba con otro profesional o con otro servicio.</p>
         <Button variant="outline" className={outlineAction} onClick={() => state.update({ professional: null })}>
           Elegir otro profesional
         </Button>
@@ -75,9 +73,7 @@ export function SlotStep() {
       {state.date ? (
         <DaySlots date={state.date} />
       ) : (
-        <p className="text-sm text-[var(--cp-granate)]/80 md:pt-3">
-          Elige un día disponible para ver sus horas.
-        </p>
+        <p className="text-sm text-[var(--cp-granate)]/80 md:pt-3">Elige un día disponible para ver sus horas.</p>
       )}
     </div>
   )
@@ -85,11 +81,7 @@ export function SlotStep() {
 
 function DaySlots({ date }: { date: string }) {
   const { slug, state } = useBookingFlow()
-  const slots = useAvailability(slug, {
-    service: state.service?.id,
-    professional: state.professional?.id,
-    date,
-  })
+  const slots = useAvailability(slug, { service: state.service?.id, professional: state.professional?.id, date })
 
   return (
     <section aria-labelledby="day-slots-heading" className="space-y-4">
@@ -103,9 +95,7 @@ function DaySlots({ date }: { date: string }) {
           ))}
         </div>
       ) : slots.isError || slots.data.slots.length === 0 ? (
-        <p className="text-sm text-[var(--cp-granate)]/80">
-          Este día ya no tiene horas libres. Elige otro día.
-        </p>
+        <p className="text-sm text-[var(--cp-granate)]/80">Este día ya no tiene horas libres. Elige otro día.</p>
       ) : (
         groupSlots(slots.data.slots).map((group) => (
           <div key={group.label} className="space-y-2">

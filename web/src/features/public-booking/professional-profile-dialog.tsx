@@ -1,13 +1,6 @@
 import { ExternalLink } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import type { PublicProfessional } from './api'
 import { professionalSubtitle } from './center-page'
 import { ProfessionalAvatar } from './professional-avatar'
@@ -42,12 +35,7 @@ export function ProfessionalProfileDialog({ professional }: { professional: Publ
           <p className="flex flex-wrap items-center gap-x-2 gap-y-1 border-t pt-4 text-sm">
             <span className="text-muted-foreground">Registro Superintendencia de Salud:</span>
             <span className="font-medium tabular-nums">{professional.health_registry}</span>
-            <a
-              href={REGISTRY_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-primary hover:underline"
-            >
+            <a href={REGISTRY_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-primary hover:underline">
               Verificar
               <ExternalLink className="size-3.5" aria-hidden="true" />
               <span className="sr-only">(se abre en una pestaña nueva)</span>

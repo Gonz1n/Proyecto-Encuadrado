@@ -3,12 +3,7 @@
 import { Check, ChevronDown } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { centersMenuItems, centersMenuState, shouldRefetchCenters } from './centers-menu'
 import { usePublicCenters } from './hooks'
 
@@ -18,11 +13,10 @@ const menuMotion =
 export function PublicHeader({ slug }: { slug: string }) {
   const centers = usePublicCenters()
   const items = centersMenuItems(centers.data ?? [], slug)
-  const state = centersMenuState({ isError: centers.isError, hasData: Boolean(centers.data?.length) })
+  const status = { isError: centers.isError, hasData: Boolean(centers.data?.length) }
+  const state = centersMenuState(status)
   const handleOpenChange = (open: boolean) => {
-    if (open && shouldRefetchCenters({ isError: centers.isError, hasData: Boolean(centers.data?.length), isFetching: centers.isFetching })) {
-      void centers.refetch()
-    }
+    if (open && shouldRefetchCenters({ ...status, isFetching: centers.isFetching })) void centers.refetch()
   }
 
   return (
@@ -49,20 +43,12 @@ export function PublicHeader({ slug }: { slug: string }) {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" sideOffset={6} className={menuMotion}>
             {state === 'loading' ? (
-              <DropdownMenuItem disabled className="min-h-11 px-2.5 py-2">
-                Cargando centros…
-              </DropdownMenuItem>
+              <DropdownMenuItem disabled className="min-h-11 px-2.5 py-2">Cargando centros…</DropdownMenuItem>
             ) : null}
             {state === 'error' ? (
               <>
-                <DropdownMenuItem disabled className="min-h-11 px-2.5 py-2">
-                  No pudimos cargar los centros
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  closeOnClick={false}
-                  onClick={() => void centers.refetch()}
-                  className="min-h-11 px-2.5 py-2 font-medium"
-                >
+                <DropdownMenuItem disabled className="min-h-11 px-2.5 py-2">No pudimos cargar los centros</DropdownMenuItem>
+                <DropdownMenuItem closeOnClick={false} onClick={() => void centers.refetch()} className="min-h-11 px-2.5 py-2 font-medium">
                   Reintentar
                 </DropdownMenuItem>
               </>
@@ -76,9 +62,7 @@ export function PublicHeader({ slug }: { slug: string }) {
               >
                 <span className="flex min-w-0 flex-1 flex-col">
                   <span className="truncate font-medium">{item.name}</span>
-                  {item.description ? (
-                    <span className="truncate text-xs text-muted-foreground">{item.description}</span>
-                  ) : null}
+                  {item.description ? <span className="truncate text-xs text-muted-foreground">{item.description}</span> : null}
                 </span>
                 {item.current ? (
                   <span className="flex shrink-0 items-center gap-1 text-xs font-medium text-primary">

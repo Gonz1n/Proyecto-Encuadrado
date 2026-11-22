@@ -1,18 +1,6 @@
 import { createContext, use } from 'react'
-import type { PublicCenter } from './api'
+import type { PatientDraft, PublicCenter } from './api'
 import type { BookingState } from './use-booking-state'
-import type { Modality } from '@/lib/modality'
-
-export type PatientDraft = {
-  patient_name: string
-  patient_email: string
-  patient_phone: string
-  patient_rut: string
-  patient_birth_date: string
-  modality: Modality
-  accept_terms: boolean
-  data_consent: boolean
-}
 
 type BookingFlowContextValue = {
   slug: string

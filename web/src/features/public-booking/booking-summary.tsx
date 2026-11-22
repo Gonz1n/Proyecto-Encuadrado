@@ -5,15 +5,7 @@ import { formatCLP, formatDuration, formatLongDate } from '@/lib/format'
 import { useBookingFlow } from './booking-context'
 import type { BookingPatch } from './use-booking-state'
 
-function SummaryRow({
-  label,
-  change,
-  children,
-}: {
-  label: string
-  change: BookingPatch
-  children: ReactNode
-}) {
+function SummaryRow({ label, change, children }: { label: string; change: BookingPatch; children: ReactNode }) {
   const { state } = useBookingFlow()
   return (
     <div className="flex items-start gap-3 py-3 first:pt-0 last:pb-0">
@@ -55,9 +47,7 @@ export function BookingSummary() {
         {professional ? (
           <SummaryRow label="Profesional" change={{ professional: null }}>
             <p className="font-medium">{professional.full_name}</p>
-            {professional.title ? (
-              <p className="text-sm text-[var(--cp-granate)]/80">{professional.title}</p>
-            ) : null}
+            {professional.title ? <p className="text-sm text-[var(--cp-granate)]/80">{professional.title}</p> : null}
           </SummaryRow>
         ) : null}
         {service && date && time ? (
