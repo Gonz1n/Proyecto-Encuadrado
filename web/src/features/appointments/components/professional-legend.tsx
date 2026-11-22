@@ -1,8 +1,8 @@
 'use client'
 
 import { cn } from '@/lib/utils'
-import type { Appointment } from './api'
-import { professionalColor } from './calendar-layout'
+import type { Appointment } from '../types/appointment'
+import { professionalColor } from '../utils/calendar-layout'
 
 export function ProfessionalLegend({ professionals }: { professionals: Appointment['professional'][] }) {
   return (

@@ -1,15 +1,5 @@
 import { expect, test } from 'vitest'
-import {
-  assignLanes,
-  blockPosition,
-  dayColumns,
-  parseDateParam,
-  professionalColor,
-  resolveView,
-  visibleHourRange,
-  weekDays,
-  weekRangeLabel,
-} from './calendar-layout'
+import { assignLanes, blockPosition, dayColumns, parseDateParam, professionalColor, resolveView, visibleHourRange, weekDays, weekRangeLabel } from './calendar-layout'
 
 const at = (time: string) => `2026-11-20T${time}`
 const span = (id: number, start: string, end: string) => ({ id, start: at(start), end: at(end) })

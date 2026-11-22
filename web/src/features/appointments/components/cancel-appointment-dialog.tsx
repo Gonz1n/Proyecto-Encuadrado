@@ -13,8 +13,8 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { formatLongDate } from '@/utils/format'
-import type { Appointment } from './api'
-import { useCancelAppointment } from './hooks'
+import type { Appointment } from '../types/appointment'
+import { useCancelAppointment } from '../hooks/use-manage-appointment'
 import { NoteField } from './note-field'
 
 type CancelAppointmentDialogProps = {

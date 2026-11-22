@@ -6,14 +6,14 @@ import { es } from 'date-fns/locale'
 import { capitalize } from '@/utils/format'
 import { useCenter } from '@/features/center/hooks/use-center'
 import { AgendaError } from './agenda-error'
-import type { Appointment } from './api'
+import type { Appointment } from '../types/appointment'
 import { AppointmentDetailDialog } from './appointment-detail-dialog'
 import { CalendarGrid, CalendarSkeleton } from './calendar-grid'
-import { DATE_FORMAT, professionalColor, visibleHourRange, weekDays } from './calendar-layout'
-import { useAppointments } from './hooks'
+import { DATE_FORMAT } from '@/constants/dates'
+import { professionalColor, visibleHourRange, weekDays } from '../utils/calendar-layout'
+import { useAppointments } from '../hooks/use-appointments'
 import { ProfessionalLegend } from './professional-legend'
-
-const ACCENT = 'border-primary bg-primary/10 text-foreground dark:bg-primary/20'
+import { WEEK_ACCENT_CLASS } from '../constants/styles'
 
 type WeekViewProps = {
   slug: string
@@ -71,7 +71,7 @@ export function WeekView({ slug, reference, professional, viewAll, includeCancel
         range={visibleHourRange(center.data.opening_time, center.data.closing_time, data)}
         appointments={data}
         columnOf={(appointment) => format(parseISO(appointment.start), DATE_FORMAT)}
-        colorFor={byProfessional ? (appointment) => professionalColor(appointment.professional.id) : () => ACCENT}
+        colorFor={byProfessional ? (appointment) => professionalColor(appointment.professional.id) : () => WEEK_ACCENT_CLASS}
         showProfessional={byProfessional}
         onSelect={setSelected}
       />

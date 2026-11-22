@@ -2,7 +2,7 @@
 
 import { format, parseISO } from 'date-fns'
 import { es } from 'date-fns/locale'
-import type { AppointmentChange } from './api'
+import type { AppointmentChange } from '../types/appointment'
 
 const stamp = (value: string) => format(parseISO(value), "d MMM, HH:mm", { locale: es })
 

@@ -5,7 +5,7 @@ import { Mail, Phone, Video } from 'lucide-react'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
 import { formatCLP, formatLongDate } from '@/utils/format'
-import type { Appointment } from './api'
+import type { Appointment } from '../types/appointment'
 import { AppointmentDetailDialog } from './appointment-detail-dialog'
 
 function groupByDay(appointments: Appointment[]) {

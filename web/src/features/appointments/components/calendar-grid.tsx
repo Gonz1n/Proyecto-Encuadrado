@@ -3,11 +3,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
-import type { Appointment } from './api'
+import type { Appointment } from '../types/appointment'
 import { AppointmentBlock } from './appointment-block'
-import { assignLanes, blockPosition, SLOT_MINUTES } from './calendar-layout'
-
-const HOUR_HEIGHT = 56
+import { assignLanes, blockPosition } from '../utils/calendar-layout'
+import { HOUR_HEIGHT, SLOT_MINUTES } from '../constants/calendar'
+import type { CalendarRange as Range } from '../types/calendar'
 
 type CalendarColumn = {
   key: string
@@ -18,7 +18,6 @@ type CalendarColumn = {
   muted?: boolean
   color?: string
 }
-type Range = { startMinutes: number; endMinutes: number }
 
 type CalendarGridProps = {
   columns: CalendarColumn[]

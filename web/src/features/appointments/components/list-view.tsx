@@ -6,8 +6,8 @@ import { CalendarX } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { AgendaError } from './agenda-error'
 import { AppointmentList } from './appointment-list'
-import { DATE_FORMAT } from './calendar-layout'
-import { useAppointments } from './hooks'
+import { DATE_FORMAT } from '@/constants/dates'
+import { useAppointments } from '../hooks/use-appointments'
 
 type ListViewProps = {
   slug: string

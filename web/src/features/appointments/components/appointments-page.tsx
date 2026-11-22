@@ -1,9 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { addDays, addWeeks, format } from 'date-fns'
-import { useParams, useSearchParams } from 'next/navigation'
-import { useSetSearchParams } from '@/hooks/use-set-search-params'
+import { useParams } from 'next/navigation'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Button } from '@/components/ui/button'
 import { CalendarPlus } from 'lucide-react'
@@ -11,7 +9,10 @@ import { useCan } from '@/features/permissions/hooks/use-can'
 import { useCurrentMembership } from '@/features/auth/hooks/use-current-membership'
 import { CalendarNavigation } from './calendar-navigation'
 import { formatLongDate } from '@/utils/format'
-import { DATE_FORMAT, parseDateParam, resolveView, weekDays, weekRangeLabel } from './calendar-layout'
+import { PageTitle } from '@/components/layout/page-title'
+import { weekDays, weekRangeLabel } from '../utils/calendar-layout'
+import { AGENDA_RANGES } from '../constants/agenda'
+import { useAgendaParams } from '../hooks/use-agenda-params'
 import { CreateAppointmentDialog } from './create-appointment-dialog'
 import { DayView } from './day-view'
 import { ListView } from './list-view'
@@ -19,46 +20,13 @@ import { ProfessionalFilter } from './professional-filter'
 import { ViewSwitcher } from './view-switcher'
 import { WeekView } from './week-view'
 
-const RANGES = [
-  { days: 7, label: 'Próximos 7 días' },
-  { days: 30, label: 'Próximos 30 días' },
-] as const
-
 export function AppointmentsPage() {
   const { slug } = useParams<{ slug: string }>()
   const viewAll = useCan('agenda:view-all')
-  const searchParams = useSearchParams()
-  const setSearchParams = useSetSearchParams()
-  const [today] = useState(() => new Date())
   const membership = useCurrentMembership()
   const [creating, setCreating] = useState(false)
   const canCreate = useCan('agenda:create')
-
-  const view = resolveView(searchParams.get('vista'), viewAll)
-  const reference = parseDateParam(searchParams.get('fecha'), today)
-  const days = searchParams.get('rango') === '30' ? 30 : 7
-  const includeCancelled = searchParams.get('canceladas') === '1'
-  const professionalParam = Number(searchParams.get('profesional'))
-  const professional =
-    viewAll && view !== 'dia' && Number.isInteger(professionalParam) && professionalParam > 0
-      ? professionalParam
-      : undefined
-
-  const updateParams = (changes: Record<string, string | undefined>) =>
-    setSearchParams(
-      (current) => {
-        const next = new URLSearchParams(current)
-        for (const [key, value] of Object.entries(changes)) {
-          if (value) next.set(key, value)
-          else next.delete(key)
-        }
-        return next
-      },
-      { replace: true },
-    )
-
-  const move = (amount: number) =>
-    updateParams({ fecha: format((view === 'dia' ? addDays : addWeeks)(reference, amount), DATE_FORMAT) })
+  const { view, reference, days, includeCancelled, professional, updateParams, move } = useAgendaParams(viewAll)
   const week = weekDays(reference)
   const title = viewAll ? 'Agenda del centro' : 'Mi agenda'
 
@@ -66,7 +34,7 @@ export function AppointmentsPage() {
     <div className="space-y-6">
       <title>{`${title} | CentradaMente`}</title>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-2xl font-bold tracking-tight text-primary border-b-2 border-primary pb-1.5">{title}</h1>
+        <PageTitle>{title}</PageTitle>
         <div className="flex flex-wrap items-center gap-3">
           <ViewSwitcher
             value={view}
@@ -84,7 +52,7 @@ export function AppointmentsPage() {
       <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
         {view === 'lista' ? (
           <div role="group" aria-label="Rango de fechas" className="flex gap-2">
-            {RANGES.map((range) => (
+            {AGENDA_RANGES.map((range) => (
               <Button
                 key={range.days}
                 variant={range.days === days ? 'default' : 'outline'}

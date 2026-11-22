@@ -5,14 +5,13 @@ import { format, isToday } from 'date-fns'
 import { useCenter } from '@/features/center/hooks/use-center'
 import { useMembers } from '@/features/center/hooks/use-members'
 import { AgendaError } from './agenda-error'
-import type { Appointment } from './api'
+import type { Appointment } from '../types/appointment'
 import { AppointmentDetailDialog } from './appointment-detail-dialog'
 import { CalendarGrid, CalendarSkeleton } from './calendar-grid'
-import { DATE_FORMAT, dayColumns, professionalColor, visibleHourRange } from './calendar-layout'
-import { useAppointments } from './hooks'
-
-const COLUMN_MIN_WIDTH_REM = 11
-const AXIS_WIDTH_REM = 3.5
+import { DATE_FORMAT } from '@/constants/dates'
+import { dayColumns, professionalColor, visibleHourRange } from '../utils/calendar-layout'
+import { useAppointments } from '../hooks/use-appointments'
+import { AXIS_WIDTH_REM, COLUMN_MIN_WIDTH_REM } from '../constants/calendar'
 
 export function DayView({ slug, date, includeCancelled }: { slug: string; date: Date; includeCancelled: boolean }) {
   const [selected, setSelected] = useState<Appointment | null>(null)

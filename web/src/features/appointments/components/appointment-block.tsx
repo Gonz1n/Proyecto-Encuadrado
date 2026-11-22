@@ -3,7 +3,7 @@
 import { differenceInMinutes, format, parseISO } from 'date-fns'
 import type { CSSProperties } from 'react'
 import { cn } from '@/lib/utils'
-import type { Appointment } from './api'
+import type { Appointment } from '../types/appointment'
 import { Video } from 'lucide-react'
 
 type AppointmentBlockProps = {

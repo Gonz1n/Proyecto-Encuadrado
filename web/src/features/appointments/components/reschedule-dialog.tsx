@@ -3,9 +3,10 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import type { Appointment } from './api'
+import type { Appointment } from '../types/appointment'
 import { DayTimePicker } from './day-time-picker'
-import { useAppointmentAvailability, useAppointmentAvailableDays, useRescheduleAppointment } from './hooks'
+import { useAppointmentAvailability, useAppointmentAvailableDays } from '../hooks/use-appointment-availability'
+import { useRescheduleAppointment } from '../hooks/use-manage-appointment'
 import { NoteField } from './note-field'
 
 type RescheduleDialogProps = {

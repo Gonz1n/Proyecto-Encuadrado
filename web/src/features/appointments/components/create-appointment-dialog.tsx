@@ -1,17 +1,16 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { format, subYears } from 'date-fns'
 import { useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
+import { FieldSelect } from '@/components/form/field-select'
 import { PendingLabel } from '@/components/form/pending-label'
+import { birthDateBounds } from '@/features/patient/utils/birth-date-bounds'
 import type { Membership } from '@/features/auth/types/auth'
 import { buildPatientShape, EMPTY_PATIENT, PATIENT_FIELD_NAMES } from '@/features/patient/patient-fields'
 import { PatientInputs } from '@/features/patient/patient-inputs'
@@ -20,9 +19,9 @@ import { usePublicCenter } from '@/features/center/hooks/use-public-center'
 import { firstMessage, setFieldErrors } from '@/utils/form-errors'
 import { MODALITY_LABELS } from '@/constants/modality'
 import { type Modality } from '@/types/modality'
-import { selectableProfessionals } from './booking-professionals'
+import { selectableProfessionals } from '../utils/booking-professionals'
 import { DayTimePicker } from './day-time-picker'
-import { useCreateAppointment } from './hooks'
+import { useCreateAppointment } from '../hooks/use-appointments'
 import { isApiError, validationErrors } from '@/utils/api-errors'
 import { SLOT_TAKEN_MESSAGE } from '@/constants/messages'
 
@@ -31,35 +30,6 @@ type CreateAppointmentDialogProps = {
   membership: Membership
   open: boolean
   onOpenChange: (open: boolean) => void
-}
-
-type FieldSelectProps = {
-  label: string
-  placeholder?: string
-  items: { value: string; label: string }[]
-  value: string | null
-  disabled?: boolean
-  onValueChange: (value: string | null) => void
-}
-
-function FieldSelect({ label, placeholder, items, value, disabled, onValueChange }: FieldSelectProps) {
-  return (
-    <div className="space-y-2">
-      <Label>{label}</Label>
-      <Select items={items} value={value} disabled={disabled} onValueChange={onValueChange}>
-        <SelectTrigger aria-label={label} className="w-full">
-          <SelectValue placeholder={placeholder} />
-        </SelectTrigger>
-        <SelectContent>
-          {items.map((item) => (
-            <SelectItem key={item.value} value={item.value}>
-              {item.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
-  )
 }
 
 export function CreateAppointmentDialog({ slug, membership, open, onOpenChange }: CreateAppointmentDialogProps) {
@@ -71,8 +41,7 @@ export function CreateAppointmentDialog({ slug, membership, open, onOpenChange }
   const [time, setTime] = useState<string>()
   const create = useCreateAppointment(slug)
 
-  const today = format(new Date(), 'yyyy-MM-dd')
-  const oldest = format(subYears(new Date(), 120), 'yyyy-MM-dd')
+  const { today, oldest } = birthDateBounds()
   const schema = useMemo(() => z.object(buildPatientShape(today, oldest)), [today, oldest])
   const { register, handleSubmit, setError, formState: { errors } } = useForm<typeof EMPTY_PATIENT>({
     resolver: zodResolver(schema),

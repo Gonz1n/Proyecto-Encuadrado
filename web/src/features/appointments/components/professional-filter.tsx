@@ -2,8 +2,7 @@
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useMembers } from '@/features/center/hooks/use-members'
-
-const ALL = 'all'
+import { ALL_PROFESSIONALS } from '../constants/agenda'
 
 type ProfessionalFilterProps = {
   slug: string
@@ -15,12 +14,12 @@ export function ProfessionalFilter({ slug, value, onChange }: ProfessionalFilter
   const { data: members = [] } = useMembers(slug)
   const professionals = members.filter((member) => member.role !== 'viewer')
   const items = [
-    { value: ALL, label: 'Todos los profesionales' },
+    { value: ALL_PROFESSIONALS, label: 'Todos los profesionales' },
     ...professionals.map((member) => ({ value: String(member.id), label: member.user.full_name })),
   ]
 
   return (
-    <Select items={items} value={value ? String(value) : ALL} onValueChange={(next) => onChange(next && next !== ALL ? Number(next) : undefined)}>
+    <Select items={items} value={value ? String(value) : ALL_PROFESSIONALS} onValueChange={(next) => onChange(next && next !== ALL_PROFESSIONALS ? Number(next) : undefined)}>
       <SelectTrigger aria-label="Profesional" className="w-full sm:w-60">
         <SelectValue />
       </SelectTrigger>

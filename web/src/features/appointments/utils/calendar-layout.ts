@@ -1,23 +1,10 @@
 import { addDays, format, isValid, parseISO, startOfWeek } from 'date-fns'
 import { es } from 'date-fns/locale'
+import { DATE_FORMAT } from '@/constants/dates'
+import { PROFESSIONAL_PALETTE, SLOT_MINUTES } from '../constants/calendar'
+import type { CalendarRange, View } from '../types/calendar'
 
-export const SLOT_MINUTES = 30
-
-export type View = 'lista' | 'semana' | 'dia'
-
-type Range = { startMinutes: number; endMinutes: number }
 type Span = { start: string; end: string }
-
-export const DATE_FORMAT = 'yyyy-MM-dd'
-
-const PALETTE = [
-  'bg-[#f8dcd6] border-[#bc7b6f] text-[#4a2620]',
-  'bg-[#5a322a] border-[#2f1814] text-white',
-  'bg-[#e4a499] border-[#9a5f53] text-[#3a1d18]',
-  'bg-[#dde6ee] border-[#718a9e] text-[#1f2f3c]',
-  'bg-[#4f6779] border-[#2f4352] text-white',
-  'bg-[#d3e0cf] border-[#7f9a78] text-[#25331f]',
-]
 
 export function parseDateParam(value: string | null, fallback: Date): Date {
   if (!value) return fallback
@@ -40,7 +27,7 @@ function clockMinutes(hhmm: string): number {
   return hours * 60 + minutes
 }
 
-export function visibleHourRange(opening: string, closing: string, appointments: Span[]): Range {
+export function visibleHourRange(opening: string, closing: string, appointments: Span[]): CalendarRange {
   let start = clockMinutes(opening)
   let end = clockMinutes(closing)
   for (const appointment of appointments) {
@@ -53,7 +40,7 @@ export function visibleHourRange(opening: string, closing: string, appointments:
   }
 }
 
-export function blockPosition(start: string, end: string, range: Range): { top: number; height: number } {
+export function blockPosition(start: string, end: string, range: CalendarRange): { top: number; height: number } {
   const total = range.endMinutes - range.startMinutes
   const from = minutesOfDay(start)
   return {
@@ -89,7 +76,7 @@ export function assignLanes<T extends { id: number; start: string; end: string }
 }
 
 export function professionalColor(id: number): string {
-  return PALETTE[Math.abs(id) % PALETTE.length]
+  return PROFESSIONAL_PALETTE[Math.abs(id) % PROFESSIONAL_PALETTE.length]
 }
 
 export function weekRangeLabel(first: Date, last: Date): string {

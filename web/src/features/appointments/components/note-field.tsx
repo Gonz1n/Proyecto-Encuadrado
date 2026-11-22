@@ -3,7 +3,7 @@
 import { useId } from 'react'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { NOTE_MAX } from './hooks'
+import { NOTE_MAX } from '../constants/limits'
 
 type NoteFieldProps = {
   value: string
