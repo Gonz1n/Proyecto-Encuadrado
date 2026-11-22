@@ -8,6 +8,7 @@ import { toast } from 'sonner'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
+import { FieldError } from '@/components/form-field'
 import {
   Dialog,
   DialogContent,
@@ -18,7 +19,8 @@ import {
 } from '@/components/ui/dialog'
 import { format, subYears } from 'date-fns'
 import { ApiError } from '@/lib/api-client'
-import { buildPatientShape, firstMessage, PATIENT_FIELD_NAMES } from '@/features/patient/patient-fields'
+import { buildPatientShape, PATIENT_FIELD_NAMES } from '@/features/patient/patient-fields'
+import { firstMessage, setFieldErrors } from '@/lib/form-errors'
 import { PatientInputs } from '@/features/patient/patient-inputs'
 import { queryKeys } from '@/lib/query-keys'
 import { useBookingFlow, type PatientDraft } from '../booking-context'
@@ -65,11 +67,7 @@ function ConsentCheckbox({
         />
         <span>{children}</span>
       </label>
-      {error ? (
-        <p id={`${id}-error`} className="text-sm text-destructive">
-          {error}
-        </p>
-      ) : null}
+      <FieldError id={`${id}-error`} message={error} />
     </div>
   )
 }
@@ -145,15 +143,7 @@ export function PatientStep() {
         state.update({ time: null }, { replace: true })
         return
       }
-      let mapped = false
-      for (const field of PATIENT_FIELDS) {
-        const message = firstMessage(data, field)
-        if (message) {
-          setError(field, { message })
-          mapped = true
-        }
-      }
-      if (mapped) return
+      if (setFieldErrors(data, PATIENT_FIELDS, setError)) return
     }
     toast.error('No pudimos agendar tu hora. Intenta de nuevo.')
   }

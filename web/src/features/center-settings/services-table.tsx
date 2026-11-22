@@ -46,7 +46,7 @@ export function ServicesTable({ slug, canEdit }: { slug: string; canEdit: boolea
       await remove.mutateAsync(service.id)
       toast.success('Servicio eliminado')
     } catch (error) {
-      notifyDeleteError(error)
+      notifyDeleteError(error, 'No pudimos eliminar el servicio. Intenta de nuevo.')
     }
     close()
   }

@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { CharCount, FieldError } from '@/components/form-field'
 import { WEEKDAY_SHORT } from '@/lib/format'
 import { CONTACT_EMAIL_ERROR, CONTACT_PHONE_ERROR, CONTACT_PHONE_PATTERN } from '@/lib/phone'
 import { SOCIAL_NETWORKS, phoneError, socialLinkError } from '@/lib/social-links'
@@ -131,14 +132,6 @@ function toValues(center: Center): CenterValues {
   }
 }
 
-function FieldError({ id, message }: { id: string; message?: string }) {
-  return message ? (
-    <p id={id} className="text-sm text-destructive">
-      {message}
-    </p>
-  ) : null
-}
-
 export function CenterForm({
   slug,
   center,
@@ -208,15 +201,7 @@ export function CenterForm({
         <div className="space-y-2">
           <div className="flex items-baseline justify-between gap-2">
             <Label htmlFor="center-description">Descripción</Label>
-            <span
-              className={
-                descriptionLength > DESCRIPTION_MAX
-                  ? 'text-xs text-destructive tabular-nums'
-                  : 'text-xs text-muted-foreground tabular-nums'
-              }
-            >
-              {descriptionLength}/{DESCRIPTION_MAX}
-            </span>
+            <CharCount count={descriptionLength} max={DESCRIPTION_MAX} />
           </div>
           <Textarea
             id="center-description"
@@ -323,15 +308,7 @@ export function CenterForm({
         <div className="space-y-2">
           <div className="flex items-baseline justify-between gap-2">
             <Label htmlFor="center-terms">Términos y condiciones</Label>
-            <span
-              className={
-                termsLength > TERMS_MAX
-                  ? 'text-xs text-destructive tabular-nums'
-                  : 'text-xs text-muted-foreground tabular-nums'
-              }
-            >
-              {termsLength}/{TERMS_MAX}
-            </span>
+            <CharCount count={termsLength} max={TERMS_MAX} />
           </div>
           <Textarea
             id="center-terms"

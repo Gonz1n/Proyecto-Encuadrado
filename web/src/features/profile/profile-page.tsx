@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { CharCount, FieldError } from '@/components/form-field'
 import { authApi, type CurrentUser, type ProfileUpdate } from '@/features/auth/api'
 import { useAuth } from '@/features/auth/auth-context'
 import { handleMutationError } from '@/features/center-settings/hooks'
@@ -129,24 +130,14 @@ function ProfileForm({ user }: { user: CurrentUser }) {
                 aria-describedby={errors[name] ? `profile-${name}-error` : undefined}
                 {...register(name)}
               />
-              {errors[name] ? (
-                <p id={`profile-${name}-error`} className="text-sm text-destructive">
-                  {errors[name].message}
-                </p>
-              ) : null}
+              <FieldError id={`profile-${name}-error`} message={errors[name]?.message} />
             </div>
           ))}
         </div>
         <div className="space-y-2">
           <div className="flex items-baseline justify-between gap-2">
             <Label htmlFor="profile-bio">Descripción</Label>
-            <span
-              className={
-                bio.length > BIO_MAX ? 'text-xs text-destructive tabular-nums' : 'text-xs text-muted-foreground tabular-nums'
-              }
-            >
-              {bio.length}/{BIO_MAX}
-            </span>
+            <CharCount count={bio.length} max={BIO_MAX} />
           </div>
           <Textarea
             id="profile-bio"
@@ -156,11 +147,7 @@ function ProfileForm({ user }: { user: CurrentUser }) {
             aria-describedby={errors.bio ? 'profile-bio-error' : undefined}
             {...register('bio')}
           />
-          {errors.bio ? (
-            <p id="profile-bio-error" className="text-sm text-destructive">
-              {errors.bio.message}
-            </p>
-          ) : null}
+          <FieldError id="profile-bio-error" message={errors.bio?.message} />
         </div>
         <Button type="submit" size="lg" disabled={!isDirty || isSubmitting}>
           {isSubmitting ? (

@@ -20,10 +20,11 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { Membership } from '@/features/auth/api'
-import { buildPatientShape, firstMessage, PATIENT_FIELD_NAMES } from '@/features/patient/patient-fields'
+import { buildPatientShape, PATIENT_FIELD_NAMES } from '@/features/patient/patient-fields'
 import { PatientInputs } from '@/features/patient/patient-inputs'
 import { useAvailability, useAvailableDays, usePublicCenter } from '@/features/public-booking/hooks'
 import { ApiError } from '@/lib/api-client'
+import { firstMessage, setFieldErrors } from '@/lib/form-errors'
 import { MODALITY_LABELS, type Modality } from '@/lib/modality'
 import { selectableProfessionals } from './booking-professionals'
 import { DayTimePicker } from './day-time-picker'
@@ -126,15 +127,7 @@ export function CreateAppointmentDialog({ slug, membership, open, onOpenChange }
               toast.error(general)
               return
             }
-            let mapped = false
-            for (const field of PATIENT_FIELD_NAMES) {
-              const message = firstMessage(data, field)
-              if (message) {
-                setError(field, { message })
-                mapped = true
-              }
-            }
-            if (mapped) return
+            if (setFieldErrors(data, PATIENT_FIELD_NAMES, setError)) return
           }
           toast.error('No pudimos agendar la hora. Intenta de nuevo.')
         },

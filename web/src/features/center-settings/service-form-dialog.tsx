@@ -17,6 +17,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { FieldError } from '@/components/form-field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { formatDuration } from '@/lib/format'
 import type { Service } from './api'
@@ -98,11 +99,7 @@ function ServiceForm({
           aria-describedby={errors.name ? 'service-name-error' : undefined}
           {...register('name')}
         />
-        {errors.name ? (
-          <p id="service-name-error" className="text-sm text-destructive">
-            {errors.name.message}
-          </p>
-        ) : null}
+        <FieldError id="service-name-error" message={errors.name?.message} />
       </div>
       <div className="space-y-2">
         <Label htmlFor="service-price">Precio (CLP)</Label>
@@ -115,11 +112,7 @@ function ServiceForm({
           aria-describedby={errors.price_clp ? 'service-price-error' : undefined}
           {...register('price_clp')}
         />
-        {errors.price_clp ? (
-          <p id="service-price-error" className="text-sm text-destructive">
-            {errors.price_clp.message}
-          </p>
-        ) : null}
+        <FieldError id="service-price-error" message={errors.price_clp?.message} />
       </div>
       <div className="space-y-2">
         <Label htmlFor="service-duration">Duración</Label>
@@ -150,11 +143,7 @@ function ServiceForm({
             </Select>
           )}
         />
-        {errors.duration_minutes ? (
-          <p id="service-duration-error" className="text-sm text-destructive">
-            {errors.duration_minutes.message}
-          </p>
-        ) : null}
+        <FieldError id="service-duration-error" message={errors.duration_minutes?.message} />
       </div>
       <div className="space-y-2">
         <Label htmlFor="service-description">Descripción (opcional)</Label>
@@ -165,11 +154,7 @@ function ServiceForm({
           aria-describedby={errors.description ? 'service-description-error' : undefined}
           {...register('description')}
         />
-        {errors.description ? (
-          <p id="service-description-error" className="text-sm text-destructive">
-            {errors.description.message}
-          </p>
-        ) : null}
+        <FieldError id="service-description-error" message={errors.description?.message} />
       </div>
       <DialogFooter>
         <Button type="button" variant="outline" onClick={onDone}>

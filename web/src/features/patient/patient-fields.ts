@@ -28,14 +28,6 @@ export type PatientFieldName =
   | 'patient_email'
   | 'patient_phone'
 
-export const PATIENT_FIELD_NAMES: readonly PatientFieldName[] = [
-  'patient_name',
-  'patient_rut',
-  'patient_birth_date',
-  'patient_email',
-  'patient_phone',
-]
-
 export const PATIENT_FIELDS: {
   name: PatientFieldName
   label: string
@@ -79,7 +71,4 @@ export const PATIENT_FIELDS: {
   },
 ]
 
-export function firstMessage(data: Record<string, unknown>, key: string): string | null {
-  const messages = data[key]
-  return Array.isArray(messages) && messages.length > 0 ? String(messages[0]) : null
-}
+export const PATIENT_FIELD_NAMES = PATIENT_FIELDS.map((field) => field.name)

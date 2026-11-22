@@ -10,10 +10,12 @@ import { Calendar } from '@/components/ui/calendar'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
+import { FieldError } from '@/components/form-field'
 import { ApiError } from '@/lib/api-client'
+import { firstMessage } from '@/lib/form-errors'
 import { formatLongDate } from '@/lib/format'
 import { cancelledMessage } from './cancelled-message'
-import { useClosures, useCreateClosure, useDeleteClosure } from './hooks'
+import { notifyDeleteError, useClosures, useCreateClosure, useDeleteClosure } from './hooks'
 
 const REASON_MAX = 120
 const DATE_FORMAT = 'yyyy-MM-dd'
@@ -21,11 +23,7 @@ const DATE_FORMAT = 'yyyy-MM-dd'
 function firstError(error: unknown): string | undefined {
   if (!(error instanceof ApiError) || error.status !== 400 || !error.data) return undefined
   const data = error.data as Record<string, unknown>
-  for (const field of ['date', 'reason']) {
-    const messages = data[field]
-    if (Array.isArray(messages) && messages.length > 0) return String(messages[0])
-  }
-  return undefined
+  return firstMessage(data, 'date') ?? firstMessage(data, 'reason') ?? undefined
 }
 
 export function ClosuresCard({ slug, canEdit }: { slug: string; canEdit: boolean }) {
@@ -63,11 +61,7 @@ export function ClosuresCard({ slug, canEdit }: { slug: string; canEdit: boolean
       await remove.mutateAsync(id)
       toast.success('Día reabierto')
     } catch (e) {
-      toast.error(
-        e instanceof ApiError && e.status === 403
-          ? 'No tienes permisos para esta acción'
-          : 'No pudimos eliminar el cierre. Intenta de nuevo.',
-      )
+      notifyDeleteError(e, 'No pudimos eliminar el cierre. Intenta de nuevo.')
     }
   }
 
@@ -103,11 +97,7 @@ export function ClosuresCard({ slug, canEdit }: { slug: string; canEdit: boolean
                 aria-describedby={error ? 'closure-error' : undefined}
                 onChange={(event) => setReason(event.target.value)}
               />
-              {error ? (
-                <p id="closure-error" className="text-sm text-destructive">
-                  {error}
-                </p>
-              ) : null}
+              <FieldError id="closure-error" message={error} />
             </div>
             <Button type="submit" disabled={create.isPending}>
               {create.isPending ? (

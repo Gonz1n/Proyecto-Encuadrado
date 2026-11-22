@@ -3,6 +3,7 @@
 import type { FieldErrors, Path, UseFormRegister } from 'react-hook-form'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { FieldError } from '@/components/form-field'
 import { formatRutInput } from '@/lib/rut'
 import { PATIENT_FIELDS, type PatientFieldName } from './patient-fields'
 
@@ -47,11 +48,7 @@ export function PatientInputs<T extends PatientValues>({
               }
             : {})}
         />
-        {error ? (
-          <p id={`${name}-error`} className="text-sm text-destructive">
-            {error}
-          </p>
-        ) : null}
+        <FieldError id={`${name}-error`} message={error} />
       </div>
     )
   })

@@ -9,6 +9,7 @@ import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { FieldError } from '@/components/form-field'
 import { ApiError } from '@/lib/api-client'
 import { useAuth } from './auth-context'
 import { safeNextPath } from '@/lib/safe-next-path'
@@ -96,11 +97,7 @@ export function LoginPage() {
                 aria-describedby={errors.email ? 'email-error' : undefined}
                 {...register('email')}
               />
-              {errors.email ? (
-                <p id="email-error" className="text-sm text-destructive">
-                  {errors.email.message}
-                </p>
-              ) : null}
+              <FieldError id="email-error" message={errors.email?.message} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="password" className="text-base font-semibold text-(--cp-granate)">
@@ -131,11 +128,7 @@ export function LoginPage() {
                   )}
                 </button>
               </div>
-              {errors.password ? (
-                <p id="password-error" className="text-sm text-destructive">
-                  {errors.password.message}
-                </p>
-              ) : null}
+              <FieldError id="password-error" message={errors.password?.message} />
             </div>
             {errors.root ? (
               <p
