@@ -1,50 +1,9 @@
 import re
 from typing import Annotated
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.shared.schemas.fields import NotBlank
-
-
-class CenterSummary(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
-    slug: str
-    name: str
-
-
-class MembershipOut(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
-    id: int
-    role: str
-    role_label: str
-    center: CenterSummary
-
-
-class UserOut(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
-    id: int
-    email: str
-    first_name: str
-    last_name: str
-    full_name: str
-    title: str
-    university: str
-    bio: str
-    health_registry: str
-    memberships: list[MembershipOut]
-
-
-class LoginIn(BaseModel):
-    email: EmailStr
-    password: str
-
-
-class LoginOut(BaseModel):
-    token: str
-    user: UserOut
 
 
 class ProfileUpdate(BaseModel):

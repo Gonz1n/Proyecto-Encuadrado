@@ -3,7 +3,7 @@ from datetime import date
 from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
 
-from app.accounts.models import User
+from app.accounts.models.user import User
 from app.centers.models import Center, CenterClosure, Membership, Role, Service
 
 
@@ -78,3 +78,13 @@ def get_closure(session: Session, center_id: int, closure_id: int) -> CenterClos
 
 def closure_exists(session: Session, center_id: int, day: date) -> bool:
     return day in closure_dates(session, center_id, day, day)
+
+
+def user_memberships(session: Session, user: User) -> list[Membership]:
+    return session.scalars(
+        select(Membership)
+        .join(Center)
+        .options(joinedload(Membership.center))
+        .where(Membership.user_id == user.id)
+        .order_by(Center.name, Membership.id)
+    ).all()

@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from app.accounts.router import router as auth_router
+from app.accounts.api.router import router as auth_router
 from app.centers.router import router as centers_router
 from app.core.errors.handlers import register_error_handlers
 from app.scheduling.private_router import router as private_router

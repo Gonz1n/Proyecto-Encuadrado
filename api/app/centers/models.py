@@ -5,7 +5,7 @@ from sqlalchemy import BigInteger, CheckConstraint, Date, DateTime, ForeignKey, 
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.accounts.models import User
+from app.accounts.models.user import User
 from app.core import clock
 from app.db.base import Base
 

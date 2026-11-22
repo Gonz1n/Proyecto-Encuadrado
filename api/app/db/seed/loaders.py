@@ -5,9 +5,9 @@ from functools import cache
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app.accounts.models import User
-from app.accounts.repository import create_user, get_user_by_email
-from app.accounts.security import hash_password
+from app.accounts.models.user import User
+from app.accounts.repositories.users import create_user, get_user_by_email
+from app.accounts.security.passwords import hash_password
 from app.centers import repository as centers
 from app.centers.models import Center, Membership, Role, Service
 from app.core import clock

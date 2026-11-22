@@ -1,4 +1,4 @@
-from app.accounts import repository
+from app.accounts.repositories import users
 from app.centers.models import Role
 
 
@@ -99,7 +99,7 @@ def test_malformed_and_unknown_token_return_401(client):
 
 
 def test_login_user_without_password_returns_400(session, client):
-    repository.create_user(session, email="sin@example.com")
+    users.create_user(session, email="sin@example.com")
     response = login(client, "sin@example.com")
     assert response.status_code == 400
     assert response.json() == {"detail": "Correo o contraseña incorrectos"}

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Response
 
-from app.accounts.deps import CurrentUser
+from app.accounts.api.dependencies import CurrentUser
 from app.centers import repository
 from app.centers.access import AdminDep, CenterDep
 from app.centers.models import CenterClosure, Membership, Service

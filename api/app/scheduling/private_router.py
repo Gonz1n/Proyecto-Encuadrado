@@ -3,7 +3,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query
 
-from app.accounts.deps import CurrentUser
+from app.accounts.api.dependencies import CurrentUser
 from app.centers.access import CenterDep, ManagerDep
 from app.centers.models import Role
 from app.core import clock

@@ -4,8 +4,8 @@ from itertools import count
 
 import pytest
 
-from app.accounts.models import User
-from app.accounts.security import hash_password
+from app.accounts.models.user import User
+from app.accounts.security.passwords import hash_password
 from app.centers.models import Center, CenterClosure, Membership, Role, Service
 from app.scheduling.models import Appointment
 

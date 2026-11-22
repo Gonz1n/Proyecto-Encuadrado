@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.accounts.models import User
+from app.accounts.models.user import User
 from app.centers import repository as centers_repository
 from app.centers.models import Center, Membership, Service
 from app.core import clock

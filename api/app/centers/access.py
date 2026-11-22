@@ -3,7 +3,7 @@ from typing import Annotated
 
 from fastapi import Depends
 
-from app.accounts.deps import CurrentUser
+from app.accounts.api.dependencies import CurrentUser
 from app.centers import repository
 from app.centers.models import Center, Membership, Role
 from app.core.errors.exceptions import DomainError

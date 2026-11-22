@@ -1,4 +1,4 @@
-from app.accounts.models import User
+from app.accounts.models.user import User
 
 PROFILE = {
     "first_name": "Camila",
