@@ -6,22 +6,27 @@ from sqlalchemy.orm import Session
 from app import clock
 from app.accounts.models import User
 from app.centers import repository as centers_repository
+from app.centers.access import NOT_FOUND
 from app.centers.models import Center, Membership, Service
+from app.errors import DomainError
 from app.scheduling.availability import slots_for_day
 from app.scheduling.models import Appointment, AppointmentChange, AppointmentStatus, ChangeKind
 from app.scheduling.schemas import PatientIn
 
 
-class SlotUnavailable(Exception):
-    pass
+class SlotUnavailable(DomainError):
+    def __init__(self):
+        super().__init__(409, "La hora seleccionada ya no está disponible")
 
 
-class AppointmentLocked(Exception):
-    pass
+class AppointmentLocked(DomainError):
+    def __init__(self):
+        super().__init__(400, "No se puede modificar una cita pasada")
 
 
-class AppointmentNotFound(Exception):
-    pass
+class AppointmentNotFound(DomainError):
+    def __init__(self):
+        super().__init__(404, NOT_FOUND)
 
 
 def lock_professional(session: Session, professional: Membership) -> None:
@@ -31,6 +36,19 @@ def lock_professional(session: Session, professional: Membership) -> None:
 def lock_center_professionals(session: Session, center: Center) -> None:
     user_ids = [m.user_id for m in centers_repository.bookable_memberships(session, center.id)]
     session.execute(select(User.id).where(User.id.in_(user_ids)).order_by(User.id).with_for_update())
+
+
+def _cancel(session: Session, appointment: Appointment, note: str, user: User) -> None:
+    session.add(
+        AppointmentChange(
+            appointment_id=appointment.id,
+            kind=ChangeKind.CANCELLED,
+            previous_start=appointment.start,
+            note=note,
+            changed_by_id=user.id,
+        )
+    )
+    appointment.status = AppointmentStatus.CANCELLED
 
 
 def cancel_for_center(
@@ -48,22 +66,10 @@ def cancel_for_center(
         )
         .with_for_update()
         .execution_options(populate_existing=True)
-    )
-    count = 0
+    ).all()
     for appointment in locked:
-        session.add(
-            AppointmentChange(
-                appointment_id=appointment.id,
-                kind=ChangeKind.CANCELLED,
-                previous_start=appointment.start,
-                new_start=None,
-                note=note,
-                changed_by_id=user.id,
-            )
-        )
-        appointment.status = AppointmentStatus.CANCELLED
-        count += 1
-    return count
+        _cancel(session, appointment, note, user)
+    return len(locked)
 
 
 def create_appointment(
@@ -142,15 +148,6 @@ def reschedule_appointment(
 
 def cancel_appointment(session: Session, appointment: Appointment, note: str, user: User, now: datetime) -> Appointment:
     appointment = _lock_editable(session, appointment, now)
-    session.add(
-        AppointmentChange(
-            appointment_id=appointment.id,
-            kind=ChangeKind.CANCELLED,
-            previous_start=appointment.start,
-            note=note,
-            changed_by_id=user.id,
-        )
-    )
-    appointment.status = AppointmentStatus.CANCELLED
+    _cancel(session, appointment, note, user)
     session.commit()
     return appointment

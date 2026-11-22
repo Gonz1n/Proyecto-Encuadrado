@@ -1,8 +1,10 @@
+import secrets
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
 
 from app.accounts.models import ApiToken, User
-from app.accounts.security import hash_password, new_token_key
+from app.accounts.security import hash_password
 from app.centers.models import Center, Membership
 
 
@@ -31,7 +33,7 @@ def get_user_by_email(session: Session, email: str) -> User | None:
 def get_or_create_token(session: Session, user: User) -> ApiToken:
     token = session.scalar(select(ApiToken).where(ApiToken.user_id == user.id))
     if token is None:
-        token = ApiToken(key=new_token_key(), user_id=user.id)
+        token = ApiToken(key=secrets.token_hex(20), user_id=user.id)
         session.add(token)
         session.flush()
     return token
@@ -51,12 +53,10 @@ def delete_token(session: Session, key: str) -> None:
 
 
 def list_memberships(session: Session, user: User) -> list[Membership]:
-    return list(
-        session.scalars(
-            select(Membership)
-            .join(Center)
-            .options(joinedload(Membership.center))
-            .where(Membership.user_id == user.id)
-            .order_by(Center.name, Membership.id)
-        )
-    )
+    return session.scalars(
+        select(Membership)
+        .join(Center)
+        .options(joinedload(Membership.center))
+        .where(Membership.user_id == user.id)
+        .order_by(Center.name, Membership.id)
+    ).all()

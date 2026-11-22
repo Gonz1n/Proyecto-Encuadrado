@@ -6,9 +6,8 @@ from sqlalchemy.orm import Session
 from app.accounts import repository
 from app.accounts.deps import CurrentToken, CurrentUser
 from app.accounts.models import User
-from app.accounts.schemas import LoginIn, LoginOut, MembershipOut, ProfileUpdate, UserOut
+from app.accounts.schemas import LoginIn, LoginOut, ProfileUpdate, UserOut
 from app.accounts.security import verify_password
-from app.centers.models import ROLE_LABELS, Role
 from app.db import SessionDep
 from app.errors import DomainError
 
@@ -18,12 +17,8 @@ BAD_CREDENTIALS = "Correo o contraseña incorrectos"
 
 
 def to_user_out(session: Session, user: User) -> UserOut:
-    memberships = [
-        MembershipOut(id=m.id, role=m.role, role_label=ROLE_LABELS[Role(m.role)], center=m.center)
-        for m in repository.list_memberships(session, user)
-    ]
     fields = {name: getattr(user, name) for name in UserOut.model_fields if name != "memberships"}
-    return UserOut(**fields, memberships=memberships)
+    return UserOut(**fields, memberships=repository.list_memberships(session, user))
 
 
 async def json_body(request: Request) -> object:

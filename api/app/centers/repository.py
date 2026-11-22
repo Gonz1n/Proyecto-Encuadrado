@@ -12,7 +12,7 @@ def get_center_by_slug(session: Session, slug: str) -> Center | None:
 
 
 def all_centers(session: Session) -> list[Center]:
-    return list(session.scalars(select(Center).order_by(Center.name)))
+    return session.scalars(select(Center).order_by(Center.name)).all()
 
 
 def get_membership(session: Session, user_id: int, center_id: int) -> Membership | None:
@@ -22,22 +22,18 @@ def get_membership(session: Session, user_id: int, center_id: int) -> Membership
 
 
 def bookable_memberships(session: Session, center_id: int) -> list[Membership]:
-    return list(
-        session.scalars(
-            select(Membership)
-            .options(joinedload(Membership.user))
-            .where(Membership.center_id == center_id, Membership.role != Role.VIEWER)
-            .order_by(Membership.id)
-        )
-    )
+    return session.scalars(
+        select(Membership)
+        .options(joinedload(Membership.user))
+        .where(Membership.center_id == center_id, Membership.role != Role.VIEWER)
+        .order_by(Membership.id)
+    ).all()
 
 
 def active_services(session: Session, center_id: int) -> list[Service]:
-    return list(
-        session.scalars(
-            select(Service).where(Service.center_id == center_id, Service.is_active).order_by(Service.name)
-        )
-    )
+    return session.scalars(
+        select(Service).where(Service.center_id == center_id, Service.is_active).order_by(Service.name)
+    ).all()
 
 
 def get_active_service(session: Session, center_id: int, service_id: int) -> Service | None:
@@ -47,15 +43,13 @@ def get_active_service(session: Session, center_id: int, service_id: int) -> Ser
 
 
 def members(session: Session, center_id: int) -> list[Membership]:
-    return list(
-        session.scalars(
-            select(Membership)
-            .join(Membership.user)
-            .options(joinedload(Membership.user))
-            .where(Membership.center_id == center_id)
-            .order_by(Membership.role, User.last_name, User.first_name)
-        )
-    )
+    return session.scalars(
+        select(Membership)
+        .join(Membership.user)
+        .options(joinedload(Membership.user))
+        .where(Membership.center_id == center_id)
+        .order_by(Membership.role, User.last_name, User.first_name)
+    ).all()
 
 
 def closure_dates(session: Session, center_id: int, start: date, end: date) -> set[date]:
@@ -69,13 +63,11 @@ def closure_dates(session: Session, center_id: int, start: date, end: date) -> s
 
 
 def upcoming_closures(session: Session, center_id: int, today: date) -> list[CenterClosure]:
-    return list(
-        session.scalars(
-            select(CenterClosure)
-            .where(CenterClosure.center_id == center_id, CenterClosure.date >= today)
-            .order_by(CenterClosure.date)
-        )
-    )
+    return session.scalars(
+        select(CenterClosure)
+        .where(CenterClosure.center_id == center_id, CenterClosure.date >= today)
+        .order_by(CenterClosure.date)
+    ).all()
 
 
 def get_closure(session: Session, center_id: int, closure_id: int) -> CenterClosure | None:

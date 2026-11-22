@@ -46,10 +46,12 @@ def ensure_in_window(day: date, include_today: bool, field: str) -> None:
         raise field_error(field, OUT_OF_WINDOW)
 
 
-def with_lunch(center: Center, day: date, busy: list[tuple[datetime, datetime]]) -> list[tuple[datetime, datetime]]:
-    if center.lunch_start is None or center.lunch_end is None:
-        return busy
-    return [*busy, (datetime.combine(day, center.lunch_start), datetime.combine(day, center.lunch_end))]
+def _center_slots(
+    center: Center, service: Service, day: date, busy: list[tuple[datetime, datetime]], now: datetime
+) -> list[datetime]:
+    if center.lunch_start is not None and center.lunch_end is not None:
+        busy = [*busy, (datetime.combine(day, center.lunch_start), datetime.combine(day, center.lunch_end))]
+    return free_slots(day, center.opening_time, center.closing_time, service.duration_minutes, busy, not_before=now)
 
 
 def slots_for_day(
@@ -65,14 +67,7 @@ def slots_for_day(
         return []
     if centers_repository.closure_dates(session, center.id, day, day):
         return []
-    return free_slots(
-        day,
-        center.opening_time,
-        center.closing_time,
-        service.duration_minutes,
-        with_lunch(center, day, repository.busy_ranges(session, professional, day, day, exclude_id)),
-        not_before=now,
-    )
+    return _center_slots(center, service, day, repository.busy_ranges(session, professional, day, day, exclude_id), now)
 
 
 def days_with_slots(
@@ -97,12 +92,5 @@ def days_with_slots(
         for day in days
         if day.weekday() in center.open_days
         and day not in closed
-        and free_slots(
-            day,
-            center.opening_time,
-            center.closing_time,
-            service.duration_minutes,
-            with_lunch(center, day, busy_by_day[day]),
-            not_before=now,
-        )
+        and _center_slots(center, service, day, busy_by_day[day], now)
     ]

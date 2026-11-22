@@ -62,6 +62,14 @@ class Membership(Base):
     user: Mapped[User] = relationship(back_populates="memberships")
     center: Mapped[Center] = relationship(back_populates="memberships")
 
+    @property
+    def role_label(self) -> str:
+        return ROLE_LABELS[Role(self.role)]
+
+    @property
+    def full_name(self) -> str:
+        return self.user.full_name
+
 
 class Service(Base):
     __tablename__ = "services"

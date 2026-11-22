@@ -4,7 +4,7 @@ from app import clock
 from app.accounts.deps import CurrentUser
 from app.centers import repository
 from app.centers.access import NOT_FOUND, AdminDep, CenterDep
-from app.centers.models import CenterClosure, Service
+from app.centers.models import CenterClosure, Membership, Service
 from app.centers.schemas import (
     CenterOut,
     CenterUpdate,
@@ -112,8 +112,8 @@ def delete_service(session: SessionDep, access: AdminDep, service_id: int) -> Re
 
 
 @router.get("/members/", response_model=list[MemberOut])
-def list_members(session: SessionDep, access: CenterDep) -> list[MemberOut]:
-    return [MemberOut.from_membership(m) for m in repository.members(session, access.center.id)]
+def list_members(session: SessionDep, access: CenterDep) -> list[Membership]:
+    return repository.members(session, access.center.id)
 
 
 @router.get("/closures/", response_model=list[ClosureOut])

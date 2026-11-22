@@ -5,19 +5,16 @@ from fastapi import APIRouter, Depends, Query
 
 from app import clock
 from app.accounts.deps import CurrentUser
-from app.centers.access import CenterDep, ManagerDep
+from app.centers.access import NOT_FOUND, CenterDep, ManagerDep
 from app.centers.models import Role
 from app.db import SessionDep
 from app.errors import DomainError, field_error
 from app.scheduling import availability, repository, services
 from app.scheduling.models import Appointment
-from app.scheduling.resolve import SLOT_TAKEN, resolve_professional, resolve_service
+from app.scheduling.resolve import resolve_professional, resolve_service
 from app.scheduling.schemas import AppointmentOut, CancelIn, DaysOut, RescheduleIn, SlotsOut, StaffBookingIn
 
 router = APIRouter(prefix="/api/centers/{slug}/appointments", tags=["appointments"])
-
-NOT_FOUND = "No encontrado."
-LOCKED = "No se puede modificar una cita pasada"
 
 
 def _appointment(session: SessionDep, access: ManagerDep, appointment_id: int) -> Appointment:
@@ -38,11 +35,11 @@ def list_appointments(
     to_day: Annotated[date | None, Query(alias="to")] = None,
     professional: Annotated[int | None, Query()] = None,
     include_cancelled: Annotated[str | None, Query()] = None,
-) -> list[AppointmentOut]:
+) -> list[Appointment]:
     today = clock.local_today()
     if access.membership.role == Role.MEMBER:
         professional = access.membership.id
-    rows = repository.list_appointments(
+    return repository.list_appointments(
         session,
         access.center.id,
         from_day or today,
@@ -50,50 +47,29 @@ def list_appointments(
         professional,
         include_cancelled == "true",
     )
-    return [AppointmentOut.from_appointment(row) for row in rows]
 
 
 @router.post("/", response_model=AppointmentOut, status_code=201)
-def create_appointment(session: SessionDep, user: CurrentUser, access: ManagerDep, data: StaffBookingIn) -> AppointmentOut:
+def create_appointment(session: SessionDep, user: CurrentUser, access: ManagerDep, data: StaffBookingIn) -> Appointment:
     service = resolve_service(session, access.center, data.service)
     professional = resolve_professional(session, access.center, data.professional)
     if access.membership.role == Role.MEMBER and professional.id != access.membership.id:
         raise field_error("professional", "Solo puedes agendar horas para ti")
     availability.ensure_in_window(data.start.date(), False, "start")
-    try:
-        appointment = services.create_appointment(session, access.center, data, professional, service, user)
-    except services.SlotUnavailable:
-        raise DomainError(409, SLOT_TAKEN) from None
-    return AppointmentOut.from_appointment(appointment)
+    return services.create_appointment(session, access.center, data, professional, service, user)
 
 
 @router.patch("/{appointment_id}/", response_model=AppointmentOut)
 def reschedule(
     session: SessionDep, user: CurrentUser, appointment: ManagedAppointment, data: RescheduleIn
-) -> AppointmentOut:
+) -> Appointment:
     availability.ensure_in_window(data.start.date(), True, "start")
-    try:
-        updated = services.reschedule_appointment(
-            session, appointment, data.start, data.note, user, clock.local_now()
-        )
-    except services.AppointmentNotFound:
-        raise DomainError(404, NOT_FOUND) from None
-    except services.AppointmentLocked:
-        raise DomainError(400, LOCKED) from None
-    except services.SlotUnavailable:
-        raise DomainError(409, SLOT_TAKEN) from None
-    return AppointmentOut.from_appointment(updated)
+    return services.reschedule_appointment(session, appointment, data.start, data.note, user, clock.local_now())
 
 
 @router.post("/{appointment_id}/cancel/", response_model=AppointmentOut)
-def cancel(session: SessionDep, user: CurrentUser, appointment: ManagedAppointment, data: CancelIn) -> AppointmentOut:
-    try:
-        updated = services.cancel_appointment(session, appointment, data.note, user, clock.local_now())
-    except services.AppointmentNotFound:
-        raise DomainError(404, NOT_FOUND) from None
-    except services.AppointmentLocked:
-        raise DomainError(400, LOCKED) from None
-    return AppointmentOut.from_appointment(updated)
+def cancel(session: SessionDep, user: CurrentUser, appointment: ManagedAppointment, data: CancelIn) -> Appointment:
+    return services.cancel_appointment(session, appointment, data.note, user, clock.local_now())
 
 
 @router.get("/{appointment_id}/availability/", response_model=SlotsOut)

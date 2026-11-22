@@ -1,10 +1,10 @@
 from datetime import date
 from typing import Annotated, Any, Literal
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field, ValidationError, field_validator
+from pydantic import AfterValidator, BaseModel, ConfigDict, EmailStr, Field, ValidationError, field_validator
 
 from app import clock
-from app.centers.phone import PHONE_ERROR, normalize_phone
+from app.centers.phone import valid_phone
 from app.centers.schemas import CenterOut, ServiceOut
 from app.formats import Minute
 from app.scheduling.rut import normalize_rut
@@ -53,7 +53,7 @@ class PatientIn(BaseModel):
     start: Minute
     patient_name: Annotated[str, Field(min_length=3, max_length=120)]
     patient_email: EmailStr
-    patient_phone: str
+    patient_phone: Annotated[str, AfterValidator(valid_phone)]
     patient_rut: str
     patient_birth_date: date
     modality: Literal["in_person", "remote"] = "in_person"
@@ -73,14 +73,6 @@ class PatientIn(BaseModel):
         if not rut:
             raise ValueError("Ingresa un RUT válido")
         return rut
-
-    @field_validator("patient_phone")
-    @classmethod
-    def valid_phone(cls, value: str) -> str:
-        phone = normalize_phone(value)
-        if not phone:
-            raise ValueError(PHONE_ERROR)
-        return phone
 
     @field_validator("patient_birth_date")
     @classmethod
@@ -140,18 +132,6 @@ class BookingOut(BaseModel):
     end: Minute
     modality: str
 
-    @classmethod
-    def from_appointment(cls, appointment, center, professional, service) -> "BookingOut":
-        return cls(
-            id=appointment.id,
-            center=BookingCenterOut(slug=center.slug, name=center.name),
-            professional=BookingProfessionalOut(full_name=professional.user.full_name),
-            service=BookingServiceOut(id=service.id, name=service.name, price_clp=service.price_clp),
-            start=appointment.start,
-            end=appointment.end,
-            modality=appointment.modality,
-        )
-
 
 class ChangeAuthorOut(BaseModel):
     full_name: str
@@ -180,40 +160,11 @@ class AppointmentOut(BaseModel):
     professional: AppointmentProfessionalOut
     patient_name: str
     patient_email: str
-    patient_phone: str
+    patient_phone: Annotated[str, AfterValidator(valid_phone)]
     patient_rut: str
     patient_birth_date: date | None
     modality: str
     changes: list[ChangeOut]
-
-    @classmethod
-    def from_appointment(cls, appointment) -> "AppointmentOut":
-        professional = appointment.professional
-        return cls(
-            id=appointment.id,
-            start=appointment.start,
-            end=appointment.end,
-            status=appointment.status,
-            service=BookingServiceOut.model_validate(appointment.service, from_attributes=True),
-            professional=AppointmentProfessionalOut(id=professional.id, full_name=professional.user.full_name),
-            patient_name=appointment.patient_name,
-            patient_email=appointment.patient_email,
-            patient_phone=appointment.patient_phone,
-            patient_rut=appointment.patient_rut,
-            patient_birth_date=appointment.patient_birth_date,
-            modality=appointment.modality,
-            changes=[
-                ChangeOut(
-                    kind=change.kind,
-                    previous_start=change.previous_start,
-                    new_start=change.new_start,
-                    note=change.note,
-                    changed_by=ChangeAuthorOut(full_name=change.changed_by.full_name) if change.changed_by else None,
-                    created_at=change.created_at,
-                )
-                for change in appointment.changes
-            ],
-        )
 
 
 class RescheduleIn(BaseModel):

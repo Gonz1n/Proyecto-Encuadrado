@@ -61,24 +61,9 @@ CENTERS = [
             ("recepcion@aurora.cl", VIEWER),
         ],
         "services": [
-            (
-                "Sesión psicológica",
-                35000,
-                45,
-                "Atención individual para acompañar procesos emocionales, ansiedad o estrés.",
-            ),
-            (
-                "Terapia de parejas",
-                55000,
-                60,
-                "Espacio para mejorar la comunicación y resolver conflictos en pareja.",
-            ),
-            (
-                "Evaluación psicológica",
-                45000,
-                60,
-                "Evaluación clínica con informe para orientar el diagnóstico y el tratamiento.",
-            ),
+            ("Sesión psicológica", 35000, 45, "Atención individual para acompañar procesos emocionales, ansiedad o estrés."),
+            ("Terapia de parejas", 55000, 60, "Espacio para mejorar la comunicación y resolver conflictos en pareja."),
+            ("Evaluación psicológica", 45000, 60, "Evaluación clínica con informe para orientar el diagnóstico y el tratamiento."),
         ],
     },
     {
@@ -112,24 +97,9 @@ CENTERS = [
             ("recepcion@nutrir.cl", VIEWER),
         ],
         "services": [
-            (
-                "Consulta nutricional",
-                30000,
-                45,
-                "Evaluación inicial de hábitos y un plan de alimentación personalizado.",
-            ),
-            (
-                "Control nutricional",
-                20000,
-                30,
-                "Seguimiento de avances y ajustes al plan de alimentación.",
-            ),
-            (
-                "Plan deportivo",
-                40000,
-                60,
-                "Plan de alimentación según tu entrenamiento y objetivos deportivos.",
-            ),
+            ("Consulta nutricional", 30000, 45, "Evaluación inicial de hábitos y un plan de alimentación personalizado."),
+            ("Control nutricional", 20000, 30, "Seguimiento de avances y ajustes al plan de alimentación."),
+            ("Plan deportivo", 40000, 60, "Plan de alimentación según tu entrenamiento y objetivos deportivos."),
         ],
     },
 ]
@@ -225,9 +195,7 @@ def create_appointments(session: Session, center: Center, now: datetime.datetime
                 patient_phone=f"+569{rng.randint(10000000, 99999999)}",
                 modality=rng.choice(list(Modality)),
                 patient_rut=format_rut(rng.randint(8_000_000, 25_000_000)),
-                patient_birth_date=datetime.date(
-                    rng.randint(1960, 2005), rng.randint(1, 12), rng.randint(1, 28)
-                ),
+                patient_birth_date=datetime.date(rng.randint(1960, 2005), rng.randint(1, 12), rng.randint(1, 28)),
                 terms_accepted_at=now,
                 data_consent_at=now,
             )

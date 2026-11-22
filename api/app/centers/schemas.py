@@ -5,9 +5,8 @@ from urllib.parse import urlparse
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, HttpUrl, TypeAdapter, field_validator
 
-from app.centers.models import ROLE_LABELS, Role
-from app.centers.phone import PHONE_ERROR, normalize_phone
-from app.formats import HourMinute
+from app.centers.phone import valid_phone
+from app.formats import HourMinute, NotBlank
 
 _url = TypeAdapter(HttpUrl)
 _email = TypeAdapter(EmailStr)
@@ -46,8 +45,6 @@ class CenterOut(BaseModel):
 
 
 class CenterListItemOut(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
     slug: str
     name: str
     description: str
@@ -60,7 +57,7 @@ class CenterUpdatedOut(CenterOut):
 class CenterUpdate(BaseModel):
     model_config = ConfigDict(extra="ignore", str_strip_whitespace=True)
 
-    name: Annotated[str, Field(max_length=120)] = Field(default=None)
+    name: Annotated[str, Field(max_length=120), NotBlank] = Field(default=None)
     description: Annotated[str, Field(max_length=400)] = Field(default=None)
     opening_time: HourMinute = Field(default=None)
     closing_time: HourMinute = Field(default=None)
@@ -78,13 +75,6 @@ class CenterUpdate(BaseModel):
     email: Annotated[str, Field(max_length=254)] = Field(default=None)
     open_days: list[Annotated[int, Field(ge=0, le=6)]] = Field(default=None)
 
-    @field_validator("name")
-    @classmethod
-    def not_blank(cls, value: str) -> str:
-        if not value:
-            raise ValueError("Este campo no puede estar en blanco.")
-        return value
-
     @field_validator("website_url", "instagram_url", "facebook_url", "linkedin_url")
     @classmethod
     def valid_url(cls, value: str, info) -> str:
@@ -101,13 +91,8 @@ class CenterUpdate(BaseModel):
 
     @field_validator("whatsapp_number")
     @classmethod
-    def valid_phone(cls, value: str) -> str:
-        if not value:
-            return ""
-        phone = normalize_phone(value)
-        if not phone:
-            raise ValueError(PHONE_ERROR)
-        return phone
+    def valid_whatsapp(cls, value: str) -> str:
+        return valid_phone(value) if value else ""
 
     @field_validator("phone")
     @classmethod
@@ -137,17 +122,10 @@ class CenterUpdate(BaseModel):
 class ServiceIn(BaseModel):
     model_config = ConfigDict(extra="ignore", str_strip_whitespace=True)
 
-    name: Annotated[str, Field(max_length=120)]
+    name: Annotated[str, Field(max_length=120), NotBlank]
     price_clp: Annotated[int, Field(ge=1, le=10_000_000)]
     duration_minutes: Annotated[int, Field(ge=15, le=240)]
     description: Annotated[str, Field(max_length=300)] = ""
-
-    @field_validator("name")
-    @classmethod
-    def not_blank(cls, value: str) -> str:
-        if not value:
-            raise ValueError("Este campo no puede estar en blanco.")
-        return value
 
     @field_validator("duration_minutes")
     @classmethod
@@ -158,7 +136,7 @@ class ServiceIn(BaseModel):
 
 
 class ServiceUpdate(ServiceIn):
-    name: Annotated[str, Field(max_length=120)] = Field(default=None)
+    name: Annotated[str, Field(max_length=120), NotBlank] = Field(default=None)
     price_clp: Annotated[int, Field(ge=1, le=10_000_000)] = Field(default=None)
     duration_minutes: Annotated[int, Field(ge=15, le=240)] = Field(default=None)
     description: Annotated[str, Field(max_length=300)] = Field(default=None)
@@ -175,8 +153,6 @@ class ServiceOut(BaseModel):
 
 
 class MemberUserOut(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
     full_name: str
     email: str
     title: str
@@ -188,15 +164,6 @@ class MemberOut(BaseModel):
     role_label: str
     user: MemberUserOut
 
-    @classmethod
-    def from_membership(cls, membership) -> "MemberOut":
-        return cls(
-            id=membership.id,
-            role=membership.role,
-            role_label=ROLE_LABELS[Role(membership.role)],
-            user=MemberUserOut.model_validate(membership.user),
-        )
-
 
 class ClosureIn(BaseModel):
     model_config = ConfigDict(extra="ignore", str_strip_whitespace=True)
@@ -206,8 +173,6 @@ class ClosureIn(BaseModel):
 
 
 class ClosureOut(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
     id: int
     date: date
     reason: str

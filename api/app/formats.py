@@ -1,7 +1,7 @@
 from datetime import datetime, time
 from typing import Annotated, Any
 
-from pydantic import BeforeValidator, PlainSerializer
+from pydantic import AfterValidator, BeforeValidator, PlainSerializer
 
 MINUTE_FORMAT = "%Y-%m-%dT%H:%M"
 HOUR_MINUTE_FORMAT = "%H:%M"
@@ -31,3 +31,12 @@ HourMinute = Annotated[
     BeforeValidator(_parser(HOUR_MINUTE_FORMAT, time, "Formato de hora inválido. Usa HH:MM.")),
     PlainSerializer(lambda v: v.strftime(HOUR_MINUTE_FORMAT), return_type=str, when_used="json"),
 ]
+
+
+def _not_blank(value: str) -> str:
+    if not value:
+        raise ValueError("Este campo no puede estar en blanco.")
+    return value
+
+
+NotBlank = AfterValidator(_not_blank)

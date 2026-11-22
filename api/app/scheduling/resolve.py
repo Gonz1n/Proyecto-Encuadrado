@@ -4,8 +4,6 @@ from app.centers import repository as centers
 from app.centers.models import Center, Membership, Service
 from app.errors import field_error
 
-SLOT_TAKEN = "La hora seleccionada ya no está disponible"
-
 BIGINT_MAX = 2**63 - 1
 
 

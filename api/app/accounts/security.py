@@ -1,5 +1,3 @@
-import secrets
-
 from pwdlib import PasswordHash
 from pwdlib.exceptions import UnknownHashError
 
@@ -15,7 +13,3 @@ def verify_password(raw: str, hashed: str) -> bool:
         return _hasher.verify(raw, hashed)
     except UnknownHashError:
         return False
-
-
-def new_token_key() -> str:
-    return secrets.token_hex(20)

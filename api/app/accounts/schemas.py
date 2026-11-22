@@ -3,6 +3,8 @@ from typing import Annotated
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
+from app.formats import NotBlank
+
 
 class CenterSummary(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -12,6 +14,8 @@ class CenterSummary(BaseModel):
 
 
 class MembershipOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     role: str
     role_label: str
@@ -46,19 +50,12 @@ class LoginOut(BaseModel):
 class ProfileUpdate(BaseModel):
     model_config = ConfigDict(extra="ignore", str_strip_whitespace=True)
 
-    first_name: Annotated[str, Field(max_length=150)] | None = None
-    last_name: Annotated[str, Field(max_length=150)] | None = None
+    first_name: Annotated[str, Field(max_length=150), NotBlank] | None = None
+    last_name: Annotated[str, Field(max_length=150), NotBlank] | None = None
     title: Annotated[str, Field(max_length=120)] | None = None
     university: Annotated[str, Field(max_length=150)] | None = None
     bio: Annotated[str, Field(max_length=500)] | None = None
     health_registry: Annotated[str, Field(max_length=10)] | None = None
-
-    @field_validator("first_name", "last_name")
-    @classmethod
-    def not_blank(cls, value: str | None) -> str | None:
-        if value is not None and not value:
-            raise ValueError("Este campo no puede estar en blanco.")
-        return value
 
     @field_validator("health_registry")
     @classmethod
