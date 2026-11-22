@@ -1,54 +1,42 @@
+import pytest
 from sqlalchemy import select
 
 from app import seed
-from app.centers.models import Role, Service
+from app.centers.models import Service
 
 PAYLOAD = {"name": "Consulta", "price_clp": 1000, "duration_minutes": 30}
-
-
-def admin_setup(membership_factory, auth_client):
-    membership = membership_factory(role=Role.ADMIN)
-    return membership.center, auth_client(membership.user)
 
 
 def url(center, suffix=""):
     return f"/api/centers/{center.slug}/services/{suffix}"
 
 
-def test_admin_creates_service_with_description(membership_factory, auth_client):
-    center, client = admin_setup(membership_factory, auth_client)
-    response = client.post(url(center), json={**PAYLOAD, "description": "Detalle"})
+@pytest.mark.parametrize(
+    "extra,expected", [({"description": "Detalle"}, "Detalle"), ({}, ""), ({"description": "  Hola  "}, "Hola")]
+)
+def test_admin_creates_service_with_description(staff, extra, expected):
+    member, client = staff()
+    response = client.post(url(member.center), json={**PAYLOAD, **extra})
     assert response.status_code == 201
-    assert response.json()["description"] == "Detalle"
+    assert response.json()["description"] == expected
 
 
-def test_description_defaults_to_empty(membership_factory, auth_client):
-    center, client = admin_setup(membership_factory, auth_client)
-    assert client.post(url(center), json=PAYLOAD).json()["description"] == ""
-
-
-def test_patch_updates_and_clears_description(membership_factory, auth_client):
-    center, client = admin_setup(membership_factory, auth_client)
-    service_id = client.post(url(center), json={**PAYLOAD, "description": "Uno"}).json()["id"]
-    edited = client.patch(url(center, f"{service_id}/"), json={"description": "Dos"})
+def test_patch_updates_and_clears_description(staff):
+    member, client = staff()
+    service_id = client.post(url(member.center), json={**PAYLOAD, "description": "Uno"}).json()["id"]
+    edited = client.patch(url(member.center, f"{service_id}/"), json={"description": "Dos"})
     assert edited.json()["description"] == "Dos"
-    cleared = client.patch(url(center, f"{service_id}/"), json={"description": ""})
+    cleared = client.patch(url(member.center, f"{service_id}/"), json={"description": ""})
     assert cleared.status_code == 200
     assert cleared.json()["description"] == ""
 
 
-def test_description_is_trimmed(membership_factory, auth_client):
-    center, client = admin_setup(membership_factory, auth_client)
-    response = client.post(url(center), json={**PAYLOAD, "description": "  Hola  "})
-    assert response.json()["description"] == "Hola"
-
-
-def test_description_over_300_is_rejected(membership_factory, auth_client):
-    center, client = admin_setup(membership_factory, auth_client)
-    response = client.post(url(center), json={**PAYLOAD, "description": "a" * 301})
+def test_description_over_300_is_rejected(staff):
+    member, client = staff()
+    response = client.post(url(member.center), json={**PAYLOAD, "description": "a" * 301})
     assert response.status_code == 400
     assert "description" in response.json()
-    assert client.post(url(center), json={**PAYLOAD, "description": "a" * 300}).status_code == 201
+    assert client.post(url(member.center), json={**PAYLOAD, "description": "a" * 300}).status_code == 201
 
 
 def test_public_profile_services_include_description(client, center_factory, service_factory):
@@ -68,12 +56,12 @@ def test_seed_sets_descriptions_only_for_services_it_creates(session):
     assert service.description == "Editada"
 
 
-def test_null_description_is_rejected(membership_factory, auth_client):
-    center, client = admin_setup(membership_factory, auth_client)
-    service_id = client.post(url(center), json={**PAYLOAD, "description": "Uno"}).json()["id"]
-    patched = client.patch(url(center, f"{service_id}/"), json={"description": None})
+def test_null_description_is_rejected(staff):
+    member, client = staff()
+    service_id = client.post(url(member.center), json={**PAYLOAD, "description": "Uno"}).json()["id"]
+    patched = client.patch(url(member.center, f"{service_id}/"), json={"description": None})
     assert patched.status_code == 400
     assert "description" in patched.json()
-    assert client.post(url(center), json={**PAYLOAD, "description": None}).status_code == 400
-    listed = client.get(url(center)).json()
+    assert client.post(url(member.center), json={**PAYLOAD, "description": None}).status_code == 400
+    listed = client.get(url(member.center)).json()
     assert [s["description"] for s in listed if s["id"] == service_id] == ["Uno"]

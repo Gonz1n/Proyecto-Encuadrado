@@ -5,7 +5,7 @@ from sqlalchemy import func, select, update
 from app import clock, seed
 from app.accounts.repository import get_user_by_email
 from app.accounts.security import verify_password
-from app.centers.models import Center, Membership
+from app.centers.models import Center, Membership, Service
 from app.scheduling.models import Appointment
 
 
@@ -52,8 +52,6 @@ def test_seed_replenishes_future_appointments_when_only_past_remain(session):
 
 
 def test_seed_does_not_overwrite_existing_rows(session):
-    from app.centers.models import Service
-
     seed.run(session)
     center = session.scalar(select(Center).where(Center.slug == "centro-aurora"))
     center.description = "Editada"

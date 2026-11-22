@@ -1,3 +1,4 @@
+from app.accounts import repository
 from app.centers.models import Role
 
 
@@ -59,8 +60,7 @@ def test_inactive_user_token_returns_401(session, user_factory, auth_client):
 
 def test_login_reuses_token(client, user_factory):
     user_factory(email="a@example.com")
-    body = {"email": "a@example.com", "password": "clave-segura-123"}
-    assert client.post("/api/auth/login/", json=body).json()["token"] == client.post("/api/auth/login/", json=body).json()["token"]
+    assert login(client, "a@example.com").json()["token"] == login(client, "a@example.com").json()["token"]
 
 
 def test_login_normalizes_email_domain(client, user_factory):
@@ -99,8 +99,6 @@ def test_malformed_and_unknown_token_return_401(client):
 
 
 def test_login_user_without_password_returns_400(session, client):
-    from app.accounts import repository
-
     repository.create_user(session, email="sin@example.com")
     response = login(client, "sin@example.com")
     assert response.status_code == 400

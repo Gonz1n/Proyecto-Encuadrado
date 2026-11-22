@@ -1,7 +1,6 @@
 from datetime import date, datetime, time, timedelta
 
 import pytest
-from sqlalchemy import event
 
 from app import clock
 from app.centers.models import Membership, Role
@@ -23,7 +22,7 @@ def setup(membership_factory, service_factory, center_factory):
 
 def booking(setup, **overrides):
     center, professional, _, service = setup
-    body = {
+    return {
         "service": service.id,
         "professional": professional.id,
         "start": f"{day(1).isoformat()}T10:00",
@@ -34,13 +33,12 @@ def booking(setup, **overrides):
         "patient_birth_date": "1990-05-14",
         "accept_terms": True,
         "data_consent": True,
+        **overrides,
     }
-    body.update(overrides)
-    return body
 
 
-def post(client, setup, **overrides):
-    return client.post(f"/api/public/centers/{setup[0].slug}/appointments/", json=booking(setup, **overrides))
+def post(client, setup, body=None, **overrides):
+    return client.post(f"/api/public/centers/{setup[0].slug}/appointments/", json=body or booking(setup, **overrides))
 
 
 def availability(client, setup, d, service=None, professional=None):
@@ -173,8 +171,9 @@ def test_booking_with_viewer_as_professional_returns_400(client, setup):
     assert response.json()["professional"] == ["El profesional no está disponible"]
 
 
-def test_invalid_phone_returns_400(client, setup):
-    response = post(client, setup, patient_phone="12345")
+@pytest.mark.parametrize("phone", ["12345", "+56 9 ١٢٣٤ ٥٦٧٨"])
+def test_invalid_phone_returns_400(client, setup, phone):
+    response = post(client, setup, patient_phone=phone)
     assert response.status_code == 400
     assert "patient_phone" in response.json()
 
@@ -191,12 +190,6 @@ def test_changing_service_duration_keeps_existing_end(client, setup, session):
     assert "16:30" in slots
 
 
-def test_invalid_phone_with_non_ascii_digits_returns_400(client, setup):
-    response = post(client, setup, patient_phone="+56 9 ١٢٣٤ ٥٦٧٨")
-    assert response.status_code == 400
-    assert "patient_phone" in response.json()
-
-
 def test_booking_in_one_center_blocks_same_user_in_another(
     client, setup, session, center_factory, service_factory, appointment_factory
 ):
@@ -211,10 +204,7 @@ def test_booking_in_one_center_blocks_same_user_in_another(
     slots = availability(client, other, day(1)).json()["slots"]
     assert "10:00" not in slots
     assert "11:00" in slots
-    response = client.post(
-        f"/api/public/centers/{other_center.slug}/appointments/", json=booking(other)
-    )
-    assert response.status_code == 409
+    assert post(client, other).status_code == 409
 
 
 @pytest.mark.parametrize("phone", ["912345678", "9 1234 5678", "56912345678"])
@@ -224,17 +214,20 @@ def test_phone_without_country_code_is_normalized(client, setup, session, phone)
     assert stored(session, response.json()["id"]).patient_phone == "+56912345678"
 
 
-@pytest.mark.parametrize("rut", ["123456785", "12345678-5", "12.345.678-5", " 12.345.678-5 "])
-def test_rut_is_normalized(client, setup, session, rut):
+@pytest.mark.parametrize(
+    "rut,expected",
+    [
+        ("123456785", "12.345.678-5"),
+        ("12345678-5", "12.345.678-5"),
+        ("12.345.678-5", "12.345.678-5"),
+        (" 12.345.678-5 ", "12.345.678-5"),
+        ("10.000.013-k", "10.000.013-K"),
+    ],
+)
+def test_rut_is_normalized(client, setup, session, rut, expected):
     response = post(client, setup, patient_rut=rut)
     assert response.status_code == 201
-    assert stored(session, response.json()["id"]).patient_rut == "12.345.678-5"
-
-
-def test_rut_with_k_check_digit_is_accepted(client, setup, session):
-    response = post(client, setup, patient_rut="10.000.013-k")
-    assert response.status_code == 201
-    assert stored(session, response.json()["id"]).patient_rut == "10.000.013-K"
+    assert stored(session, response.json()["id"]).patient_rut == expected
 
 
 @pytest.mark.parametrize("rut", ["12.345.678-9", "abc", "", "1-8"])
@@ -256,21 +249,17 @@ def test_birth_date_cannot_be_future_or_too_old(client, setup):
 def test_rut_and_birth_date_are_required(client, setup):
     body = booking(setup)
     del body["patient_rut"], body["patient_birth_date"]
-    response = client.post(f"/api/public/centers/{setup[0].slug}/appointments/", json=body)
+    response = post(client, setup, body)
     assert response.status_code == 400
     assert {"patient_rut", "patient_birth_date"} <= set(response.json())
 
 
-def test_booking_defaults_to_in_person(client, setup, session):
-    response = post(client, setup)
-    assert response.json()["modality"] == "in_person"
-    assert stored(session, response.json()["id"]).modality == "in_person"
-
-
-def test_booking_can_be_remote(client, setup, session):
-    response = post(client, setup, modality="remote")
+@pytest.mark.parametrize("extra,modality", [({}, "in_person"), ({"modality": "remote"}, "remote")])
+def test_booking_modality_defaults_to_in_person(client, setup, session, extra, modality):
+    response = post(client, setup, **extra)
     assert response.status_code == 201
-    assert stored(session, response.json()["id"]).modality == "remote"
+    assert response.json()["modality"] == modality
+    assert stored(session, response.json()["id"]).modality == modality
 
 
 def test_invalid_modality_returns_400(client, setup):
@@ -291,12 +280,9 @@ def test_non_integer_ids_are_invalid(client, setup):
     assert post(client, setup, professional="abc").json()["professional"] == ["El profesional no es válido"]
 
 
-def test_booking_locks_professional_row(session, client, setup):
-    statements = []
-    event.listen(
-        session.get_bind(), "before_cursor_execute", lambda *args: statements.append(args[2])
-    )
-    assert post(client, setup).status_code == 201
+def test_booking_locks_professional_row(client, setup, capture_sql):
+    with capture_sql() as statements:
+        assert post(client, setup).status_code == 201
     assert any("FROM users" in s and "FOR UPDATE" in s for s in statements)
 
 
@@ -326,24 +312,15 @@ TERMS_ERROR = "Debes aceptar los términos y condiciones"
 CONSENT_ERROR = "Debes autorizar el tratamiento de tus datos personales"
 
 
+@pytest.mark.parametrize("field,error", [("accept_terms", TERMS_ERROR), ("data_consent", CONSENT_ERROR)])
 @pytest.mark.parametrize("value", [False, "missing"])
-def test_booking_requires_accept_terms(client, setup, value):
-    body = booking(setup, accept_terms=value)
+def test_booking_requires_checkboxes(client, setup, field, error, value):
+    body = booking(setup, **{field: value})
     if value == "missing":
-        del body["accept_terms"]
-    response = client.post(f"/api/public/centers/{setup[0].slug}/appointments/", json=body)
+        del body[field]
+    response = post(client, setup, body)
     assert response.status_code == 400
-    assert response.json() == {"accept_terms": [TERMS_ERROR]}
-
-
-@pytest.mark.parametrize("value", [False, "missing"])
-def test_booking_requires_data_consent(client, setup, value):
-    body = booking(setup, data_consent=value)
-    if value == "missing":
-        del body["data_consent"]
-    response = client.post(f"/api/public/centers/{setup[0].slug}/appointments/", json=body)
-    assert response.status_code == 400
-    assert response.json() == {"data_consent": [CONSENT_ERROR]}
+    assert response.json() == {field: [error]}
 
 
 def test_booking_reports_both_checkboxes_with_other_errors(client, setup):

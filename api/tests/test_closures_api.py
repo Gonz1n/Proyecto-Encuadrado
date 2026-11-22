@@ -1,20 +1,11 @@
 from datetime import datetime, timedelta
 
 import pytest
-from sqlalchemy import event, select
+from sqlalchemy import select
 
 from app import clock
 from app.centers.models import CenterClosure, Role
 from app.scheduling.models import AppointmentChange, AppointmentStatus
-
-
-@pytest.fixture
-def setup(membership_factory, auth_client):
-    def make(role):
-        membership = membership_factory(role=role)
-        return membership, auth_client(membership.user)
-
-    return make
 
 
 def url(center, suffix=""):
@@ -29,8 +20,8 @@ def at(day, hour):
     return datetime.combine(day, datetime.min.time()).replace(hour=hour)
 
 
-def test_admin_creates_closure_and_cancels_day(setup, service_factory, appointment_factory, session):
-    admin, client = setup(Role.ADMIN)
+def test_admin_creates_closure_and_cancels_day(staff, service_factory, appointment_factory, session):
+    admin, client = staff(Role.ADMIN)
     service = service_factory(center=admin.center)
     day = future_day()
     first = appointment_factory(admin, service, at(day, 10))
@@ -54,8 +45,8 @@ def test_admin_creates_closure_and_cancels_day(setup, service_factory, appointme
     assert closure.created_by_id == admin.user_id
 
 
-def test_closure_keeps_past_and_cancelled(setup, service_factory, appointment_factory, session, monkeypatch):
-    admin, client = setup(Role.ADMIN)
+def test_closure_keeps_past_and_cancelled(staff, service_factory, appointment_factory, session):
+    admin, client = staff(Role.ADMIN)
     service = service_factory(center=admin.center)
     day = future_day()
     other_day = appointment_factory(admin, service, at(day + timedelta(days=1), 10))
@@ -70,8 +61,8 @@ def test_closure_keeps_past_and_cancelled(setup, service_factory, appointment_fa
     assert not session.scalars(select(AppointmentChange).where(AppointmentChange.appointment_id == already.id)).all()
 
 
-def test_closure_on_today_cancels_only_upcoming(setup, service_factory, appointment_factory, session, monkeypatch):
-    admin, client = setup(Role.ADMIN)
+def test_closure_on_today_cancels_only_upcoming(staff, service_factory, appointment_factory, session, monkeypatch):
+    admin, client = staff(Role.ADMIN)
     service = service_factory(center=admin.center)
     today = clock.local_today()
     now = at(today, 12)
@@ -88,16 +79,16 @@ def test_closure_on_today_cancels_only_upcoming(setup, service_factory, appointm
     assert later.status == AppointmentStatus.CANCELLED
 
 
-def test_past_date_is_rejected(setup):
-    admin, client = setup(Role.ADMIN)
+def test_past_date_is_rejected(staff):
+    admin, client = staff(Role.ADMIN)
     day = clock.local_today() - timedelta(days=1)
     response = client.post(url(admin.center), json={"date": day.isoformat(), "reason": "Feriado"})
     assert response.status_code == 400
     assert response.json() == {"date": ["La fecha no puede ser pasada"]}
 
 
-def test_duplicate_closure_is_rejected(setup, closure_factory):
-    admin, client = setup(Role.ADMIN)
+def test_duplicate_closure_is_rejected(staff, closure_factory):
+    admin, client = staff(Role.ADMIN)
     day = future_day()
     closure_factory(admin.center, day)
     response = client.post(url(admin.center), json={"date": day.isoformat(), "reason": "Otra vez"})
@@ -105,8 +96,8 @@ def test_duplicate_closure_is_rejected(setup, closure_factory):
     assert response.json() == {"date": ["Ese día ya está marcado como cerrado"]}
 
 
-def test_reason_required_and_max_120(setup):
-    admin, client = setup(Role.ADMIN)
+def test_reason_required_and_max_120(staff):
+    admin, client = staff(Role.ADMIN)
     day = future_day().isoformat()
     assert client.post(url(admin.center), json={"date": day}).json() == {"reason": ["Este campo es obligatorio."]}
     assert client.post(url(admin.center), json={"date": day, "reason": "   "}).status_code == 400
@@ -116,8 +107,8 @@ def test_reason_required_and_max_120(setup):
 
 
 @pytest.mark.parametrize("role", [Role.MEMBER, Role.VIEWER])
-def test_member_and_viewer_cannot_create_or_delete(setup, closure_factory, role):
-    membership, client = setup(role)
+def test_member_and_viewer_cannot_create_or_delete(staff, closure_factory, role):
+    membership, client = staff(role)
     closure = closure_factory(membership.center, future_day())
     created = client.post(url(membership.center), json={"date": future_day(11).isoformat(), "reason": "Feriado"})
     deleted = client.delete(url(membership.center, f"{closure.id}/"))
@@ -126,8 +117,8 @@ def test_member_and_viewer_cannot_create_or_delete(setup, closure_factory, role)
 
 
 @pytest.mark.parametrize("role", [Role.ADMIN, Role.MEMBER, Role.VIEWER])
-def test_any_member_lists_upcoming_closures(setup, closure_factory, role):
-    membership, client = setup(role)
+def test_any_member_lists_upcoming_closures(staff, closure_factory, role):
+    membership, client = staff(role)
     today = clock.local_today()
     closure_factory(membership.center, today - timedelta(days=1), "Pasado")
     later = closure_factory(membership.center, today + timedelta(days=9), "Despues")
@@ -140,8 +131,8 @@ def test_any_member_lists_upcoming_closures(setup, closure_factory, role):
     ]
 
 
-def test_delete_closure_does_not_restore(setup, service_factory, appointment_factory, session):
-    admin, client = setup(Role.ADMIN)
+def test_delete_closure_does_not_restore(staff, service_factory, appointment_factory, session):
+    admin, client = staff(Role.ADMIN)
     service = service_factory(center=admin.center)
     day = future_day()
     appointment = appointment_factory(admin, service, at(day, 10))
@@ -153,8 +144,8 @@ def test_delete_closure_does_not_restore(setup, service_factory, appointment_fac
     assert client.get(url(admin.center)).json() == []
 
 
-def test_delete_closure_of_other_center_is_404(setup, center_factory, closure_factory):
-    admin, client = setup(Role.ADMIN)
+def test_delete_closure_of_other_center_is_404(staff, center_factory, closure_factory):
+    admin, client = staff(Role.ADMIN)
     foreign = closure_factory(center_factory(), future_day())
     for closure_id in (foreign.id, foreign.id + 999):
         response = client.delete(url(admin.center, f"{closure_id}/"))
@@ -162,25 +153,14 @@ def test_delete_closure_of_other_center_is_404(setup, center_factory, closure_fa
         assert response.json() == {"detail": "No encontrado."}
 
 
-def test_closure_locks_center_professionals(
-    setup, membership_factory, service_factory, appointment_factory, session
-):
-    admin, client = setup(Role.ADMIN)
+def test_closure_locks_center_professionals(staff, membership_factory, service_factory, appointment_factory, capture_sql):
+    admin, client = staff(Role.ADMIN)
     other = membership_factory(role=Role.MEMBER, center=admin.center)
     service = service_factory(center=admin.center)
     day = future_day()
     appointment_factory(other, service, at(day, 10))
-    statements = []
-
-    def record(conn, cursor, statement, *args):
-        statements.append(statement)
-
-    engine = session.get_bind().engine
-    event.listen(engine, "before_cursor_execute", record)
-    try:
+    with capture_sql() as statements:
         response = client.post(url(admin.center), json={"date": day.isoformat(), "reason": "Feriado"})
-    finally:
-        event.remove(engine, "before_cursor_execute", record)
     assert response.status_code == 201
     lock = next(i for i, s in enumerate(statements) if "FROM users" in s and "FOR UPDATE" in s)
     update = next(i for i, s in enumerate(statements) if s.startswith("UPDATE appointments"))

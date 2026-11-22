@@ -53,13 +53,10 @@ def test_local_now_is_santiago_time():
 
 
 def test_minute_format_round_trip():
-    class M(BaseModel):
-        start: Minute
-
-    assert M(start="2026-12-01T10:30").model_dump(mode="json") == {"start": "2026-12-01T10:30"}
+    assert MinuteProbe(start="2026-12-01T10:30").model_dump(mode="json") == {"start": "2026-12-01T10:30"}
     for bad in ["2026-12-01T10:30:00", "2026-12-01T10:30Z", "2026-12-01"]:
         with pytest.raises(ValidationError):
-            M(start=bad)
+            MinuteProbe(start=bad)
 
 
 def test_hour_minute_format_round_trip():

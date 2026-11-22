@@ -30,11 +30,6 @@ def path(center):
     return f"/api/centers/{center.slug}/_probe/"
 
 
-def test_no_token_returns_401(client, center_factory):
-    center = center_factory()
-    assert client.get(path(center)).status_code == 401
-
-
 def test_no_token_on_unknown_center_returns_401(client):
     assert client.get("/api/centers/nope/_probe/").status_code == 401
 

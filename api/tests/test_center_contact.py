@@ -14,62 +14,53 @@ FIELDS = {
 }
 
 
-@pytest.fixture
-def setup(membership_factory, auth_client):
-    def make(role):
-        membership = membership_factory(role=role)
-        return membership.center, auth_client(membership.user)
-
-    return make
-
-
 def url(center):
     return f"/api/centers/{center.slug}/"
 
 
-def test_admin_sets_contact_fields(setup):
-    center, client = setup(Role.ADMIN)
-    response = client.patch(url(center), json=FIELDS)
+def test_admin_sets_contact_fields(staff):
+    member, client = staff(Role.ADMIN)
+    response = client.patch(url(member.center), json=FIELDS)
     assert response.status_code == 200
     for key, value in FIELDS.items():
         assert response.json()[key] == value
-    assert client.get(url(center)).json()["email"] == FIELDS["email"]
+    assert client.get(url(member.center)).json()["email"] == FIELDS["email"]
 
 
 @pytest.mark.parametrize("role", [Role.MEMBER, Role.VIEWER])
-def test_non_admin_cannot_set_contact(setup, role):
-    center, client = setup(role)
-    assert client.patch(url(center), json=FIELDS).status_code == 403
+def test_non_admin_cannot_set_contact(staff, role):
+    member, client = staff(role)
+    assert client.patch(url(member.center), json=FIELDS).status_code == 403
 
 
 @pytest.mark.parametrize("phone", ["12", "abc", "+56 2"])
-def test_invalid_phone_rejected(setup, phone):
-    center, client = setup(Role.ADMIN)
-    response = client.patch(url(center), json={"phone": phone})
+def test_invalid_phone_rejected(staff, phone):
+    member, client = staff(Role.ADMIN)
+    response = client.patch(url(member.center), json={"phone": phone})
     assert response.status_code == 400
     assert response.json()["phone"] == [PHONE_ERROR]
 
 
 @pytest.mark.parametrize("phone", ["+56 2 2345 6789", "222345678", "+56912345678"])
-def test_valid_phone_accepted(setup, phone):
-    center, client = setup(Role.ADMIN)
-    response = client.patch(url(center), json={"phone": phone})
+def test_valid_phone_accepted(staff, phone):
+    member, client = staff(Role.ADMIN)
+    response = client.patch(url(member.center), json={"phone": phone})
     assert response.status_code == 200
     assert response.json()["phone"] == phone
 
 
 @pytest.mark.parametrize("email", ["sin-arroba", "a@b", "a b@c.cl"])
-def test_invalid_email_rejected(setup, email):
-    center, client = setup(Role.ADMIN)
-    response = client.patch(url(center), json={"email": email})
+def test_invalid_email_rejected(staff, email):
+    member, client = staff(Role.ADMIN)
+    response = client.patch(url(member.center), json={"email": email})
     assert response.status_code == 400
     assert response.json()["email"] == [EMAIL_ERROR]
 
 
-def test_blank_clears_each_field(setup):
-    center, client = setup(Role.ADMIN)
-    client.patch(url(center), json=FIELDS)
-    response = client.patch(url(center), json={key: "" for key in FIELDS})
+def test_blank_clears_each_field(staff):
+    member, client = staff(Role.ADMIN)
+    client.patch(url(member.center), json=FIELDS)
+    response = client.patch(url(member.center), json={key: "" for key in FIELDS})
     assert response.status_code == 200
     assert all(response.json()[key] == "" for key in FIELDS)
 

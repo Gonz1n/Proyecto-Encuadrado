@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from functools import cache
 from itertools import count
 
 import pytest
@@ -8,13 +9,7 @@ from app.accounts.security import hash_password
 from app.centers.models import Center, CenterClosure, Membership, Role, Service
 from app.scheduling.models import Appointment
 
-_hashes: dict[str, str] = {}
-
-
-def _hash(password: str) -> str:
-    if password not in _hashes:
-        _hashes[password] = hash_password(password)
-    return _hashes[password]
+_hash = cache(hash_password)
 
 
 @pytest.fixture
@@ -112,5 +107,16 @@ def closure_factory(session):
         session.add(closure)
         session.flush()
         return closure
+
+    return make
+
+
+@pytest.fixture
+def staff(membership_factory, auth_client):
+    def make(role=Role.ADMIN, **center):
+        membership = membership_factory(role=role)
+        for field, value in center.items():
+            setattr(membership.center, field, value)
+        return membership, auth_client(membership.user)
 
     return make

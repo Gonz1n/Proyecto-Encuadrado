@@ -5,7 +5,7 @@ from sqlalchemy import func, select
 
 from app import clock
 from app.centers.models import Role
-from app.scheduling.models import Appointment, AppointmentChange, AppointmentStatus, ChangeKind
+from app.scheduling.models import AppointmentChange, AppointmentStatus, ChangeKind
 from app.scheduling.services import (
     AppointmentLocked,
     AppointmentNotFound,
@@ -263,11 +263,7 @@ def test_availability_of_cancelled_appointment_returns_404(setup, auth_client, s
 def test_appointment_availability_permissions(setup, auth_client):
     center, _, _, member_b, viewer, _, appointment = setup
     days = availability_url(center, appointment) + "days/"
+    other = auth_client(member_b.user)
     assert auth_client(viewer.user).get(days).status_code == 403
-    assert auth_client(member_b.user).get(days).status_code == 404
-    assert (
-        auth_client(member_b.user)
-        .get(availability_url(center, appointment), params={"date": at(1).date().isoformat()})
-        .status_code
-        == 404
-    )
+    assert other.get(days).status_code == 404
+    assert other.get(availability_url(center, appointment), params={"date": at(1).date().isoformat()}).status_code == 404

@@ -1,24 +1,13 @@
 from datetime import datetime, time, timedelta
 
 import pytest
-from sqlalchemy import event, select
+from sqlalchemy import select
 
 from app import clock
 from app.centers.models import Role
 from app.scheduling.models import AppointmentChange, AppointmentStatus
 
 LUNCH = {"lunch_start": "13:00", "lunch_end": "14:00"}
-
-
-@pytest.fixture
-def setup(membership_factory, auth_client):
-    def make(role=Role.ADMIN, **center):
-        membership = membership_factory(role=role)
-        for field, value in center.items():
-            setattr(membership.center, field, value)
-        return membership, auth_client(membership.user)
-
-    return make
 
 
 def url(center):
@@ -33,8 +22,8 @@ def future_day(days=10):
     return clock.local_today() + timedelta(days=days)
 
 
-def test_admin_sets_lunch(setup, session):
-    admin, client = setup()
+def test_admin_sets_lunch(staff, session):
+    admin, client = staff()
     response = client.patch(url(admin.center), json=LUNCH)
     assert response.status_code == 200
     body = response.json()
@@ -48,39 +37,39 @@ def test_admin_sets_lunch(setup, session):
     assert "cancelled_appointments" not in got
 
 
-@pytest.mark.parametrize("payload", [{"lunch_start": "13:00"}, {"lunch_end": "14:00"}, {"lunch_start": "13:00", "lunch_end": None}])
-def test_lunch_requires_both_fields(setup, payload):
-    admin, client = setup()
+PAIR = "Indica inicio y término de la colación"
+ORDER = "El término de la colación debe ser posterior al inicio"
+RANGE = "La colación debe estar dentro del horario de atención"
+
+
+@pytest.mark.parametrize(
+    "payload,message",
+    [
+        ({"lunch_start": "13:00"}, PAIR),
+        ({"lunch_end": "14:00"}, PAIR),
+        ({"lunch_start": "13:00", "lunch_end": None}, PAIR),
+        ({"lunch_start": "14:00", "lunch_end": "13:00"}, ORDER),
+        ({"lunch_start": "13:00", "lunch_end": "13:00"}, ORDER),
+        ({"lunch_start": "08:00", "lunch_end": "09:30"}, RANGE),
+        ({"lunch_start": "17:00", "lunch_end": "18:30"}, RANGE),
+    ],
+)
+def test_invalid_lunch_is_rejected(staff, payload, message):
+    admin, client = staff()
     response = client.patch(url(admin.center), json=payload)
     assert response.status_code == 400
-    assert "Indica inicio y término de la colación" in response.text
+    assert message in response.text
 
 
-@pytest.mark.parametrize("payload", [{"lunch_start": "14:00", "lunch_end": "13:00"}, {"lunch_start": "13:00", "lunch_end": "13:00"}])
-def test_lunch_end_after_start(setup, payload):
-    admin, client = setup()
-    response = client.patch(url(admin.center), json=payload)
-    assert response.status_code == 400
-    assert "El término de la colación debe ser posterior al inicio" in response.text
-
-
-@pytest.mark.parametrize("payload", [{"lunch_start": "08:00", "lunch_end": "09:30"}, {"lunch_start": "17:00", "lunch_end": "18:30"}])
-def test_lunch_inside_opening_hours(setup, payload):
-    admin, client = setup()
-    response = client.patch(url(admin.center), json=payload)
-    assert response.status_code == 400
-    assert "La colación debe estar dentro del horario de atención" in response.text
-
-
-def test_hours_change_leaving_lunch_outside_is_rejected(setup):
-    admin, client = setup(lunch_start=time(13, 0), lunch_end=time(14, 0))
+def test_hours_change_leaving_lunch_outside_is_rejected(staff):
+    admin, client = staff(lunch_start=time(13, 0), lunch_end=time(14, 0))
     response = client.patch(url(admin.center), json={"closing_time": "13:30"})
     assert response.status_code == 400
-    assert "La colación debe estar dentro del horario de atención" in response.text
+    assert RANGE in response.text
 
 
-def test_null_clears_lunch(setup, session):
-    admin, client = setup(lunch_start=time(13, 0), lunch_end=time(14, 0))
+def test_null_clears_lunch(staff, session):
+    admin, client = staff(lunch_start=time(13, 0), lunch_end=time(14, 0))
     response = client.patch(url(admin.center), json={"lunch_start": None, "lunch_end": None})
     assert response.status_code == 200
     assert response.json()["lunch_start"] is None
@@ -90,8 +79,8 @@ def test_null_clears_lunch(setup, session):
     assert admin.center.lunch_start is None
 
 
-def test_setting_lunch_cancels_overlapping(setup, service_factory, appointment_factory, session):
-    admin, client = setup()
+def test_setting_lunch_cancels_overlapping(staff, service_factory, appointment_factory, session):
+    admin, client = staff()
     service = service_factory(center=admin.center, duration_minutes=60)
     day = future_day()
     inside = appointment_factory(admin, service, at(day, 13))
@@ -113,8 +102,8 @@ def test_setting_lunch_cancels_overlapping(setup, service_factory, appointment_f
         assert appointment.status == AppointmentStatus.CONFIRMED
 
 
-def test_patch_without_lunch_change_cancels_nothing(setup, service_factory, appointment_factory, session):
-    admin, client = setup(lunch_start=time(13, 0), lunch_end=time(14, 0))
+def test_patch_without_lunch_change_cancels_nothing(staff, service_factory, appointment_factory, session):
+    admin, client = staff(lunch_start=time(13, 0), lunch_end=time(14, 0))
     service = service_factory(center=admin.center, duration_minutes=60)
     appointment = appointment_factory(admin, service, at(future_day(), 13))
     response = client.patch(url(admin.center), json={"name": "Otro", **LUNCH})
@@ -134,27 +123,17 @@ def test_public_profile_exposes_lunch(client, center_factory):
     assert body["lunch_end"] is None
 
 
-def test_member_cannot_set_lunch(setup):
-    member, client = setup(Role.MEMBER)
+def test_member_cannot_set_lunch(staff):
+    member, client = staff(Role.MEMBER)
     assert client.patch(url(member.center), json=LUNCH).status_code == 403
 
 
-def test_lunch_locks_professionals_before_selecting_appointments(setup, service_factory, appointment_factory, session):
-    admin, client = setup()
+def test_lunch_locks_professionals_before_selecting_appointments(staff, service_factory, appointment_factory, capture_sql):
+    admin, client = staff()
     service = service_factory(center=admin.center, duration_minutes=60)
     appointment_factory(admin, service, at(future_day(), 13))
-    session.flush()
-    statements = []
-
-    def record(conn, cursor, statement, *args):
-        statements.append(statement)
-
-    engine = session.get_bind().engine
-    event.listen(engine, "before_cursor_execute", record)
-    try:
+    with capture_sql() as statements:
         response = client.patch(url(admin.center), json=LUNCH)
-    finally:
-        event.remove(engine, "before_cursor_execute", record)
     assert response.json()["cancelled_appointments"] == 1
     lock = next(i for i, s in enumerate(statements) if "FROM users" in s and "FOR UPDATE" in s)
     select_appointments = next(i for i, s in enumerate(statements) if s.startswith("SELECT") and "FROM appointments" in s)

@@ -1,8 +1,7 @@
-from datetime import date, datetime, time
+from datetime import date, datetime, time, timedelta
 
 import pytest
 from fastapi.exceptions import RequestValidationError
-from sqlalchemy import event
 
 from app import clock
 from app.scheduling import repository
@@ -21,12 +20,16 @@ def at(h, m=0, day=D):
     return datetime.combine(day, time(h, m))
 
 
-def test_grid_fills_opening_hours():
-    assert free_slots(D, time(9), time(12), 60, []) == [at(9), at(9, 30), at(10), at(10, 30), at(11)]
-
-
-def test_busy_range_blocks_overlapping_slots():
-    assert free_slots(D, time(9), time(12), 60, [(at(10), at(11))]) == [at(9), at(11)]
+@pytest.mark.parametrize(
+    "busy,not_before,expected",
+    [
+        ([], None, [at(9), at(9, 30), at(10), at(10, 30), at(11)]),
+        ([(at(10), at(11))], None, [at(9), at(11)]),
+        ([], at(10), [at(10, 30), at(11)]),
+    ],
+)
+def test_free_slots_of_an_hour_long_service(busy, not_before, expected):
+    assert free_slots(D, time(9), time(12), 60, busy, not_before=not_before) == expected
 
 
 def test_slot_may_start_when_previous_ends():
@@ -37,15 +40,8 @@ def test_last_slot_must_fit_before_closing():
     assert free_slots(D, time(9), time(12), 50, [])[-1] == at(11)
 
 
-def test_not_before_drops_past_slots():
-    assert free_slots(D, time(9), time(12), 60, [], not_before=at(10)) == [at(10, 30), at(11)]
-
-
-def test_window_starts_tomorrow_for_patients():
+def test_window_starts_tomorrow_for_patients_or_includes_today():
     assert booking_window(D) == (date(2026, 12, 2), date(2026, 12, 31))
-
-
-def test_window_can_include_today():
     assert booking_window(D, include_today=True) == (D, date(2026, 12, 31))
 
 
@@ -112,21 +108,12 @@ def test_busy_ranges_cover_every_center_of_the_user(session, membership_factory,
     assert repository.busy_ranges(session, first, D, D) == [(at(10), at(11))]
 
 
-def test_days_with_slots_runs_one_busy_query(session, setup, appointment_factory):
+def test_days_with_slots_runs_one_busy_query(session, setup, appointment_factory, capture_sql):
     professional, service = setup
     appointment_factory(professional, service, at(10))
-    statements = []
-
-    def count(conn, cursor, statement, *args):
-        if "FROM appointments" in statement:
-            statements.append(statement)
-
-    event.listen(session.get_bind(), "before_cursor_execute", count)
-    try:
+    with capture_sql() as statements:
         days_with_slots(session, professional, service, D, date(2026, 12, 10), NOW)
-    finally:
-        event.remove(session.get_bind(), "before_cursor_execute", count)
-    assert len(statements) == 1
+    assert len([s for s in statements if "FROM appointments" in s]) == 1
 
 
 @pytest.mark.parametrize(
@@ -134,8 +121,6 @@ def test_days_with_slots_runs_one_busy_query(session, setup, appointment_factory
     [(0, False, False), (0, True, True), (1, False, True), (30, False, True), (31, False, False), (-1, True, False)],
 )
 def test_ensure_in_window(monkeypatch, offset, include_today, ok):
-    from datetime import timedelta
-
     monkeypatch.setattr(clock, "local_today", lambda: D)
     day = D + timedelta(days=offset)
     if ok:
@@ -195,18 +180,9 @@ def test_days_with_slots_applies_lunch(session, membership_factory, service_fact
     assert days_with_slots(session, professional, service, D, D, NOW) == []
 
 
-def test_days_with_slots_runs_one_closure_query(session, setup, closure_factory):
+def test_days_with_slots_runs_one_closure_query(session, setup, closure_factory, capture_sql):
     professional, service = setup
     closure_factory(professional.center, D)
-    statements = []
-
-    def count(conn, cursor, statement, *args):
-        if "center_closures" in statement:
-            statements.append(statement)
-
-    event.listen(session.get_bind(), "before_cursor_execute", count)
-    try:
+    with capture_sql() as statements:
         days_with_slots(session, professional, service, D, date(2026, 12, 10), NOW)
-    finally:
-        event.remove(session.get_bind(), "before_cursor_execute", count)
-    assert len(statements) == 1
+    assert len([s for s in statements if "center_closures" in s]) == 1

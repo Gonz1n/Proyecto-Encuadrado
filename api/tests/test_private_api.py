@@ -2,7 +2,7 @@ import re
 from datetime import datetime, time, timedelta
 
 import pytest
-from sqlalchemy import event, select
+from sqlalchemy import select
 
 from app import clock
 from app.centers.models import Role
@@ -128,7 +128,7 @@ def test_list_returns_changes_newest_first(setup, auth_client, session):
 
 
 def test_list_query_count_does_not_grow_with_changes(
-    setup, auth_client, appointment_factory, service_factory, session
+    setup, auth_client, appointment_factory, service_factory, session, capture_sql
 ):
     center, admin, member_a, _, _ = setup
     service = service_factory(center)
@@ -137,17 +137,9 @@ def test_list_query_count_does_not_grow_with_changes(
     for appointment in session.scalars(select(Appointment)).all():
         make_changes(session, appointment, 2, admin.user)
     session.expire_all()
-    statements = []
-
-    def count(conn, cursor, statement, parameters, context, executemany):
-        statements.append(statement)
-
     client = auth_client(admin.user)
-    event.listen(session.get_bind(), "before_cursor_execute", count)
-    try:
+    with capture_sql() as statements:
         response = client.get(url(center))
-    finally:
-        event.remove(session.get_bind(), "before_cursor_execute", count)
     assert len(response.json()) == 5
     assert len(statements) <= 8
 
@@ -164,7 +156,7 @@ def booking_setup(membership_factory, service_factory, center_factory):
 
 
 def staff_body(professional, service, **overrides):
-    body = {
+    return {
         "service": service.id,
         "professional": professional.id,
         "start": at(2, 10).strftime(FORMAT),
@@ -173,9 +165,8 @@ def staff_body(professional, service, **overrides):
         "patient_phone": "+56 9 1234 5678",
         "patient_rut": "12.345.678-5",
         "patient_birth_date": "1990-05-14",
+        **overrides,
     }
-    body.update(overrides)
-    return body
 
 
 def test_admin_creates_appointment_for_another_professional(booking_setup, auth_client, session):

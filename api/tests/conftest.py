@@ -1,8 +1,11 @@
+from contextlib import contextmanager
+
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session
 
+from app.accounts import repository
 from app.db import Base, get_session
 from app.main import app
 from app.settings import settings
@@ -49,11 +52,28 @@ def client(session):
 @pytest.fixture
 def auth_client(session, client):
     def make(user) -> TestClient:
-        from app.accounts import repository
-
         token = repository.get_or_create_token(session, user)
         authed = TestClient(app)
         authed.headers["Authorization"] = f"Bearer {token.key}"
         return authed
 
     return make
+
+
+@pytest.fixture
+def capture_sql(session):
+    @contextmanager
+    def capture():
+        statements = []
+
+        def record(conn, cursor, statement, *args):
+            statements.append(statement)
+
+        bind = session.get_bind()
+        event.listen(bind, "before_cursor_execute", record)
+        try:
+            yield statements
+        finally:
+            event.remove(bind, "before_cursor_execute", record)
+
+    return capture
