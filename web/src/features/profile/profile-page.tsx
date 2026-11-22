@@ -28,7 +28,6 @@ const profileSchema = z.object({
     .string()
     .trim()
     .regex(/^\d{0,10}$/, 'El registro solo admite números, hasta 10 dígitos'),
-  avatar_url: z.union([z.literal(''), z.url('Ingresa un enlace válido, por ejemplo https://...')]),
 })
 
 type ProfileValues = z.infer<typeof profileSchema>
@@ -40,10 +39,9 @@ const FIELDS = [
   'university',
   'bio',
   'health_registry',
-  'avatar_url',
 ] as const
 
-const TEXT_FIELDS: { name: (typeof FIELDS)[number]; label: string; placeholder?: string; inputMode?: 'numeric' | 'url' }[] = [
+const TEXT_FIELDS: { name: (typeof FIELDS)[number]; label: string; placeholder?: string; inputMode?: 'numeric' }[] = [
   { name: 'first_name', label: 'Nombre' },
   { name: 'last_name', label: 'Apellido' },
   { name: 'title', label: 'Profesión', placeholder: 'Psicóloga clínica' },
@@ -54,7 +52,6 @@ const TEXT_FIELDS: { name: (typeof FIELDS)[number]; label: string; placeholder?:
     placeholder: '123456',
     inputMode: 'numeric',
   },
-  { name: 'avatar_url', label: 'Foto (enlace a una imagen)', placeholder: 'https://...', inputMode: 'url' },
 ]
 
 function toValues(user: CurrentUser): ProfileValues {
@@ -84,9 +81,9 @@ function ProfileForm({ user }: { user: CurrentUser }) {
     control,
     formState: { errors, isDirty, isSubmitting },
   } = useForm<ProfileValues>({ resolver: zodResolver(profileSchema), defaultValues: toValues(user) })
-  const [bio, avatar, firstName, lastName] = useWatch({
+  const [bio, firstName, lastName] = useWatch({
     control,
-    name: ['bio', 'avatar_url', 'first_name', 'last_name'],
+    name: ['bio', 'first_name', 'last_name'],
   })
 
   const onSubmit = handleSubmit(async (values) => {
@@ -111,7 +108,7 @@ function ProfileForm({ user }: { user: CurrentUser }) {
       <form onSubmit={onSubmit} noValidate className="max-w-2xl space-y-5">
         <div className="flex items-center gap-4">
           <Avatar className="size-16">
-            {avatar && !errors.avatar_url ? <AvatarImage src={avatar} alt="" /> : null}
+            {user.avatar_url ? <AvatarImage src={user.avatar_url} alt="" /> : null}
             <AvatarFallback className="bg-primary/10 text-lg font-medium text-primary">
               {`${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase()}
             </AvatarFallback>
@@ -122,7 +119,7 @@ function ProfileForm({ user }: { user: CurrentUser }) {
           {TEXT_FIELDS.map(({ name, label, placeholder, inputMode }) => (
             <div
               key={name}
-              className={name === 'health_registry' || name === 'avatar_url' ? 'space-y-2 sm:col-span-2' : 'space-y-2'}
+              className={name === 'health_registry' ? 'space-y-2 sm:col-span-2' : 'space-y-2'}
             >
               <Label htmlFor={`profile-${name}`}>{label}</Label>
               <Input

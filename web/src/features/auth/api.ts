@@ -24,7 +24,7 @@ export type CurrentUser = {
 
 export type ProfileUpdate = Pick<
   CurrentUser,
-  'first_name' | 'last_name' | 'title' | 'university' | 'bio' | 'health_registry' | 'avatar_url'
+  'first_name' | 'last_name' | 'title' | 'university' | 'bio' | 'health_registry'
 >
 
 type LoginResponse = { user: CurrentUser }
