@@ -4,10 +4,11 @@ import { ExternalLink } from 'lucide-react'
 import { useParams } from 'next/navigation'
 import type { ReactNode } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
+import { PageTitle } from '@/components/layout/page-title'
 import { useCan } from '@/features/permissions/hooks/use-can'
 import { CenterForm } from './center-form'
 import { ClosuresCard } from './closures-card'
-import { useCenter } from './hooks'
+import { useCenter } from '@/features/center/hooks/use-center'
 import { ServicesTable } from './services-table'
 
 type SectionProps = { id: string; title: string; description: string; className?: string; children: ReactNode }
@@ -35,7 +36,7 @@ export function SettingsPage() {
     <div className="space-y-12">
       <title>Configuración | CentradaMente</title>
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-bold tracking-tight text-primary border-b-2 border-primary pb-1.5">Configuración</h1>
+        <PageTitle>Configuración</PageTitle>
         <a
           href={`/c/${slug}`}
           target="_blank"

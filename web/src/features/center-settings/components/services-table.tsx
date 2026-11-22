@@ -17,9 +17,9 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { formatCLP, formatDuration } from '@/utils/format'
-import type { Service } from './api'
+import type { Service } from '@/features/center/types/center'
 import { notifyDeleteError } from '@/utils/mutation-errors'
-import { useDeleteService, useServices } from './hooks'
+import { useDeleteService, useServices } from '@/features/center/hooks/use-services'
 import { ServiceFormDialog } from './service-form-dialog'
 
 type OpenDialog = 'form' | 'delete' | null

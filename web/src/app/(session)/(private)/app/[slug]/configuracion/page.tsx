@@ -1,4 +1,4 @@
-import { SettingsPage } from '@/features/center-settings/settings-page'
+import { SettingsPage } from '@/features/center-settings/components/settings-page'
 
 export default function ConfiguracionPage() {
   return <SettingsPage />

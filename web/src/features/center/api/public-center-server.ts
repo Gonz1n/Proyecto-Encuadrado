@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import type { PublicCenter } from '@/features/public-booking/api'
+import type { PublicCenter } from '../types/public-center'
 
 async function getPublicCenter(slug: string): Promise<PublicCenter | null> {
   const apiUrl = process.env.API_URL

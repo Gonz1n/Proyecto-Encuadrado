@@ -1,7 +1,7 @@
 import { format, isValid, parseISO } from 'date-fns'
 import { useSearchParams } from 'next/navigation'
 import { useSetSearchParams } from '@/hooks/use-set-search-params'
-import type { PublicCenter, PublicProfessional, PublicService } from './api'
+import type { PublicCenter, PublicProfessional, PublicService } from '@/features/center/types/public-center'
 
 export type BookingStart = 'service' | 'professional'
 export type BookingStep = 'start' | 'service' | 'professional' | 'slot' | 'patient'

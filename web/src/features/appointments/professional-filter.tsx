@@ -1,7 +1,7 @@
 'use client'
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { useMembers } from '@/features/center-settings/hooks'
+import { useMembers } from '@/features/center/hooks/use-members'
 
 const ALL = 'all'
 

@@ -1,5 +1,6 @@
 import { createContext, use } from 'react'
-import type { PatientDraft, PublicCenter } from './api'
+import type { PatientDraft } from './api'
+import type { PublicCenter } from '@/features/center/types/public-center'
 import type { BookingState } from './use-booking-state'
 
 type BookingFlowContextValue = {

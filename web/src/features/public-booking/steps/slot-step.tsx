@@ -7,7 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { formatLongDate } from '@/utils/format'
 import { cn } from '@/lib/utils'
 import { useBookingFlow } from '../booking-context'
-import { useAvailability, useAvailableDays } from '../hooks'
+import { useAvailability, useAvailableDays } from '@/features/availability/hooks/use-availability'
 
 const toKey = (day: Date) => format(day, 'yyyy-MM-dd')
 

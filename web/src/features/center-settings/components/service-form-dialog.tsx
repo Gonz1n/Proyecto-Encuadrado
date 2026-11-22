@@ -3,7 +3,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
-import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
@@ -11,27 +10,11 @@ import { Textarea } from '@/components/ui/textarea'
 import { Field } from '@/components/form/field'
 import { PendingLabel } from '@/components/form/pending-label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { formatDuration } from '@/utils/format'
-import type { Service } from './api'
+import type { Service } from '@/features/center/types/center'
 import { handleMutationError } from '@/utils/mutation-errors'
-import { useCreateService, useUpdateService } from './hooks'
-
-const DURATION_OPTIONS = Array.from({ length: 16 }, (_, i) => {
-  const minutes = (i + 1) * 15
-  return { value: String(minutes), label: formatDuration(minutes) }
-})
-
-const serviceSchema = z.object({
-  name: z.string().trim().min(1, 'Ingresa el nombre del servicio'),
-  price_clp: z
-    .string()
-    .regex(/^[1-9]\d*$/, 'Ingresa un precio entero mayor a 0')
-    .refine((value) => Number(value) <= 10_000_000, 'El precio no puede superar $10.000.000'),
-  duration_minutes: z.string().min(1, 'Selecciona la duración'),
-  description: z.string().trim().max(300, 'La descripción admite hasta 300 caracteres'),
-})
-
-type ServiceValues = z.infer<typeof serviceSchema>
+import { useCreateService, useUpdateService } from '@/features/center/hooks/use-services'
+import { DURATION_OPTIONS, SERVICE_FIELDS } from '../constants/service-form'
+import { serviceSchema, type ServiceValues } from '../schemas/service-schema'
 
 function ServiceForm({ slug, service, onDone }: { slug: string; service?: Service; onDone: () => void }) {
   const create = useCreateService(slug)
@@ -64,7 +47,7 @@ function ServiceForm({ slug, service, onDone }: { slug: string; service?: Servic
       }
       onDone()
     } catch (error) {
-      handleMutationError(error, setError, ['name', 'price_clp', 'duration_minutes', 'description'])
+      handleMutationError(error, setError, SERVICE_FIELDS)
     }
   })
 

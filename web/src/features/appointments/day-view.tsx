@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import { format, isToday } from 'date-fns'
-import { useCenter, useMembers } from '@/features/center-settings/hooks'
+import { useCenter } from '@/features/center/hooks/use-center'
+import { useMembers } from '@/features/center/hooks/use-members'
 import { AgendaError } from './agenda-error'
 import type { Appointment } from './api'
 import { AppointmentDetailDialog } from './appointment-detail-dialog'

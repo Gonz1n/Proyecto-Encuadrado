@@ -1,7 +1,7 @@
 import { ExternalLink } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import type { PublicProfessional } from './api'
+import type { PublicProfessional } from '@/features/center/types/public-center'
 import { professionalSubtitle } from './center-page'
 import { ProfessionalAvatar } from './professional-avatar'
 

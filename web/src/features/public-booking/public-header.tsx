@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { centersMenuItems, centersMenuState, shouldRefetchCenters } from './centers-menu'
-import { usePublicCenters } from './hooks'
+import { usePublicCenters } from '@/features/center/hooks/use-public-center'
 
 const menuMotion =
   'w-80 max-w-[calc(100vw-2rem)] duration-[180ms] ease-[cubic-bezier(0.23,1,0.32,1)] data-closed:duration-[130ms] data-[side=bottom]:slide-in-from-top-0 motion-reduce:data-open:zoom-in-100 motion-reduce:data-closed:zoom-out-100'

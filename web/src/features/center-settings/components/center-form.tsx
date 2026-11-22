@@ -5,7 +5,6 @@ import { Lock } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { Controller, useForm, useWatch } from 'react-hook-form'
 import { toast } from 'sonner'
-import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -14,87 +13,21 @@ import { CharCount } from '@/components/form/char-count'
 import { Field } from '@/components/form/field'
 import { FieldError } from '@/components/form/field-error'
 import { PendingLabel } from '@/components/form/pending-label'
-import { WEEKDAY_SHORT } from '@/constants/dates'
-import { CONTACT_EMAIL_ERROR, CONTACT_PHONE_ERROR, CONTACT_PHONE_PATTERN } from '@/constants/phone'
 import { SOCIAL_NETWORKS } from '@/constants/social-networks'
-import { phoneError, socialLinkError } from '@/utils/social-links'
-import type { Center, CenterUpdate } from './api'
-import { cancelledMessage } from './cancelled-message'
+import type { Center, CenterUpdate } from '@/features/center/types/center'
+import { cancelledMessage } from '../utils/cancelled-message'
 import { handleMutationError } from '@/utils/mutation-errors'
-import { useUpdateCenter } from './hooks'
-
-const DESCRIPTION_MAX = 400
-const TERMS_MAX = 5000
-
-const refined = (check: (value: string) => string | null) =>
-  z
-    .string()
-    .trim()
-    .superRefine((value, ctx) => {
-      const message = check(value)
-      if (message) ctx.addIssue({ code: 'custom', message })
-    })
-
-const socialLink = (domain?: string, label?: string) => refined((value) => socialLinkError(value, domain, label))
-
-const centerSchema = z
-  .object({
-    name: z.string().trim().min(1, 'Ingresa el nombre del centro'),
-    description: z.string().max(DESCRIPTION_MAX, `La descripción admite hasta ${DESCRIPTION_MAX} caracteres`),
-    terms: z.string().max(TERMS_MAX, `Los términos admiten hasta ${TERMS_MAX} caracteres`),
-    opening_time: z.string().min(1, 'Ingresa el horario de inicio'),
-    closing_time: z.string().min(1, 'Ingresa el horario de término'),
-    open_days: z.array(z.number()).min(1, 'Selecciona al menos un día de atención'),
-    lunch_start: z.string(),
-    lunch_end: z.string(),
-    website_url: socialLink(),
-    instagram_url: socialLink('instagram.com', 'Instagram'),
-    facebook_url: socialLink('facebook.com', 'Facebook'),
-    linkedin_url: socialLink('linkedin.com', 'LinkedIn'),
-    whatsapp_number: refined(phoneError),
-    address: z.string().trim().max(200, 'La dirección admite hasta 200 caracteres'),
-    commune: z.string().trim().max(80, 'La comuna admite hasta 80 caracteres'),
-    phone: z
-      .string()
-      .trim()
-      .refine(
-        (value) => !value || (CONTACT_PHONE_PATTERN.test(value) && value.replace(/\D/g, '').length >= 8),
-        CONTACT_PHONE_ERROR,
-      ),
-    email: z
-      .string()
-      .trim()
-      .refine((value) => !value || z.email().safeParse(value).success, CONTACT_EMAIL_ERROR),
-  })
-  .refine((v) => !v.opening_time || !v.closing_time || v.closing_time > v.opening_time, {
-    path: ['closing_time'],
-    message: 'El horario de término debe ser posterior al de inicio',
-  })
-  .refine((v) => Boolean(v.lunch_start) === Boolean(v.lunch_end), {
-    path: ['lunch_end'],
-    message: 'Indica inicio y término de la colación',
-  })
-  .refine((v) => !v.lunch_start || !v.lunch_end || v.lunch_end > v.lunch_start, {
-    path: ['lunch_end'],
-    message: 'El término de la colación debe ser posterior al inicio',
-  })
-
-type CenterValues = z.infer<typeof centerSchema>
-
-const FIELDS = Object.keys(centerSchema.shape) as (keyof CenterValues)[]
-
-const CONTACT_FIELDS = [
-  { field: 'address', label: 'Dirección', placeholder: 'Av. Providencia 1234, oficina 5', type: 'text', autoComplete: 'street-address' },
-  { field: 'commune', label: 'Comuna', placeholder: 'Providencia', type: 'text', autoComplete: 'address-level2' },
-  { field: 'phone', label: 'Teléfono', placeholder: '+56 2 2345 6789', type: 'tel', autoComplete: 'tel' },
-  { field: 'email', label: 'Correo', placeholder: 'contacto@tucentro.cl', type: 'email', autoComplete: 'email' },
-] as const
+import { useUpdateCenter } from '@/features/center/hooks/use-center'
+import { CENTER_FIELDS, CONTACT_FIELDS } from '../constants/center-form'
+import { DESCRIPTION_MAX, TERMS_MAX } from '../constants/limits'
+import { centerSchema, type CenterValues } from '../schemas/center-schema'
+import { OpenDaysPicker } from './open-days-picker'
 
 const time = (value: string | null) => value?.slice(0, 5) ?? ''
 
 function toValues(center: Center): CenterValues {
   return {
-    ...(Object.fromEntries(FIELDS.map((field) => [field, center[field]])) as CenterValues),
+    ...(Object.fromEntries(CENTER_FIELDS.map((field) => [field, center[field]])) as CenterValues),
     opening_time: time(center.opening_time),
     closing_time: time(center.closing_time),
     lunch_start: time(center.lunch_start),
@@ -133,7 +66,7 @@ export function CenterForm({ slug, center, canEdit }: { slug: string; center: Ce
 
   const onSubmit = handleSubmit(async (values) => {
     const body = Object.fromEntries(
-      FIELDS.filter((field) => dirtyFields[field]).map((field) => [field, values[field]]),
+      CENTER_FIELDS.filter((field) => dirtyFields[field]).map((field) => [field, values[field]]),
     ) as CenterUpdate
     const lunchChanged = Boolean(dirtyFields.lunch_start || dirtyFields.lunch_end)
     if (lunchChanged) {
@@ -147,7 +80,7 @@ export function CenterForm({ slug, center, canEdit }: { slug: string; center: Ce
         lunchChanged ? cancelledMessage('Colación guardada.', saved.cancelled_appointments) : 'Cambios guardados',
       )
     } catch (error) {
-      handleMutationError(error, setError, FIELDS)
+      handleMutationError(error, setError, CENTER_FIELDS)
     }
   })
 
@@ -199,41 +132,7 @@ export function CenterForm({ slug, center, canEdit }: { slug: string; center: Ce
           control={control}
           name="open_days"
           render={({ field }) => (
-            <div className="space-y-2">
-              <span id="center-open-days-label" className="text-sm font-medium">
-                Días de atención
-              </span>
-              <div
-                role="group"
-                aria-labelledby="center-open-days-label"
-                aria-describedby={errors.open_days ? 'center-open-days-error' : undefined}
-                className="flex flex-wrap gap-2"
-              >
-                {WEEKDAY_SHORT.map((label, day) => {
-                  const active = field.value.includes(day)
-                  return (
-                    <Button
-                      key={label}
-                      type="button"
-                      size="sm"
-                      variant={active ? 'default' : 'outline'}
-                      aria-pressed={active}
-                      className="min-w-12"
-                      onClick={() =>
-                        field.onChange(
-                          active
-                            ? field.value.filter((value) => value !== day)
-                            : [...field.value, day].sort((a, b) => a - b),
-                        )
-                      }
-                    >
-                      {label}
-                    </Button>
-                  )
-                })}
-              </div>
-              <FieldError id="center-open-days-error" message={errors.open_days?.message} />
-            </div>
+            <OpenDaysPicker value={field.value} error={errors.open_days?.message} onChange={field.onChange} />
           )}
         />
         <Field

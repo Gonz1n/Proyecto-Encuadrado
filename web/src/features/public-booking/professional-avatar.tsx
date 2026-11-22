@@ -1,7 +1,7 @@
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
 import { nameInitials } from '@/utils/initials'
-import type { PublicProfessional } from './api'
+import type { PublicProfessional } from '@/features/center/types/public-center'
 
 export function ProfessionalAvatar({
   professional,

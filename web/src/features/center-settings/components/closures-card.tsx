@@ -13,14 +13,13 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { FieldError } from '@/components/form/field-error'
 import { firstMessage } from '@/utils/form-errors'
 import { formatLongDate } from '@/utils/format'
-import { cancelledMessage } from './cancelled-message'
+import { cancelledMessage } from '../utils/cancelled-message'
 import { notifyDeleteError } from '@/utils/mutation-errors'
-import { useClosures, useCreateClosure, useDeleteClosure } from './hooks'
+import { useClosures, useCreateClosure, useDeleteClosure } from '@/features/center/hooks/use-closures'
 import { isApiError, validationErrors } from '@/utils/api-errors'
 import { FORBIDDEN_MESSAGE, SAVE_ERROR_MESSAGE } from '@/constants/messages'
-
-const REASON_MAX = 120
-const DATE_FORMAT = 'yyyy-MM-dd'
+import { DATE_FORMAT } from '@/constants/dates'
+import { REASON_MAX } from '../constants/limits'
 
 function firstError(error: unknown): string | undefined {
   const data = validationErrors(error)

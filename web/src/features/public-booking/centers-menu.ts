@@ -1,4 +1,4 @@
-import type { PublicCenterSummary } from './api'
+import type { PublicCenterSummary } from '@/features/center/types/public-center'
 
 type CentersMenuItem = PublicCenterSummary & { current: boolean }
 
