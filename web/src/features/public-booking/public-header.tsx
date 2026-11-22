@@ -78,11 +78,11 @@ export function PublicHeader({ slug }: { slug: string }) {
           <Button
             nativeButton={false}
             render={<Link href="/login" />}
-            aria-label="Iniciar sesión"
+            aria-label="Acceso profesionales"
             className="h-10 gap-1.5 px-3 transition-transform duration-150 ease-out active:scale-[0.97] motion-reduce:transition-none"
           >
             <LogIn aria-hidden="true" />
-            <span className="hidden sm:inline">Iniciar sesión</span>
+            <span className="hidden sm:inline">Acceso profesionales</span>
           </Button>
         </div>
       </div>
